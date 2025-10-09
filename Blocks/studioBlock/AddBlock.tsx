@@ -5,7 +5,7 @@ import BlockDialog from "./BlockDialog";
 
 export default function AddBlock() {
   return (
-    <div className="mt-8 flex max-w-2xl ">
+    <div className="mt-8 flex max-w-xl ">
       <Dialog>
         <DialogTrigger asChild className="w-full mx-auto px-1">
           <Button size="lg" className="w-full mx-auto">

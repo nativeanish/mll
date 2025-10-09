@@ -70,7 +70,7 @@ export default function BasicCard() {
   const disabled = isFetching;
 
   return (
-    <div className="relative max-w-2xl rounded-2xl border border-dashed bg-background/40 p-4 sm:p-6">
+    <div className="relative max-w-xl rounded-2xl border border-dashed bg-background/40 p-4 sm:p-6">
       {/* Cover Image pill */}
       <div className="absolute left-4 top-4 z-10 rounded-md bg-black/60 px-3 py-1 backdrop-blur-sm">
         <span className="text-xs font-medium text-white">Cover Image</span>

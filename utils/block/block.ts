@@ -1,5 +1,5 @@
 import {
-  //   MessageCircle,
+  MessageCircle,
   AlignCenter,
   Users,
   Clapperboard,
@@ -16,6 +16,7 @@ import {
   User,
   Mail,
   Phone,
+  SquareSplitVertical,
 } from "lucide-react";
 import { SiFarcaster } from "react-icons/si";
 import Paragraph from "@/assets/Paragraph";
@@ -33,11 +34,11 @@ import {
   FaTwitch,
   FaYoutube,
 } from "react-icons/fa";
-// import social from "./social";
 import { RiNftFill } from "react-icons/ri";
+import social from "./social";
 export const node = {
   nav: [
-    // { name: "Social", icon: MessageCircle, node: social },
+    { name: "Social", icon: MessageCircle, node: social },
     {
       name: "General",
       icon: Link,
@@ -86,6 +87,12 @@ export const node = {
           icon: Phone,
           description:
             "Add your phone number to your profile for direct contact",
+        },
+        {
+          name: "Divider",
+          alt: "Divider",
+          icon: SquareSplitVertical,
+          description: "Add a visual divider",
         },
       ],
     },

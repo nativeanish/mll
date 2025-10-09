@@ -38,7 +38,7 @@ export default function BlockDialog() {
   const data = node;
   const [selected, setSelected] = useState(data.nav[0].name);
   const [searchQuery, setSearchQuery] = useState("");
-  const addBlocks = (_: string) => {};
+  const addBlocks = (e: string) => {};
   const addedBlocks: Array<{ alt: string }> = [];
 
   // Filter nodes based on search query

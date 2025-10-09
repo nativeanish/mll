@@ -1,5 +1,6 @@
-import AddBlock from "@/Blocks/Block/AddBlock";
-import BasicCard from "@/Blocks/Block/BasicBlock";
+import Block from "@/Blocks/Block";
+import AddBlock from "@/Blocks/studioBlock/AddBlock";
+import BasicCard from "@/Blocks/studioBlock/BasicBlock";
 import NavBar from "@/Blocks/UI/NavBar";
 
 function Studio() {
@@ -13,6 +14,7 @@ function Studio() {
           <div className="w-full lg:w-[70%] lg:mr-[30%] overflow-y-auto min-h-screen p-4">
             <BasicCard />
             <AddBlock />
+            <Block />
           </div>
         </div>
       </div>
