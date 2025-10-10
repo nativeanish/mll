@@ -17,7 +17,7 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
   React.useEffect(() => {
     if (url && url.length > 0) {
       const urlPattern =
-        /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
+        /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
       if (!urlPattern.test(url)) {
         setError(true);
         SetError(true);
@@ -63,7 +63,8 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
           </div>
           {error && (
             <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
-              Please enter a valid URL (must start with http:// or https://)
+              Please enter a valid URL (must start with https://example.com or
+              example.com)
             </div>
           )}
         </div>
