@@ -133,10 +133,10 @@ function BlockForMultiUrl({ isEdit, setError }: Props) {
                 {urls.map((u, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg"
+                    className="flex items-center gap-2 p-3 dark:bg-muted/30 bg-black/20 rounded-lg"
                   >
                     <div className="flex-1 min-w-0 flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground truncate">
+                      <span className="text-sm dark:text-muted-foreground truncate">
                         {u}
                       </span>
                       <Button
