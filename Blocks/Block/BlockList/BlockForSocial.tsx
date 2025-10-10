@@ -111,7 +111,7 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
           {description && (
             <div>
               <span className="text-xs dark:text-muted-foreground">
-                Description (tooltip):
+                Description (optional):
               </span>
               <p className="text-sm dark:text-foreground">{description}</p>
             </div>

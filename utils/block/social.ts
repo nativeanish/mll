@@ -7,7 +7,6 @@ import {
   FaMedium,
   FaSnapchat,
   FaTwitch,
-  FaWhatsapp,
   FaXTwitter,
   FaYoutube,
 } from "react-icons/fa6";
@@ -94,12 +93,6 @@ const social = [
     icon: FaReddit,
     alt: "Reddit",
     description: "Feature your Reddit posts and communities",
-  },
-  {
-    name: "Whatsapp",
-    icon: FaWhatsapp,
-    alt: "Whatsapp",
-    description: "Add WhatsApp contact or business link",
   },
   {
     name: "Snapchat",

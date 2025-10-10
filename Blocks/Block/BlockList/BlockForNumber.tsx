@@ -15,8 +15,10 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
+import { toast } from "sonner";
+import { Copy, Phone } from "lucide-react";
 interface NumberBlockData {
-  title: string;
   description: string;
   countryCode: string;
   phoneNumber: string;
@@ -31,11 +33,18 @@ interface CountryData {
   name: {
     common: string;
     official: string;
+    nativeName?: {
+      [languageCode: string]: {
+        official: string;
+        common: string;
+      };
+    };
   };
   idd: {
     root: string;
     suffixes?: string[];
   };
+  timezones?: string[];
 }
 function BlockForNumber({ isEdit, setError }: Props) {
   const [description, setDescription] = useState("");
@@ -45,39 +54,48 @@ function BlockForNumber({ isEdit, setError }: Props) {
     selectedCountry: CountryData;
   }>();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showError, setShowError] = useState(false);
   const [blockData, setBlockData] = useState<NumberBlockData>(() => {
-    try {
-      if (data.urls && data.urls.length > 0) {
-        return JSON.parse(data.urls[0]);
-      }
-    } catch {
-      // ignore
-    }
-
     return {
-      title: data.title || "",
-      description: data.customDescription || "",
-      countryCode: "",
+      description: "",
+      countryCode: selectedCountry?.countryCode || "",
       phoneNumber: "",
-      selectedCountry: undefined,
+      selectedCountry: selectedCountry?.selectedCountry || undefined,
     };
   });
+  useEffect(() => {
+    console.log("Block Data:", blockData);
+  }, [blockData]);
+  useEffect(() => {
+    if (blockData.phoneNumber && blockData.phoneNumber.length > 0) {
+      const test = /^\d{7,15}$/;
+      if (!test.test(blockData.phoneNumber)) {
+        setError(true);
+        setShowError(true);
+        return;
+      }
+    }
+    setError(false);
+    setShowError(false);
+  }, [blockData.phoneNumber]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["countries"],
     queryFn: async (): Promise<CountryData[]> => {
-      const res = await fetch("https://restcountries.com/v3.1/all");
+      const res = await fetch(
+        "https://arweave.net/oXwiC2jv9AILJsnVpPoSH4X6rbhY-NJmP752vyd7W1Y"
+      );
       return res.json();
     },
-    enabled: false,
+    enabled: true,
   });
   useEffect(() => {
-    if (blockData) {
+    if (data) {
       setCountries(
-        blockData.sort((a, b) => a.name.common.localeCompare(b.name.common))
+        data.sort((a, b) => a.name.common.localeCompare(b.name.common))
       );
     }
-  }, [blockData]);
+  }, [data]);
   const handleCountrySelect = (countryName: string) => {
     const country = countries.find((c) => c.name.common === countryName);
     if (country) {
@@ -85,7 +103,11 @@ function BlockForNumber({ isEdit, setError }: Props) {
         country.idd.suffixes && country.idd.suffixes.length > 1
           ? country.idd.root
           : `${country.idd.root}${country.idd.suffixes?.[0] || ""}`;
-
+      setBlockData((prev) => ({
+        ...prev,
+        countryCode: code,
+        selectedCountry: country,
+      }));
       setSelectedCountry({ countryCode: code, selectedCountry: country });
     }
   };
@@ -93,26 +115,11 @@ function BlockForNumber({ isEdit, setError }: Props) {
   const filteredCountries = countries.filter((country) =>
     country.name.common.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   return (
     <div>
       {isEdit ? (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label
-              //   htmlFor={`description-${data.id}`}
-              className="text-sm font-medium"
-            >
-              Description
-            </Label>
-            <Textarea
-              //   id={`description-${data.id}`}
-              placeholder="Enter description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="min-h-20 bg-muted/40"
-            />
-          </div>
-
           <div className="space-y-2">
             <Label className="text-sm font-medium">Country</Label>
             {isLoading ? (
@@ -181,9 +188,113 @@ function BlockForNumber({ isEdit, setError }: Props) {
               </Select>
             )}
           </div>
+          <div className="space-y-2">
+            <Label
+              // htmlFor={`phone-${data.id}`}
+              className="text-sm font-medium"
+            >
+              Phone Number
+            </Label>
+            <div className="flex gap-2">
+              {selectedCountry?.countryCode &&
+                selectedCountry.selectedCountry && (
+                  <div className="flex items-center px-3 bg-muted/40 border rounded-md min-w-fit">
+                    <span className="text-sm font-medium">
+                      {selectedCountry.countryCode}
+                    </span>
+                  </div>
+                )}
+              <Input
+                // id={`phone-${data.id}`}
+                placeholder="Enter phone number"
+                value={blockData.phoneNumber}
+                onChange={(e) =>
+                  setBlockData((prev) => ({
+                    ...prev,
+                    phoneNumber: e.target.value,
+                  }))
+                }
+                className={`bg-muted/40`}
+              />
+            </div>
+            {showError && (
+              <div className="text-sm mt-4 text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+                Phone number must contain only digits, no spaces or special
+                characters.
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label
+              //   htmlFor={`description-${data.id}`}
+              className="text-sm font-medium"
+            >
+              Description (optional)
+            </Label>
+            <Textarea
+              //   id={`description-${data.id}`}
+              placeholder="Enter description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-20 bg-muted/40"
+            />
+          </div>
         </div>
       ) : (
-        <></>
+        <div className="space-y-3">
+          {blockData.selectedCountry && blockData.phoneNumber ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+                <img
+                  src={`https://arweave.net/${blockData.selectedCountry.flags.svg}`}
+                  alt={blockData.selectedCountry.name.common}
+                  className="w-8 h-5 object-cover rounded"
+                />
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">
+                    {blockData.selectedCountry.name.common}
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {`${blockData.countryCode} ${blockData.phoneNumber}`}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    const fullNumber = `${blockData.countryCode} ${blockData.phoneNumber}`;
+                    navigator.clipboard.writeText(fullNumber);
+                    toast.success("Phone number copied to clipboard");
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={() => {
+                  window.open(
+                    `tel:${blockData.countryCode} ${blockData.phoneNumber}`,
+                    "_self"
+                  );
+                  toast.success("Initiating call...");
+                }}
+              >
+                <Phone className="h-4 w-4 mr-2" />
+                Call Now
+              </Button>
+            </div>
+          ) : (
+            <div className="p-6 bg-muted/30 rounded-lg text-center">
+              <Phone className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                No phone number set
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

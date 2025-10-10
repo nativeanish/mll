@@ -102,7 +102,7 @@ function BlockForEmail({ isEdit, setError }: Props) {
               {description && description.length > 0 && (
                 <div>
                   <span className="text-xs dark:text-muted-foreground">
-                    Description (tooltip):
+                    Description (optional):
                   </span>
                   <p className="text-sm dark:text-foreground">{description}</p>
                 </div>
