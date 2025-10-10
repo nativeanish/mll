@@ -3,7 +3,7 @@ import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Copy, ExternalLink, Trash2 } from "lucide-react";
-import React, { useEffect } from "react";
+import React from "react";
 import { toast } from "sonner";
 
 interface Props {
@@ -29,9 +29,6 @@ function BlockForMultiUrl({ isEdit, setError }: Props) {
     setError(false);
     SetError(false);
   };
-  useEffect(() => {
-    console.log(urls.some((e) => e !== ""));
-  }, [urls]);
   return (
     <div>
       {isEdit ? (
