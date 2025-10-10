@@ -15,6 +15,7 @@ import {
 import { Edit3, Eye, MousePointerClick, Save, Trash2 } from "lucide-react";
 import React from "react";
 import { FaXTwitter } from "react-icons/fa6";
+import BlockForCommunity from "./BlockList/BlockForCommunity";
 
 function Block() {
   const [isEdit, setIsEdit] = React.useState(false);
@@ -110,7 +111,9 @@ function Block() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-0"></CardContent>
+        <CardContent className="pt-0">
+          <BlockForCommunity isEdit={isEdit} setError={setError} />
+        </CardContent>
         <CardFooter>
           <div className="flex w-full justify-between pt-2">
             <div className="flex items-center gap-2">

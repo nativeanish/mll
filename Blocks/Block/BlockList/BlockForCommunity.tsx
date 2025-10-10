@@ -10,10 +10,11 @@ interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
 }
-function BlockForSocial({ isEdit, setError: SetError }: Props) {
+function BlockForCommunity({ isEdit, setError: SetError }: Props) {
   const [url, setUrl] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [error, setError] = React.useState(false);
+  const [title, setTitle] = React.useState("");
   React.useEffect(() => {
     if (url && url.length > 0) {
       const urlPattern =
@@ -31,20 +32,37 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
     <div>
       {isEdit ? (
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label
-              //   htmlFor={`url-${data.id}`}
-              className="text-sm font-medium"
-            >
-              URL/Link
-            </Label>
-            <Input
-              //   id={`url-${data.id}`}
-              placeholder={`Enter Twitter URL`}
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="bg-muted/40"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label
+                //   htmlFor={`title-${data.id}`}
+                className="text-sm font-medium"
+              >
+                Display Title
+              </Label>
+              <Input
+                //   id={`title-${data.id}`}
+                placeholder={`Join Reddit Community`}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="bg-muted/40"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
+                //   htmlFor={`url-${data.id}`}
+                className="text-sm font-medium"
+              >
+                URL/Link
+              </Label>
+              <Input
+                //   id={`url-${data.id}`}
+                placeholder={`Enter Twitter URL`}
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="bg-muted/40"
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label
@@ -108,12 +126,10 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
               </Button>
             )}
           </div>
-          {description && (
+          {title && (
             <div>
-              <span className="text-xs dark:text-muted-foreground">
-                Description (optional):
-              </span>
-              <p className="text-sm dark:text-foreground">{description}</p>
+              <span className="text-xs dark:text-muted-foreground">Title:</span>
+              <p className="text-sm dark:text-foreground">{title}</p>
             </div>
           )}
         </div>
@@ -122,4 +138,4 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
   );
 }
 
-export default BlockForSocial;
+export default BlockForCommunity;

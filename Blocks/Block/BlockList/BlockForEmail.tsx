@@ -51,7 +51,7 @@ function BlockForEmail({ isEdit, setError }: Props) {
               // htmlFor={`description-${data.id}`}
               className="text-sm font-medium"
             >
-              Description (tooltip)
+              Description (optional)
             </Label>
             <Textarea
               // id={`description-${data.id}`}
