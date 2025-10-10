@@ -4,6 +4,7 @@ import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Copy, ExternalLink } from "lucide-react";
 import React from "react";
+import { toast } from "sonner";
 
 interface Props {
   isEdit: boolean;
@@ -79,7 +80,10 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 shrink-0"
-                    onClick={() => navigator.clipboard.writeText(url || "")}
+                    onClick={() => {
+                      navigator.clipboard.writeText(url || "");
+                      toast.success("URL copied to clipboard");
+                    }}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
@@ -95,7 +99,10 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 shrink-0"
-                onClick={() => window.open(url, "_blank")}
+                onClick={() => {
+                  window.open(url, "_blank");
+                  toast.success("Opening URL...");
+                }}
               >
                 <ExternalLink className="h-3 w-3" />
               </Button>

@@ -15,7 +15,7 @@ import {
 import { Edit3, Eye, MousePointerClick, Save, Trash2 } from "lucide-react";
 import React from "react";
 import { FaXTwitter } from "react-icons/fa6";
-import BlockForSocial from "./BlockList/BlockForSocial";
+import BlockForEmail from "./BlockList/BlockForEmail";
 
 function Block() {
   const [isEdit, setIsEdit] = React.useState(false);
@@ -112,7 +112,8 @@ function Block() {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <BlockForSocial isEdit={isEdit} setError={setError} />
+          {/* <BlockForSocial isEdit={isEdit} setError={setError} /> */}
+          <BlockForEmail isEdit={isEdit} setError={setError} />
         </CardContent>
         <CardFooter>
           <div className="flex w-full justify-between pt-2">
