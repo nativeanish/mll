@@ -1,10 +1,15 @@
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { Copy, Edit, ExternalLink, Trash2 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { uuidv7 } from "uuidv7";
-
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/components/ui/input-group";
+import { Textarea } from "@/src/components/ui/textarea";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
@@ -21,6 +26,7 @@ function BlockForImage({ isEdit }: Props) {
   const [galleryTitle, setGalleryTitle] = useState("Image Gallery");
   const [images, setImages] = useState<LocalImageMeta[]>([]);
   const dragItem = useRef<string | null>(null);
+  const [description, setDescription] = useState("");
 
   const onSelectImages = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,21 +124,21 @@ function BlockForImage({ isEdit }: Props) {
                 <p className="text-[10px] text-muted-foreground">
                   Drag images to reorder.
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
                   {images.map((img, idx) => (
                     <div
                       key={img.id}
-                      className="group relative rounded-md overflow-hidden border bg-muted/20 backdrop-blur-sm flex flex-col"
+                      className="group relative rounded-md overflow-hidden border bg-muted/20 backdrop-blur-sm flex flex-col break-inside-avoid mb-3"
                       draggable
                       onDragStart={onDragStart(img.id)}
                       onDragOver={onDragOver(img.id)}
                       onDragEnd={onDragEnd}
                     >
-                      <div className="aspect-video w-full relative bg-black/5">
+                      <div className="w-full relative bg-black/5">
                         <img
                           src={img.url}
                           alt={img.title || img.name}
-                          className="h-full w-full object-cover"
+                          className="w-full h-auto object-cover"
                           draggable={false}
                         />
                         <div className="absolute top-1 left-1 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-white">
@@ -157,20 +163,25 @@ function BlockForImage({ isEdit }: Props) {
                           </Button>
                         </div>
                       </div>
-                      <Input
-                        value={img.title}
-                        placeholder="Image title"
-                        onChange={(e) =>
-                          setImages((prev) =>
-                            prev.map((p) =>
-                              p.id === img.id
-                                ? { ...p, title: e.target.value }
-                                : p
+                      <InputGroup>
+                        <InputGroupInput
+                          id={`image-title-${img.id}`}
+                          placeholder="Image title"
+                          onChange={(e) =>
+                            setImages((prev) =>
+                              prev.map((p) =>
+                                p.id === img.id
+                                  ? { ...p, title: e.target.value }
+                                  : p
+                              )
                             )
-                          )
-                        }
-                        className="rounded-none border-0 border-t bg-background/70 text-xs"
-                      />
+                          }
+                          value={img.title}
+                        />
+                        <InputGroupAddon>
+                          <Edit className="size-4" />
+                        </InputGroupAddon>
+                      </InputGroup>
                     </div>
                   ))}
                 </div>
@@ -181,9 +192,70 @@ function BlockForImage({ isEdit }: Props) {
               </div>
             )}
           </div>
+          <div className="space-y-2">
+            <Label
+            // htmlFor={`gallery-desc-${data.id}`}
+            >
+              Description
+            </Label>
+            <Textarea
+              // id={`gallery-desc-${data.id}`}
+              placeholder="Describe this gallery..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-20 bg-muted/40"
+            />
+          </div>
         </div>
       ) : (
-        <div></div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {images.length === 0 ? (
+              <div className="col-span-full p-4 rounded-lg bg-muted/30 text-sm text-muted-foreground italic">
+                No images added.
+              </div>
+            ) : (
+              images.map((img) => (
+                <div
+                  key={img.id}
+                  className="group relative rounded-md overflow-hidden border bg-muted/20"
+                >
+                  <div className="aspect-video w-full relative">
+                    <img
+                      src={img.url}
+                      alt={img.title || img.name}
+                      className="h-full w-full object-cover"
+                      draggable={false}
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-1.5">
+                      <p className="text-[11px] text-white font-medium truncate">
+                        {img.title || img.name}
+                      </p>
+                    </div>
+                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 bg-black/40 text-white hover:bg-black/60"
+                        onClick={() => navigator.clipboard.writeText(img.url)}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 bg-black/40 text-white hover:bg-black/60"
+                        onClick={() => window.open(img.url, "_blank")}
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
