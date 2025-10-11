@@ -10,6 +10,7 @@ import {
   InputGroupInput,
 } from "@/src/components/ui/input-group";
 import { Textarea } from "@/src/components/ui/textarea";
+import { toast } from "sonner";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
@@ -209,22 +210,22 @@ function BlockForImage({ isEdit }: Props) {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {images.length === 0 ? (
-              <div className="col-span-full p-4 rounded-lg bg-muted/30 text-sm text-muted-foreground italic">
-                No images added.
-              </div>
-            ) : (
-              images.map((img) => (
+          {images.length === 0 ? (
+            <div className="col-span-full p-4 rounded-lg bg-muted/30 text-sm text-muted-foreground italic">
+              No images added.
+            </div>
+          ) : (
+            <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
+              {images.map((img) => (
                 <div
                   key={img.id}
-                  className="group relative rounded-md overflow-hidden border bg-muted/20"
+                  className="group relative rounded-md overflow-hidden border bg-muted/20 break-inside-avoid mb-3"
                 >
-                  <div className="aspect-video w-full relative">
+                  <div className="w-full relative">
                     <img
                       src={img.url}
                       alt={img.title || img.name}
-                      className="h-full w-full object-cover"
+                      className="w-full h-auto object-cover"
                       draggable={false}
                     />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-1.5">
@@ -237,7 +238,10 @@ function BlockForImage({ isEdit }: Props) {
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6 bg-black/40 text-white hover:bg-black/60"
-                        onClick={() => navigator.clipboard.writeText(img.url)}
+                        onClick={() => {
+                          navigator.clipboard.writeText(img.url);
+                          toast.success("Image URL copied to clipboard");
+                        }}
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
@@ -245,14 +249,35 @@ function BlockForImage({ isEdit }: Props) {
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6 bg-black/40 text-white hover:bg-black/60"
-                        onClick={() => window.open(img.url, "_blank")}
+                        onClick={() => {
+                          window.open(img.url, "_blank");
+                          toast.success("Image opened in new tab");
+                        }}
                       >
                         <ExternalLink className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
                 </div>
-              ))
+              ))}
+            </div>
+          )}
+          <div>
+            {galleryTitle && (
+              <div>
+                <span className="text-xs dark:text-muted-foreground">
+                  Title:
+                </span>
+                <p className="text-sm dark:text-foreground">{galleryTitle}</p>
+              </div>
+            )}
+            {description && (
+              <div>
+                <span className="text-xs dark:text-muted-foreground">
+                  Description (Optional):
+                </span>
+                <p className="text-sm dark:text-foreground">{description}</p>
+              </div>
             )}
           </div>
         </div>
