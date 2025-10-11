@@ -15,8 +15,7 @@ import {
 import { Edit3, Eye, MousePointerClick, Save, Trash2 } from "lucide-react";
 import React from "react";
 import { FaXTwitter } from "react-icons/fa6";
-import BlockForFile from "./BlockList/BlockForFile";
-import BlockForImage from "./BlockList/BlockForImage";
+import BlockForMap from "./BlockList/BlockForMap";
 
 function Block() {
   const [isEdit, setIsEdit] = React.useState(false);
@@ -113,7 +112,7 @@ function Block() {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <BlockForImage isEdit={isEdit} setError={setError} />
+          <BlockForMap isEdit={isEdit} setError={setError} />
         </CardContent>
         <CardFooter>
           <div className="flex w-full justify-between pt-2">
