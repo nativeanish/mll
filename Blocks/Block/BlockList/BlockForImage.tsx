@@ -30,14 +30,62 @@ function BlockForImage({ isEdit }: Props) {
   const [description, setDescription] = useState("");
 
   const onSelectImages = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const list = e.target.files;
       if (!list) return;
       const metas: LocalImageMeta[] = [];
+
       for (let i = 0; i < list.length; i++) {
         const file = list.item(i)!;
-        if (!file.type.startsWith("image/")) continue;
+
+        // Basic file validation
+        if (!file.type.startsWith("image/")) {
+          console.warn(`Non-image file skipped: ${file.name}`);
+          toast.warning(`Non-image file skipped: ${file.name}`);
+          continue;
+        }
+
+        // Check if file is accessible and not corrupted
+        if (file.size === 0) {
+          console.warn(`Empty file skipped: ${file.name}`);
+          toast.warning(`Empty file skipped: ${file.name}`);
+          continue;
+        }
+
+        // Try to read the file to ensure it's accessible
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          if (arrayBuffer.byteLength === 0) {
+            console.warn(`Corrupted file skipped: ${file.name}`);
+            toast.warning(`Corrupted file skipped: ${file.name}`);
+            continue;
+          }
+        } catch (error) {
+          console.warn(`Cannot access file: ${file.name}`, error);
+          toast.error(`Cannot access file: ${file.name}`);
+          continue;
+        }
+
+        // Create object URL and validate image can be loaded
         const url = URL.createObjectURL(file);
+        const isValidImage = await new Promise<boolean>((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            resolve(true);
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(url); // Clean up if invalid
+            resolve(false);
+          };
+          img.src = url;
+        });
+
+        if (!isValidImage) {
+          console.warn(`Invalid image file: ${file.name}`);
+          toast.warning(`Invalid image file skipped: ${file.name}`);
+          continue;
+        }
+
         metas.push({
           id: uuidv7(),
           url,
@@ -47,6 +95,11 @@ function BlockForImage({ isEdit }: Props) {
           type: file.type,
         });
       }
+
+      if (metas.length > 0) {
+        toast.success(`${metas.length} image(s) added successfully`);
+      }
+
       setImages((prev) => [...prev, ...metas]);
       e.target.value = "";
     },
