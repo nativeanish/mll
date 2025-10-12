@@ -1,6 +1,6 @@
 import useWallet from "@/store/useWallet";
 import { fetchProfilewithAssets } from "@/utils/block/fetchDetails";
-import { ImageIcon, Loader2, Trash2, User } from "lucide-react";
+import { ImageIcon, LinkIcon, Loader2, Trash2, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -8,7 +8,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/src/components/ui/avatar";
-import BazarAssetViewer from "./BlockForNFT/bazarAssetViewer";
+import BazarAssetViewer from "./nftutils/bazarAssetViewer";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/src/components/ui/badge";
@@ -328,6 +328,23 @@ function BlockForBazarProfile({ isEdit }: Props) {
               </div>
             </div>
           )}
+          <div className="w-full">
+            <Button
+              variant={"default"}
+              size={"lg"}
+              className="w-full flex gap-x-2"
+              onClick={() => {
+                window.open(
+                  `https://bazar.arweave.dev/#/profile/${profile.id}`,
+                  "_blank"
+                );
+                toast.success("Opening profile on bazar");
+              }}
+            >
+              <LinkIcon className="w-4 h-4" />
+              <span>View on Bazar</span>
+            </Button>
+          </div>
         </div>
       )}
     </div>
