@@ -33,13 +33,13 @@ import {
 import { useState } from "react";
 import { useMemo } from "react";
 import { node } from "@/utils/block/block";
+import { useBlockStore } from "@/store/useBlockStore";
 
 export default function BlockDialog() {
   const data = node;
   const [selected, setSelected] = useState(data.nav[0].name);
   const [searchQuery, setSearchQuery] = useState("");
-  const addBlocks = (e: string) => {};
-  const addedBlocks: Array<{ alt: string }> = [];
+  const { addBlock, blocks } = useBlockStore();
 
   // Filter nodes based on search query
   const filteredNodes = useMemo(() => {
@@ -73,7 +73,25 @@ export default function BlockDialog() {
   };
 
   const handleAddBlock = (alt: string) => {
-    addBlocks(alt);
+    // Find the block in the data structure
+    let foundBlock = null;
+    for (const navItem of data.nav) {
+      const block = navItem.node.find((b) => b.alt === alt);
+      if (block) {
+        foundBlock = block;
+        break;
+      }
+    }
+
+    if (foundBlock) {
+      addBlock(
+        foundBlock.alt,
+        foundBlock.name,
+        foundBlock.icon,
+        foundBlock.display
+      );
+    }
+
     setTimeout(() => {
       const closeButton = document.querySelector(
         '[data-slot="dialog-close"]'
@@ -254,7 +272,7 @@ export default function BlockDialog() {
                       />
 
                       {(() => {
-                        const count = addedBlocks.filter(
+                        const count = blocks.filter(
                           (b) => b.alt === block.alt
                         ).length;
                         return count > 0 ? (
