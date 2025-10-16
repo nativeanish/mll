@@ -1,7 +1,7 @@
 import { Textarea } from "@/src/components/ui/textarea";
 import { Label } from "@radix-ui/react-label";
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   isEdit: boolean;
@@ -77,7 +77,7 @@ function BlockForNumber({ isEdit, setError }: Props) {
     }
     setError(false);
     setShowError(false);
-  }, [blockData.phoneNumber]);
+  }, [blockData.phoneNumber, setError]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["countries"],
