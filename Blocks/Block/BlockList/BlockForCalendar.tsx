@@ -14,7 +14,8 @@ import { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, Clock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { DateRange } from "react-day-picker";
-
+import { useQuery } from "@tanstack/react-query";
+const discard_timezone = ["Europe/Uzhhorod", "Europe/Zaporizhzhia"];
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
@@ -77,6 +78,10 @@ const WEEKDAYS = [
 ];
 
 function BlockForCalendar({ isEdit, setError }: Props) {
+  const [timezone, setTimezone] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
+
   const [blockData, setBlockData] = useState<CalendarBlockData>({
     title: "",
     description: "",
@@ -96,6 +101,47 @@ function BlockForCalendar({ isEdit, setError }: Props) {
     customInterval: "",
     dayByDayAvailability: [],
   });
+
+  const timezone_data = useQuery({
+    queryKey: ["timezones"],
+    queryFn: async () => {
+      const res = await fetch(
+        "https://arweave.net/8kcrMR_jflTOqkGED1EmQaTYjy1Jjj8lMZ7Qa4h2P7Q"
+      );
+      if (!res.ok) {
+        toast.error("Failed to load timezone data");
+        throw new Error("Failed to fetch timezones");
+      }
+      return res.json();
+    },
+  });
+
+  useEffect(() => {
+    if (timezone_data.data) {
+      if (Array.isArray(timezone_data.data)) {
+        const dt = timezone_data.data as Array<{
+          value: string;
+          abbr: string;
+          offset: number;
+          isdt: false;
+          text: string;
+          utc: Array<string>;
+        }>;
+        const fs: Array<{ value: string; label: string }> = [];
+        const seen = new Set<string>();
+        dt.forEach((tz) => {
+          tz.utc.forEach((utcZone) => {
+            if (!seen.has(utcZone) && !discard_timezone.includes(utcZone)) {
+              seen.add(utcZone);
+              fs.push({ value: String(tz.offset), label: utcZone });
+            }
+          });
+        });
+        setTimezone(fs);
+        console.log(fs);
+      }
+    }
+  }, [timezone_data.data]);
 
   const [showDayEditor, setShowDayEditor] = useState(false);
 
@@ -367,28 +413,21 @@ function BlockForCalendar({ isEdit, setError }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="America/New_York">
-                  Eastern Time (ET)
-                </SelectItem>
-                <SelectItem value="America/Chicago">
-                  Central Time (CT)
-                </SelectItem>
-                <SelectItem value="America/Denver">
-                  Mountain Time (MT)
-                </SelectItem>
-                <SelectItem value="America/Los_Angeles">
-                  Pacific Time (PT)
-                </SelectItem>
-                <SelectItem value="Europe/London">London (GMT)</SelectItem>
-                <SelectItem value="Europe/Paris">Paris (CET)</SelectItem>
-                <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
-                <SelectItem value="Asia/Shanghai">Shanghai (CST)</SelectItem>
-                <SelectItem value="Australia/Sydney">Sydney (AEDT)</SelectItem>
-                <SelectItem
-                  value={Intl.DateTimeFormat().resolvedOptions().timeZone}
-                >
-                  {Intl.DateTimeFormat().resolvedOptions().timeZone} (Local)
-                </SelectItem>
+                {timezone.map((tz) => {
+                  // Get current time in that timezone
+                  const currentTime = new Intl.DateTimeFormat("en-US", {
+                    timeZone: tz.label,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  }).format(new Date());
+
+                  return (
+                    <SelectItem key={tz.value} value={tz.label}>
+                      {`${tz.label} (${currentTime})`}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
