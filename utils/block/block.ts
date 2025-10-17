@@ -17,6 +17,7 @@ import {
   Mail,
   Phone,
   SquareSplitVertical,
+  Coffee,
 } from "lucide-react";
 import { SiFarcaster } from "react-icons/si";
 import Paragraph from "@/assets/Paragraph";
@@ -101,6 +102,13 @@ export const node = {
           icon: SquareSplitVertical,
           description: "Add a visual divider",
           display: ["View"],
+        },
+        {
+          name: "Fund My Brew",
+          alt: "FundMyBrew-Card",
+          icon: Coffee,
+          description: "Accept tips and donations from your supporters",
+          display: ["View", "Tip"],
         },
       ],
     },

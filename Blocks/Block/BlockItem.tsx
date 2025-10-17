@@ -31,6 +31,7 @@ import BlockForCommunity from "./BlockList/BlockForCommunity";
 import BlockForBazarCollection from "./BlockList/BlockForBazarCollection";
 import BlockForBazarProfile from "./BlockList/BlockForBazarProfile";
 import BlockForEmailGeneral from "./BlockList/BlockForEmailGeneral";
+import BlockForFundMyBrew from "./BlockList/BlockForFundMyBrew";
 
 interface BlockItemProps {
   block: BlockData;
@@ -108,6 +109,8 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
         return <BlockForBazarCollection isEdit={isEdit} setError={setError} />;
       case "Bazar-Profile":
         return <BlockForBazarProfile isEdit={isEdit} setError={setError} />;
+      case "FundMyBrew-Card":
+        return <BlockForFundMyBrew isEdit={isEdit} setError={setError} />;
       default:
         return <BlockForText isEdit={isEdit} setError={setError} />;
     }
@@ -218,6 +221,19 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
               <TooltipContent sideOffset={4}>
                 0 scheduled in Total
               </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
+        {displayArray.includes("Tip") && (
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1">
+                  <MousePointerClick className="h-3 w-3" />
+                  <span>0 tips</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={4}>0 tips in Total</TooltipContent>
             </Tooltip>
           </div>
         )}

@@ -187,15 +187,25 @@ function BlockForCalendar({ isEdit, setError }: Props) {
             (d) => d.date === dateStr
           );
 
-          days.push(
-            existingDay || {
+          if (existingDay) {
+            days.push({
+              ...existingDay,
+              available: isAvailableByDefault,
+              slots: isAvailableByDefault
+                ? existingDay.slots.length > 0
+                  ? existingDay.slots
+                  : prev.defaultTimeSlots.map((s) => ({ ...s }))
+                : [],
+            });
+          } else {
+            days.push({
               date: dateStr,
               available: isAvailableByDefault,
               slots: isAvailableByDefault
                 ? prev.defaultTimeSlots.map((s) => ({ ...s }))
                 : [],
-            }
-          );
+            });
+          }
 
           currentDate.setDate(currentDate.getDate() + 1);
         }
@@ -466,9 +476,45 @@ function BlockForCalendar({ isEdit, setError }: Props) {
           {blockData.dateRange?.from && blockData.dateRange?.to && (
             <>
               <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  Default Weekly Availability
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">
+                    Default Weekly Availability
+                  </Label>
+                  {blockData.dateRange?.from &&
+                    blockData.dateRange?.to &&
+                    (() => {
+                      const availableDays =
+                        blockData.dayByDayAvailability.filter(
+                          (d) => d.available
+                        ).length;
+                      const totalDays = blockData.dayByDayAvailability.length;
+                      const statusType =
+                        availableDays === 0
+                          ? "unavailable"
+                          : availableDays === totalDays
+                            ? "full"
+                            : "partial";
+                      const statusText =
+                        statusType === "unavailable"
+                          ? "Unavailable"
+                          : statusType === "full"
+                            ? "Full"
+                            : "Partial";
+                      const statusColor =
+                        statusType === "unavailable"
+                          ? "text-destructive bg-destructive/10"
+                          : statusType === "full"
+                            ? "text-green-600 bg-green-50"
+                            : "text-yellow-600 bg-yellow-50";
+                      return (
+                        <span
+                          className={`text-xs px-2 py-1 rounded-md font-medium ${statusColor}`}
+                        >
+                          {statusText}
+                        </span>
+                      );
+                    })()}
+                </div>
                 <div className="flex gap-2 flex-wrap">
                   {WEEKDAYS.map((day) => (
                     <Button
