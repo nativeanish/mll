@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { Coffee, Coins } from "lucide-react";
 import useWallet from "@/store/useWallet";
 import { toast } from "sonner";
+import { useTheme } from "@/hooks/useTheme";
 
 interface Props {
   isEdit: boolean;
@@ -34,6 +35,7 @@ const SUPPORTED_CHAINS = [
   { value: "AO", label: "AO", symbol: "AO" },
   { value: "ARIO", label: "ARIO", symbol: "ARIO" },
   { value: "AR", label: "Arweave", symbol: "AR" },
+  { value: "wAR", label: "wAR", symbol: "wAR" },
 ];
 
 interface FundMyBrewData {
@@ -48,7 +50,43 @@ interface FundMyBrewData {
 
 function BlockForFundMyBrew({ isEdit, setError }: Props) {
   const { address } = useWallet();
-
+  const theme = useTheme().theme;
+  const renderChainLogo = (label: string) => {
+    const commonCls = "inline h-4 w-4 mr-2";
+    if (label === "ARIO") {
+      return (
+        <img
+          src="https://arweave.net/GIayVyo49wof1hOtgLcJ_XAE6OuF5MeYiYsgu3z4gxk"
+          alt="ARIO"
+          className={commonCls}
+        />
+      );
+    }
+    if (label === "AO") {
+      const src =
+        theme === "dark"
+          ? "https://arweave.net/UVK6iwKDIqAo_vfWIMqIiwV7Qp4mY4y8QPyi2sdrCeo"
+          : "https://arweave.net/O-DVZ_sUmrNdZKhgoPrACAsApCUTvMmeyjH_Et_UWi8";
+      return <img src={src} alt="AO" className={commonCls} />;
+    }
+    if (label === "Arweave") {
+      const src =
+        theme === "dark"
+          ? "https://arweave.net/r6TvdrKbdBtWUaCs_m1sT9ce1JWxE4lhJlOOixb_INw"
+          : "https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E";
+      return <img src={src} alt="Arweave" className={commonCls} />;
+    }
+    if (label === "wAR") {
+      return (
+        <img
+          src="https://arweave.net/L99jaxRKQKJt9CqoJtPaieGPEhJD3wNhR4iGqc8amXs"
+          alt="wAR"
+          className={commonCls}
+        />
+      );
+    }
+    return null;
+  };
   const [blockData, setBlockData] = useState<FundMyBrewData>({
     title: "Fund My Brew",
     description: "",
@@ -65,7 +103,7 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
     if (address && !blockData.paymentAddress) {
       setBlockData((prev) => ({ ...prev, paymentAddress: address }));
     }
-  }, [address]);
+  }, [address, blockData.paymentAddress]);
 
   useEffect(() => {
     if (
@@ -192,7 +230,7 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Select Chain</Label>
+            <Label className="text-sm font-medium">Select Token</Label>
             <Select
               value={blockData.selectedChain}
               onValueChange={(value) =>
@@ -205,13 +243,58 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
               <SelectContent>
                 {SUPPORTED_CHAINS.map((chain) => (
                   <SelectItem key={chain.value} value={chain.value}>
+                    {chain.label === "ARIO" && (
+                      <img
+                        src="https://arweave.net/GIayVyo49wof1hOtgLcJ_XAE6OuF5MeYiYsgu3z4gxk"
+                        alt="ARIO"
+                        className="inline h-4 w-4 mr-2"
+                      />
+                    )}
+
+                    {chain.label === "AO" && (
+                      <div>
+                        {theme === "dark" ? (
+                          <img
+                            src="https://arweave.net/UVK6iwKDIqAo_vfWIMqIiwV7Qp4mY4y8QPyi2sdrCeo"
+                            className="inline h-4 w-4 mr-2"
+                          />
+                        ) : (
+                          <img
+                            src="https://arweave.net/O-DVZ_sUmrNdZKhgoPrACAsApCUTvMmeyjH_Et_UWi8"
+                            className="inline h-4 w-4 mr-2"
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    {chain.label === "Arweave" && (
+                      <div>
+                        {theme === "dark" ? (
+                          <img
+                            src="https://arweave.net/r6TvdrKbdBtWUaCs_m1sT9ce1JWxE4lhJlOOixb_INw"
+                            className="inline h-4 w-4 mr-2"
+                          />
+                        ) : (
+                          <img
+                            src="https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E"
+                            className="inline h-4 w-4 mr-2"
+                          />
+                        )}
+                      </div>
+                    )}
+                    {chain.label === "wAR" && (
+                      <img
+                        src="https://arweave.net/L99jaxRKQKJt9CqoJtPaieGPEhJD3wNhR4iGqc8amXs"
+                        className="inline h-4 w-4 mr-2"
+                      />
+                    )}
                     {chain.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Choose which blockchain to receive tips on
+              Choose which token to receive tips on
             </p>
           </div>
 
@@ -240,19 +323,19 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
               Tip Amounts ({getChainSymbol()})
             </Label>
             <div className="grid grid-cols-3 gap-2">
-              {[5, 10, 15].map((amount) => {
+              {blockData.tipAmounts.map((amount) => {
                 const isSelected = blockData.tipAmounts.some(
-                  (amt) => amt.value === amount
+                  (amt) => amt.value === amount.value
                 );
                 return (
                   <Button
-                    key={amount}
+                    key={amount.value}
                     type="button"
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
-                    onClick={() => handleTipAmountToggle(amount)}
+                    onClick={() => handleTipAmountToggle(amount.value)}
                   >
-                    {amount} {getChainSymbol()}
+                    {amount.value} {getChainSymbol()}
                   </Button>
                 );
               })}
@@ -348,13 +431,20 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
               <div className="p-4 bg-muted/30 rounded-lg space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Chain:</span>
-                  <span className="font-medium">
-                    {
+                  <div className="flex items-center">
+                    {renderChainLogo(
                       SUPPORTED_CHAINS.find(
                         (c) => c.value === blockData.selectedChain
-                      )?.label
-                    }
-                  </span>
+                      )?.label || ""
+                    )}
+                    <span className="font-medium">
+                      {
+                        SUPPORTED_CHAINS.find(
+                          (c) => c.value === blockData.selectedChain
+                        )?.label
+                      }
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Address:</span>

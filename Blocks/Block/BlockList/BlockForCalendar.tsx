@@ -78,6 +78,13 @@ const WEEKDAYS = [
 ];
 
 function BlockForCalendar({ isEdit, setError }: Props) {
+  const toLocalDateKey = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const [timezone, setTimezone] = useState<
     Array<{ value: string; label: string }>
   >([]);
@@ -138,7 +145,6 @@ function BlockForCalendar({ isEdit, setError }: Props) {
           });
         });
         setTimezone(fs);
-        console.log(fs);
       }
     }
   }, [timezone_data.data]);
@@ -178,7 +184,8 @@ function BlockForCalendar({ isEdit, setError }: Props) {
         const endDate = new Date(to);
 
         while (currentDate <= endDate) {
-          const dateStr = currentDate.toISOString().split("T")[0];
+          // Use local date key to avoid off-by-one day shifts due to UTC conversion
+          const dateStr = toLocalDateKey(currentDate);
           const dayOfWeek = currentDate.getDay();
           const weekdayKey = WEEKDAYS[dayOfWeek].key;
           const isAvailableByDefault = prev.weeklyAvailability[weekdayKey];
@@ -433,7 +440,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
                   }).format(new Date());
 
                   return (
-                    <SelectItem key={tz.value} value={tz.label}>
+                    <SelectItem key={tz.label} value={tz.label}>
                       {`${tz.label} (${currentTime})`}
                     </SelectItem>
                   );
