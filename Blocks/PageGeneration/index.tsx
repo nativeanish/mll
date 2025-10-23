@@ -1,0 +1,167 @@
+export default function PageGeneration() {
+  return (
+    <>
+      <style>{`
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #000000 #f5f5f5;
+        }
+        
+        *::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        
+        *::-webkit-scrollbar-track {
+          background: #f5f5f5;
+        }
+        
+        *::-webkit-scrollbar-thumb {
+          background: #000000;
+          border-radius: 4px;
+        }
+        
+        *::-webkit-scrollbar-thumb:hover {
+          background: #333333;
+        }
+      `}</style>
+
+      <div className="bg-white min-h-screen">
+        {/* Header */}
+        <div className="flex justify-between items-center pt-4 px-4 pb-3 bg-white sticky top-0 z-50 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-white rounded border border-gray-300"></div>
+            <span className="text-gray-900 font-semibold">lynku.id</span>
+          </div>
+          <button className="text-gray-600 hover:text-gray-900 transition">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Profile Banner */}
+        <div className="h-36 md:h-64 bg-gradient-to-br from-purple-900 via-purple-700 to-purple-600 relative">
+          <div className="hidden md:absolute md:inset-0 md:flex md:items-center md:justify-center">
+            <span className="text-white text-3xl font-light">Cover Image</span>
+          </div>
+
+          {/* Mobile Profile Image */}
+          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 md:hidden">
+            <img
+              src="/mark-stephanus-profile.jpg"
+              alt="Mark Stephanus"
+              className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="mt-20 px-6 pb-8 md:mt-0 md:px-0">
+          <div className="md:max-w-4xl md:mx-auto">
+            {/* Desktop Profile Image - Centered between cover and content */}
+            <div className="hidden md:flex justify-center -mt-32 mb-8 relative z-10">
+              <img
+                src="/mark-stephanus-profile.jpg"
+                alt="Mark Stephanus"
+                className="w-40 h-40 rounded-full border-4 border-white shadow-xl object-cover"
+              />
+            </div>
+
+            <div className="md:px-6">
+              {/* Profile Info */}
+              <div className="mb-6 md:text-center md:mb-8">
+                <h1 className="text-2xl md:text-4xl font-bold text-center md:text-center text-gray-900 mb-3 md:mb-4">
+                  Mark Stephanus
+                </h1>
+                <p className="text-center md:text-center text-gray-600 text-sm md:text-lg md:max-w-2xl md:mx-auto mb-6">
+                  Hi 👋, call me mark. I'm a digital creator that create some
+                  content about digital marketing, business motivation, and
+                  technopreneurship
+                </p>
+              </div>
+
+              {/* Social Links */}
+              <div className="flex justify-center gap-4 mb-6 md:mb-4">
+                <a
+                  href="#"
+                  className="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
+                  aria-label="Social link 1"
+                />
+                <a
+                  href="#"
+                  className="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
+                  aria-label="Social link 2"
+                />
+                <a
+                  href="#"
+                  className="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
+                  aria-label="Social link 3"
+                />
+                <a
+                  href="#"
+                  className="w-10 md:w-12 h-10 md:h-12 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700 transition"
+                  aria-label="Social link 4"
+                />
+              </div>
+
+              {/* Visit Website Button */}
+              <button className="w-full bg-gray-900 text-white py-3 rounded-lg flex items-center justify-between px-4 hover:bg-gray-800 transition mb-4">
+                <span>Visit my website</span>
+              </button>
+
+              {/* Product Card 1 */}
+              <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                <img
+                  src="/harmonica-product.jpg"
+                  alt="Harmonica"
+                  className="w-16 h-16 rounded object-cover"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">Harmonica</p>
+                  <p className="text-sm text-gray-600">Limited Series</p>
+                </div>
+                <span className="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">
+                  IDR 690K
+                </span>
+              </div>
+
+              {/* Visit Instagram Button */}
+              <button className="w-full bg-white border-2 border-gray-200 text-gray-900 py-3 rounded-lg flex items-center justify-between px-4 hover:border-gray-300 transition mb-4">
+                <span>Visit my Instagram</span>
+              </button>
+
+              {/* Product Card 2 */}
+              <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                <img
+                  src="/digital-marketing-ebook.png"
+                  alt="Digital Marketing"
+                  className="w-16 h-16 rounded object-cover"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">
+                    Digital Marketing
+                  </p>
+                  <p className="text-sm text-gray-600">E-Book</p>
+                </div>
+                <span className="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">
+                  IDR 690K
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

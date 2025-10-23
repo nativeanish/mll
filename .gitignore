@@ -30,3 +30,4 @@ lerna-lock.json
 *.njsproj
 *.sln
 *.sw?
+*cert

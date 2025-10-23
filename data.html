@@ -1,0 +1,1055 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Exported Site</title>
+    <meta
+      name="description"
+      content="SEO-friendly React export built client-side."
+    />
+    <link rel="preconnect" href="https://esm.sh" crossorigin />
+    <style data-generated="tailwind">
+      *,
+      ::after,
+      ::backdrop,
+      ::before {
+        --tw-translate-x: 0;
+        --tw-translate-y: 0;
+        --tw-rotate: 0;
+        --tw-skew-x: 0;
+        --tw-skew-y: 0;
+        --tw-scale-x: 1;
+        --tw-scale-y: 1;
+        --tw-transform: translateX(var(--tw-translate-x))
+          translateY(var(--tw-translate-y)) rotate(var(--tw-rotate))
+          skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
+          scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 0 #0000;
+      }
+      *,
+      ::after,
+      ::before {
+        box-sizing: border-box;
+        border-width: 0;
+        border-style: solid;
+        border-color: #e5e7eb;
+      }
+      ::after,
+      ::before {
+        --tw-content: "";
+      }
+      html {
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+        -moz-tab-size: 4;
+        tab-size: 4;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          "Noto Sans",
+          sans-serif,
+          "Apple Color Emoji",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
+          "Noto Color Emoji";
+      }
+      body {
+        margin: 0;
+        line-height: inherit;
+      }
+      hr {
+        height: 0;
+        color: inherit;
+        border-top-width: 1px;
+      }
+      abbr:where([title]) {
+        text-decoration: underline dotted;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-size: inherit;
+        font-weight: inherit;
+      }
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
+      b,
+      strong {
+        font-weight: bolder;
+      }
+      code,
+      kbd,
+      pre,
+      samp {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 1em;
+      }
+      small {
+        font-size: 80%;
+      }
+      sub,
+      sup {
+        font-size: 75%;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+      }
+      sub {
+        bottom: -0.25em;
+      }
+      sup {
+        top: -0.5em;
+      }
+      table {
+        text-indent: 0;
+        border-color: inherit;
+        border-collapse: collapse;
+      }
+      button,
+      input,
+      optgroup,
+      select,
+      textarea {
+        font-family: inherit;
+        font-size: 100%;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        padding: 0;
+      }
+      button,
+      select {
+        text-transform: none;
+      }
+      [type="button"],
+      [type="reset"],
+      [type="submit"],
+      button {
+        -webkit-appearance: button;
+        background-color: transparent;
+        background-image: none;
+      }
+      :-moz-focusring {
+        outline: auto;
+      }
+      :-moz-ui-invalid {
+        box-shadow: none;
+      }
+      progress {
+        vertical-align: baseline;
+      }
+      ::-webkit-inner-spin-button,
+      ::-webkit-outer-spin-button {
+        height: auto;
+      }
+      [type="search"] {
+        -webkit-appearance: textfield;
+        outline-offset: -2px;
+      }
+      ::-webkit-search-decoration {
+        -webkit-appearance: none;
+      }
+      ::-webkit-file-upload-button {
+        -webkit-appearance: button;
+        font: inherit;
+      }
+      summary {
+        display: list-item;
+      }
+      blockquote,
+      dd,
+      dl,
+      figure,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      hr,
+      p,
+      pre {
+        margin: 0;
+      }
+      fieldset,
+      menu,
+      ol,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+      legend {
+        padding: 0;
+      }
+      menu,
+      ol,
+      ul {
+        list-style: none;
+      }
+      textarea {
+        resize: vertical;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        opacity: 1;
+        color: #9ca3af;
+      }
+      [role="button"],
+      button {
+        cursor: pointer;
+      }
+      :disabled {
+        cursor: default;
+      }
+      audio,
+      canvas,
+      embed,
+      iframe,
+      img,
+      object,
+      svg,
+      video {
+        display: block;
+        vertical-align: middle;
+      }
+      img,
+      video {
+        max-width: 100%;
+        height: auto;
+      }
+      [hidden] {
+        display: none;
+      }
+      .-translate-x-1\/2 {
+        --tw-translate-x: calc(50% * -1);
+        transform: var(--tw-transform);
+      }
+      .text-gray-600 {
+        --tw-text-opacity: 1;
+        color: rgba(75, 85, 99, var(--tw-text-opacity));
+      }
+      .hover\:text-gray-900:hover,
+      .text-gray-900,
+      .text-white {
+        --tw-text-opacity: 1;
+        color: rgba(17, 24, 39, var(--tw-text-opacity));
+      }
+      .text-white {
+        color: rgba(255, 255, 255, var(--tw-text-opacity));
+      }
+      .shadow-lg,
+      .shadow-xl {
+        box-shadow:
+          var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+      }
+      .shadow-lg {
+        --tw-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        --tw-shadow-colored:
+          0 10px 15px -3px var(--tw-shadow-color),
+          0 4px 6px -4px var(--tw-shadow-color);
+      }
+      .shadow-xl {
+        --tw-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        --tw-shadow-colored:
+          0 20px 25px -5px var(--tw-shadow-color),
+          0 8px 10px -6px var(--tw-shadow-color);
+      }
+      .absolute {
+        position: absolute;
+      }
+      .flex {
+        display: flex;
+      }
+      .flex-1 {
+        flex: 1 1 0%;
+      }
+      .gap-2 {
+        gap: 0.5rem;
+      }
+      .gap-3 {
+        gap: 0.75rem;
+      }
+      .gap-4 {
+        gap: 1rem;
+      }
+      .h-6 {
+        height: 1.5rem;
+      }
+      .h-10 {
+        height: 2.5rem;
+      }
+      .h-16 {
+        height: 4rem;
+      }
+      .h-32 {
+        height: 8rem;
+      }
+      .h-36 {
+        height: 9rem;
+      }
+      .h-40 {
+        height: 10rem;
+      }
+      .hidden {
+        display: none;
+      }
+      .p-3 {
+        padding: 0.75rem;
+      }
+      .relative {
+        position: relative;
+      }
+      .sticky {
+        position: sticky;
+      }
+      .transform {
+        transform: var(--tw-transform);
+      }
+      .w-6 {
+        width: 1.5rem;
+      }
+      .w-10 {
+        width: 2.5rem;
+      }
+      .w-16 {
+        width: 4rem;
+      }
+      .w-32 {
+        width: 8rem;
+      }
+      .w-40 {
+        width: 10rem;
+      }
+      .w-full {
+        width: 100%;
+      }
+      .bg-black {
+        --tw-bg-opacity: 1;
+        background-color: rgba(0, 0, 0, var(--tw-bg-opacity));
+      }
+      .bg-gray-50,
+      .bg-gray-900 {
+        --tw-bg-opacity: 1;
+        background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+      }
+      .bg-gray-900 {
+        background-color: rgba(17, 24, 39, var(--tw-bg-opacity));
+      }
+      .bg-purple-600,
+      .bg-white {
+        --tw-bg-opacity: 1;
+        background-color: rgba(147, 51, 234, var(--tw-bg-opacity));
+      }
+      .bg-white {
+        background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+      }
+      .border-gray-200 {
+        --tw-border-opacity: 1;
+        border-color: rgba(229, 231, 235, var(--tw-border-opacity));
+      }
+      .border-gray-300,
+      .border-white {
+        --tw-border-opacity: 1;
+        border-color: rgba(209, 213, 219, var(--tw-border-opacity));
+      }
+      .border-white {
+        border-color: rgba(255, 255, 255, var(--tw-border-opacity));
+      }
+      .px-3 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+      .px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .px-6 {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+      .py-1 {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+      }
+      .py-3 {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+      .text-2xl {
+        font-size: 1.5rem;
+        line-height: 2rem;
+      }
+      .text-3xl {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+      }
+      .text-sm {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+      }
+      .transition {
+        transition-property:
+          color, background-color, border-color, text-decoration-color, fill,
+          stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+      }
+      .-bottom-16 {
+        bottom: calc(4rem * -1);
+      }
+      .-mt-32 {
+        margin-top: calc(8rem * -1);
+      }
+      .left-1\/2 {
+        left: 50%;
+      }
+      .bg-gradient-to-br {
+        background-image: linear-gradient(
+          to bottom right,
+          var(--tw-gradient-stops)
+        );
+      }
+      .border {
+        border-width: 1px;
+      }
+      .border-2 {
+        border-width: 2px;
+      }
+      .border-4 {
+        border-width: 4px;
+      }
+      .font-bold {
+        font-weight: 700;
+      }
+      .font-light {
+        font-weight: 300;
+      }
+      .font-semibold {
+        font-weight: 600;
+      }
+      .items-center {
+        align-items: center;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+      .justify-center {
+        justify-content: center;
+      }
+      .mb-3 {
+        margin-bottom: 0.75rem;
+      }
+      .mb-4 {
+        margin-bottom: 1rem;
+      }
+      .mb-6 {
+        margin-bottom: 1.5rem;
+      }
+      .mb-8 {
+        margin-bottom: 2rem;
+      }
+      .min-h-screen {
+        min-height: 100vh;
+      }
+      .mt-20 {
+        margin-top: 5rem;
+      }
+      .object-cover {
+        object-fit: cover;
+      }
+      .pb-3 {
+        padding-bottom: 0.75rem;
+      }
+      .pb-8 {
+        padding-bottom: 2rem;
+      }
+      .pt-4 {
+        padding-top: 1rem;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .top-0 {
+        top: 0;
+      }
+      .z-10 {
+        z-index: 10;
+      }
+      .z-50 {
+        z-index: 50;
+      }
+      .rounded {
+        border-radius: 0.25rem;
+      }
+      .rounded-full {
+        border-radius: 9999px;
+      }
+      .rounded-lg {
+        border-radius: 0.5rem;
+      }
+      .border-b {
+        border-bottom-width: 1px;
+      }
+      .from-purple-900 {
+        --tw-gradient-from: rgba(88, 28, 135, 1);
+        --tw-gradient-to: rgba(88, 28, 135, 0);
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+      }
+      .via-purple-700 {
+        --tw-gradient-to: rgba(126, 34, 206, 0);
+        --tw-gradient-stops:
+          var(--tw-gradient-from), rgba(126, 34, 206, 1), var(--tw-gradient-to);
+      }
+      .to-purple-600 {
+        --tw-gradient-to: rgba(147, 51, 234, 1);
+      }
+      .hover\:bg-gray-800:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+      }
+      .hover\:bg-purple-700:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgba(126, 34, 206, var(--tw-bg-opacity));
+      }
+      .hover\:border-gray-300:hover {
+        --tw-border-opacity: 1;
+        border-color: rgba(209, 213, 219, var(--tw-border-opacity));
+      }
+      @media (min-width: 768px) {
+        .md\:inset-0 {
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+        }
+        .md\:absolute {
+          position: absolute;
+        }
+        .md\:flex {
+          display: flex;
+        }
+        .md\:h-12 {
+          height: 3rem;
+        }
+        .md\:h-64 {
+          height: 16rem;
+        }
+        .md\:hidden {
+          display: none;
+        }
+        .md\:w-12 {
+          width: 3rem;
+        }
+        .md\:mx-auto {
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .md\:px-0 {
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .md\:px-6 {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+        }
+        .md\:text-4xl {
+          font-size: 2.25rem;
+          line-height: 2.5rem;
+        }
+        .md\:text-lg {
+          font-size: 1.125rem;
+          line-height: 1.75rem;
+        }
+        .md\:items-center {
+          align-items: center;
+        }
+        .md\:justify-center {
+          justify-content: center;
+        }
+        .md\:max-w-2xl {
+          max-width: 42rem;
+        }
+        .md\:max-w-4xl {
+          max-width: 56rem;
+        }
+        .md\:mb-4 {
+          margin-bottom: 1rem;
+        }
+        .md\:mb-8 {
+          margin-bottom: 2rem;
+        }
+        .md\:mt-0 {
+          margin-top: 0;
+        }
+        .md\:text-center {
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <link rel="preload" as="image" href="/mark-stephanus-profile.jpg" /><link
+        rel="preload"
+        as="image"
+        href="/harmonica-product.jpg"
+      /><link
+        rel="preload"
+        as="image"
+        href="/digital-marketing-ebook.png"
+      /><style>
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #000000 #f5f5f5;
+        }
+
+        *::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+
+        *::-webkit-scrollbar-track {
+          background: #f5f5f5;
+        }
+
+        *::-webkit-scrollbar-thumb {
+          background: #000000;
+          border-radius: 4px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+          background: #333333;
+        }
+      </style>
+      <div class="bg-white min-h-screen">
+        <div
+          class="flex justify-between items-center pt-4 px-4 pb-3 bg-white sticky top-0 z-50 border-b border-gray-200"
+        >
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 bg-white rounded border border-gray-300"></div>
+            <span class="text-gray-900 font-semibold">lynku.id</span>
+          </div>
+          <button class="text-gray-600 hover:text-gray-900 transition">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <div
+          class="h-36 md:h-64 bg-gradient-to-br from-purple-900 via-purple-700 to-purple-600 relative"
+        >
+          <div
+            class="hidden md:absolute md:inset-0 md:flex md:items-center md:justify-center"
+          >
+            <span class="text-white text-3xl font-light">Cover Image</span>
+          </div>
+          <div
+            class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 md:hidden"
+          >
+            <img
+              src="/mark-stephanus-profile.jpg"
+              alt="Mark Stephanus"
+              class="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+            />
+          </div>
+        </div>
+        <div class="mt-20 px-6 pb-8 md:mt-0 md:px-0">
+          <div class="md:max-w-4xl md:mx-auto">
+            <div
+              class="hidden md:flex justify-center -mt-32 mb-8 relative z-10"
+            >
+              <img
+                src="/mark-stephanus-profile.jpg"
+                alt="Mark Stephanus"
+                class="w-40 h-40 rounded-full border-4 border-white shadow-xl object-cover"
+              />
+            </div>
+            <div class="md:px-6">
+              <div class="mb-6 md:text-center md:mb-8">
+                <h1
+                  class="text-2xl md:text-4xl font-bold text-center md:text-center text-gray-900 mb-3 md:mb-4"
+                >
+                  Mark Stephanus
+                </h1>
+                <p
+                  class="text-center md:text-center text-gray-600 text-sm md:text-lg md:max-w-2xl md:mx-auto mb-6"
+                >
+                  Hi 👋, call me mark. I&#x27;m a digital creator that create
+                  some content about digital marketing, business motivation, and
+                  technopreneurship
+                </p>
+              </div>
+              <div class="flex justify-center gap-4 mb-6 md:mb-4">
+                <a
+                  href="#"
+                  class="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
+                  aria-label="Social link 1"
+                ></a
+                ><a
+                  href="#"
+                  class="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
+                  aria-label="Social link 2"
+                ></a
+                ><a
+                  href="#"
+                  class="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
+                  aria-label="Social link 3"
+                ></a
+                ><a
+                  href="#"
+                  class="w-10 md:w-12 h-10 md:h-12 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700 transition"
+                  aria-label="Social link 4"
+                ></a>
+              </div>
+              <button
+                class="w-full bg-gray-900 text-white py-3 rounded-lg flex items-center justify-between px-4 hover:bg-gray-800 transition mb-4"
+              >
+                <span>Visit my website</span>
+              </button>
+              <div
+                class="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg"
+              >
+                <img
+                  src="/harmonica-product.jpg"
+                  alt="Harmonica"
+                  class="w-16 h-16 rounded object-cover"
+                />
+                <div class="flex-1">
+                  <p class="font-semibold text-gray-900">Harmonica</p>
+                  <p class="text-sm text-gray-600">Limited Series</p>
+                </div>
+                <span
+                  class="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold"
+                  >IDR 690K</span
+                >
+              </div>
+              <button
+                class="w-full bg-white border-2 border-gray-200 text-gray-900 py-3 rounded-lg flex items-center justify-between px-4 hover:border-gray-300 transition mb-4"
+              >
+                <span>Visit my Instagram</span>
+              </button>
+              <div
+                class="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg"
+              >
+                <img
+                  src="/digital-marketing-ebook.png"
+                  alt="Digital Marketing"
+                  class="w-16 h-16 rounded object-cover"
+                />
+                <div class="flex-1">
+                  <p class="font-semibold text-gray-900">Digital Marketing</p>
+                  <p class="text-sm text-gray-600">E-Book</p>
+                </div>
+                <span
+                  class="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold"
+                  >IDR 690K</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import b from "https://esm.sh/react@19.1.1?min";
+      import {
+        hydrateRoot as p,
+        createRoot as g,
+      } from "https://esm.sh/react-dom@19.1.1/client?deps=react@19.1.1&min";
+      import {
+        Fragment as c,
+        jsx as e,
+        jsxs as t,
+      } from "https://esm.sh/react@19.1.1/jsx-runtime?min";
+      function s() {
+        return t(c, {
+          children: [
+            e("style", {
+              children: `
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #000000 #f5f5f5;
+        }
+        
+        *::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        
+        *::-webkit-scrollbar-track {
+          background: #f5f5f5;
+        }
+        
+        *::-webkit-scrollbar-thumb {
+          background: #000000;
+          border-radius: 4px;
+        }
+        
+        *::-webkit-scrollbar-thumb:hover {
+          background: #333333;
+        }
+      `,
+            }),
+            t("div", {
+              className: "bg-white min-h-screen",
+              children: [
+                t("div", {
+                  className:
+                    "flex justify-between items-center pt-4 px-4 pb-3 bg-white sticky top-0 z-50 border-b border-gray-200",
+                  children: [
+                    t("div", {
+                      className: "flex items-center gap-2",
+                      children: [
+                        e("div", {
+                          className:
+                            "w-6 h-6 bg-white rounded border border-gray-300",
+                        }),
+                        e("span", {
+                          className: "text-gray-900 font-semibold",
+                          children: "lynku.id",
+                        }),
+                      ],
+                    }),
+                    e("button", {
+                      className: "text-gray-600 hover:text-gray-900 transition",
+                      children: e("svg", {
+                        className: "w-6 h-6",
+                        fill: "none",
+                        stroke: "currentColor",
+                        viewBox: "0 0 24 24",
+                        children: e("path", {
+                          strokeLinecap: "round",
+                          strokeLinejoin: "round",
+                          strokeWidth: 2,
+                          d: "M4 6h16M4 12h16M4 18h16",
+                        }),
+                      }),
+                    }),
+                  ],
+                }),
+                t("div", {
+                  className:
+                    "h-36 md:h-64 bg-gradient-to-br from-purple-900 via-purple-700 to-purple-600 relative",
+                  children: [
+                    e("div", {
+                      className:
+                        "hidden md:absolute md:inset-0 md:flex md:items-center md:justify-center",
+                      children: e("span", {
+                        className: "text-white text-3xl font-light",
+                        children: "Cover Image",
+                      }),
+                    }),
+                    e("div", {
+                      className:
+                        "absolute -bottom-16 left-1/2 transform -translate-x-1/2 md:hidden",
+                      children: e("img", {
+                        src: "/mark-stephanus-profile.jpg",
+                        alt: "Mark Stephanus",
+                        className:
+                          "w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover",
+                      }),
+                    }),
+                  ],
+                }),
+                e("div", {
+                  className: "mt-20 px-6 pb-8 md:mt-0 md:px-0",
+                  children: t("div", {
+                    className: "md:max-w-4xl md:mx-auto",
+                    children: [
+                      e("div", {
+                        className:
+                          "hidden md:flex justify-center -mt-32 mb-8 relative z-10",
+                        children: e("img", {
+                          src: "/mark-stephanus-profile.jpg",
+                          alt: "Mark Stephanus",
+                          className:
+                            "w-40 h-40 rounded-full border-4 border-white shadow-xl object-cover",
+                        }),
+                      }),
+                      t("div", {
+                        className: "md:px-6",
+                        children: [
+                          t("div", {
+                            className: "mb-6 md:text-center md:mb-8",
+                            children: [
+                              e("h1", {
+                                className:
+                                  "text-2xl md:text-4xl font-bold text-center md:text-center text-gray-900 mb-3 md:mb-4",
+                                children: "Mark Stephanus",
+                              }),
+                              e("p", {
+                                className:
+                                  "text-center md:text-center text-gray-600 text-sm md:text-lg md:max-w-2xl md:mx-auto mb-6",
+                                children:
+                                  "Hi \u{1F44B}, call me mark. I'm a digital creator that create some content about digital marketing, business motivation, and technopreneurship",
+                              }),
+                            ],
+                          }),
+                          t("div", {
+                            className: "flex justify-center gap-4 mb-6 md:mb-4",
+                            children: [
+                              e("a", {
+                                href: "#",
+                                className:
+                                  "w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition",
+                                "aria-label": "Social link 1",
+                              }),
+                              e("a", {
+                                href: "#",
+                                className:
+                                  "w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition",
+                                "aria-label": "Social link 2",
+                              }),
+                              e("a", {
+                                href: "#",
+                                className:
+                                  "w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition",
+                                "aria-label": "Social link 3",
+                              }),
+                              e("a", {
+                                href: "#",
+                                className:
+                                  "w-10 md:w-12 h-10 md:h-12 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700 transition",
+                                "aria-label": "Social link 4",
+                              }),
+                            ],
+                          }),
+                          e("button", {
+                            className:
+                              "w-full bg-gray-900 text-white py-3 rounded-lg flex items-center justify-between px-4 hover:bg-gray-800 transition mb-4",
+                            children: e("span", {
+                              children: "Visit my website",
+                            }),
+                          }),
+                          t("div", {
+                            className:
+                              "flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg",
+                            children: [
+                              e("img", {
+                                src: "/harmonica-product.jpg",
+                                alt: "Harmonica",
+                                className: "w-16 h-16 rounded object-cover",
+                              }),
+                              t("div", {
+                                className: "flex-1",
+                                children: [
+                                  e("p", {
+                                    className: "font-semibold text-gray-900",
+                                    children: "Harmonica",
+                                  }),
+                                  e("p", {
+                                    className: "text-sm text-gray-600",
+                                    children: "Limited Series",
+                                  }),
+                                ],
+                              }),
+                              e("span", {
+                                className:
+                                  "bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold",
+                                children: "IDR 690K",
+                              }),
+                            ],
+                          }),
+                          e("button", {
+                            className:
+                              "w-full bg-white border-2 border-gray-200 text-gray-900 py-3 rounded-lg flex items-center justify-between px-4 hover:border-gray-300 transition mb-4",
+                            children: e("span", {
+                              children: "Visit my Instagram",
+                            }),
+                          }),
+                          t("div", {
+                            className:
+                              "flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg",
+                            children: [
+                              e("img", {
+                                src: "/digital-marketing-ebook.png",
+                                alt: "Digital Marketing",
+                                className: "w-16 h-16 rounded object-cover",
+                              }),
+                              t("div", {
+                                className: "flex-1",
+                                children: [
+                                  e("p", {
+                                    className: "font-semibold text-gray-900",
+                                    children: "Digital Marketing",
+                                  }),
+                                  e("p", {
+                                    className: "text-sm text-gray-600",
+                                    children: "E-Book",
+                                  }),
+                                ],
+                              }),
+                              e("span", {
+                                className:
+                                  "bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold",
+                                children: "IDR 690K",
+                              }),
+                            ],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                }),
+              ],
+            }),
+          ],
+        });
+      }
+      var r = document.getElementById("root");
+      if (!r) throw new Error("Hydration container #root not found");
+      (function i(o) {
+        let m = Array.from(o.childNodes);
+        for (let a of m)
+          a.nodeType === Node.TEXT_NODE
+            ? (a.textContent || "").trim() || o.removeChild(a)
+            : a.nodeType === Node.ELEMENT_NODE && i(a);
+      })(r);
+      var d = b.createElement(s, {}),
+        l = !1,
+        n = () => {
+          if (l) return;
+          ((l = !0), (r.innerHTML = ""), g(r).render(d));
+        };
+      try {
+        p(r, d, {
+          onRecoverableError() {
+            n();
+          },
+        });
+      } catch {
+        n();
+      }
+    </script>
+  </body>
+</html>

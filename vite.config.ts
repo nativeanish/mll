@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { readFileSync, existsSync } from "fs";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -37,7 +38,19 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 3000,
     host: true,
+    https: (() => {
+      const certDir = path.resolve(__dirname, "./cert");
+      const keyPath = path.join(certDir, "key.pem");
+      const certPath = path.join(certDir, "cert.pem");
+      if (existsSync(keyPath) && existsSync(certPath)) {
+        return {
+          key: readFileSync(keyPath),
+          cert: readFileSync(certPath),
+        } as const;
+      }
+      return undefined;
+    })(),
   },
 });

@@ -10,14 +10,13 @@ import {
   AvatarImage,
 } from "@/src/components/ui/avatar";
 import { Upload, Camera, X } from "lucide-react";
-import useBasicBlockData from "@/store/block/useBasicBlockData";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import getProfile, { type Profile } from "@/utils/ao/getProfile";
+import useBlockData from "@/store/useBlockData";
 
 export default function BasicCard() {
-  const { setData, name, description, coverUrl, avatarUrl } =
-    useBasicBlockData();
+  const { setData, name, description, coverUrl, avatarUrl } = useBlockData();
 
   const { refetch, isFetching } = useQuery<Profile>({
     queryKey: ["arnsProfile"],

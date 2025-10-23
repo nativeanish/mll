@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/src/components/ui/tooltip";
 import { Edit3, Eye, MousePointerClick, Save, Trash2 } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import type { BlockData } from "@/store/useBlockStore";
 import BlockForDivider from "./BlockList/BlockForDivider";
 import BlockForText from "./BlockList/BlockForText";
@@ -46,7 +46,9 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
   const IconComponent = block.icon as React.ComponentType<{
     className?: string;
   }>;
-
+  useEffect(() => {
+    console.log("BlockItem mounted or updated:", block);
+  }, [block]);
   const renderBlockContent = () => {
     switch (block.alt) {
       case "Divider":
