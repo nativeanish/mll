@@ -1,10 +1,11 @@
 import type { BasicBlockData } from "@/store/useBlockData";
-import { useEffect } from "react";
 
-export default function PageGeneration({ name, description }: BasicBlockData) {
-  useEffect(() => {
-    console.log(name, description);
-  }, [name, description]);
+export default function PageGeneration({
+  name,
+  description,
+  avatarUrl,
+  coverUrl,
+}: BasicBlockData) {
   return (
     <>
       <style>{`
@@ -57,46 +58,37 @@ export default function PageGeneration({ name, description }: BasicBlockData) {
         </div>
 
         <div className="px-4 md:px-8 lg:px-16 py-4 md:py-6">
-          <div
-            className="relative w-full bg-gradient-to-br from-purple-900 via-purple-700 to-purple-600 rounded-lg overflow-hidden"
-            style={{ aspectRatio: "3/1" }}
-          >
-            {/* Cover Image */}
-            <img
-              src="/purple-gradient-professional-cover.jpg"
-              alt="Cover"
-              className="w-full h-full object-cover"
-            />
-
-            {/* Overlay text for desktop */}
-            <div className="hidden md:absolute md:inset-0 md:flex md:items-center md:justify-center">
-              <span className="text-white text-3xl font-light">
-                Cover Image
-              </span>
+          {(coverUrl || avatarUrl) && (
+            <div
+              className="relative w-full  rounded-lg "
+              style={{ aspectRatio: "3/1" }}
+            >
+              {/* Cover Image */}
+              {coverUrl && (
+                <img
+                  src={coverUrl}
+                  alt="Cover"
+                  className="w-full h-full object-cover"
+                />
+              )}
+              {/* Profile Image (overlaps cover on all breakpoints) */}
+              {avatarUrl && (
+                <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
+                  <img
+                    src={avatarUrl}
+                    alt="Profile avatar"
+                    className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg object-cover"
+                  />
+                </div>
+              )}
             </div>
-
-            {/* Mobile Profile Image */}
-            <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 md:hidden">
-              <img
-                src="/mark-stephanus-profile.jpg"
-                alt="Mark Stephanus"
-                className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Main Content */}
-        <div className="mt-20 px-6 pb-8 md:mt-0 md:px-0">
+        <div className="mt-20 px-6 pb-8 md:mt-20 md:px-0">
           <div className="md:max-w-4xl md:mx-auto">
-            {/* Desktop Profile Image - Centered between cover and content */}
-            <div className="hidden md:flex justify-center -mt-32 mb-8 relative z-10">
-              <img
-                src="/mark-stephanus-profile.jpg"
-                alt="Mark Stephanus"
-                className="w-40 h-40 rounded-full border-4 border-white shadow-xl object-cover"
-              />
-            </div>
+            {/* Avatar now overlaps cover on all breakpoints; extra container removed */}
 
             <div className="md:px-6">
               {/* Profile Info */}

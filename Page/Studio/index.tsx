@@ -39,8 +39,8 @@ function Studio() {
           '<script type="module">{{INLINE_MODULE_JS}}</script>' +
           "</body></html>",
       });
-      console.log("Generated HTML:", html.html);
       setHtml(html.html);
+      console.log("Generated HTML:", html.html);
     };
 
     // initial generate on mount

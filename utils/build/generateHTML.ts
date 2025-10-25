@@ -7,10 +7,6 @@ import { getEsbuild } from "./esbuild";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - Vite injects the string content for `../package.json?raw` at build time
 import rootPkgJson from "../../package.json?raw";
-// Twind (Tailwind-in-JS) running in the browser; we collect just the CSS actually used by the SSR markup.
-import { twind as createTw, virtual, defineConfig } from "@twind/core";
-import presetTailwind from "@twind/preset-tailwind";
-import * as csso from "csso";
 
 export type DeliveryMode = "inline" | "network";
 
@@ -57,66 +53,13 @@ export interface GenerateHtmlOptions {
   isError?: (payload: { error: 0 | 1; data: string | null }) => void;
 }
 
-export interface GenerateHtmlResult {
+export type GenerateHtmlResult = {
   html: string; // final full HTML document
   previewHtml: string; // SSR-only inner HTML for preview
   bundledJs: string; // the client bundle (inlineable)
-}
-
-// Global Twind instance backed by a virtual sheet so we can read the generated CSS out as a string.
-const __twindSheet = virtual();
-const __tw = createTw(
-  defineConfig({
-    presets: [presetTailwind()],
-  }),
-  __twindSheet
-);
-
-/**
- * From the SSR HTML, collect only the Tailwind utilities that actually appear
- * and produce a minified CSS string suitable for inlining.
- *
- * How it works (client-only):
- * - Parse class/className attributes in the SSR markup
- * - Feed each distinct class list into Twind, which writes rules to a virtual sheet
- * - Read out the sheet and minify it with csso
- */
-async function buildTailwindCssFromHtml(html: string): Promise<string> {
-  // Start fresh for this export so previously collected rules don't leak
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const anySheet = __twindSheet as any;
-  if (typeof anySheet.reset === "function") {
-    anySheet.reset();
-  } else if (Array.isArray(anySheet.target)) {
-    anySheet.target.length = 0;
-  }
-
-  // Find class/className attributes (class="..." or className='...') and tell Twind about them
-  const classAttrRegex = /\bclass(?:Name)?\s*=\s*("([^"]*)"|'([^']*)')/g;
-  const seen = new Set<string>();
-  let match: RegExpExecArray | null;
-  while ((match = classAttrRegex.exec(html)) !== null) {
-    const raw = match[2] ?? match[3] ?? "";
-    const value = raw.trim();
-    if (!value) continue;
-    // Skip repeats to reduce work
-    if (seen.has(value)) continue;
-    seen.add(value);
-    try {
-      // Tell Twind to realize the CSS for this class list into the virtual sheet
-      __tw(value);
-    } catch {
-      // If a class is malformed, ignore it and keep going
-    }
-  }
-
-  // Read out the CSS from the virtual sheet
-  const css = __twindSheet.target.join("\n");
-
-  // Minify before inlining
-  const minified = css ? csso.minify(css).css : "";
-  return minified;
-}
+};
+// Tailwind CSS via CDN (runtime engine). We skip CSS extraction and include this script tag in <head>.
+const TAILWIND_CDN_TAG = '<script src="https://cdn.tailwindcss.com"></script>';
 
 function getCdnReactVersion(): { version: string; dev: boolean } {
   const declared = JSON.parse(rootPkgJson) as {
@@ -251,8 +194,19 @@ export async function generateHtml(
     const ssrHtml = ReactDOMServer.renderToString(element);
     const staticHtml = ssrHtml.replace(/>\s+</g, "><").trim();
 
-    // Build Tailwind CSS from the SSR output (best-effort): only utilities present in the markup are included.
-    const tailwindCss = await buildTailwindCssFromHtml(staticHtml);
+    // React 19 may inject <link rel="preload"/> (and friends) into the SSR tree near where
+    // resources are used. That produces valid-but-messy HTML (link tags inside the body/root).
+    // We hoist those resource hints up into <head> for a cleaner, more conventional document.
+    const hoistedHeadLinks: string[] = [];
+    const staticHtmlWithoutHeadLinks = staticHtml.replace(
+      /<link\b[^>]*\brel\s*=\s*("|')(?:preload|modulepreload)\1[^>]*>\s*/gi,
+      (m) => {
+        hoistedHeadLinks.push(m);
+        return "";
+      }
+    );
+
+    // Skip Tailwind CSS extraction; we'll include the Tailwind CDN runtime instead.
 
     const { version: cdnVersion, dev } = getCdnReactVersion();
 
@@ -416,26 +370,22 @@ export async function generateHtml(
       const hasScript = /\{\{\s*INLINE_MODULE_JS\s*\}\}/.test(
         options.htmlTemplate
       );
-      const hasCss = /\{\{\s*INLINE_CSS\s*\}\}/.test(options.htmlTemplate);
       if (hasStatic && hasScript) {
         const hasRoot = /id=("|')root\1/.test(options.htmlTemplate);
         const staticSlot = hasRoot
-          ? staticHtml
-          : `<div id="root">${staticHtml}</div>`;
+          ? staticHtmlWithoutHeadLinks
+          : `<div id="root">${staticHtmlWithoutHeadLinks}</div>`;
         html = options.htmlTemplate
           .replace(/\{\{\s*PRECONNECT\s*\}\}/g, () => preconnect)
           .replace(/\{\{\s*STATIC_HTML\s*\}\}/g, () => staticSlot)
           .replace(/\{\{\s*INLINE_MODULE_JS\s*\}\}/g, () => inlineJsEscaped);
-        if (tailwindCss) {
-          if (hasCss) {
-            html = html.replace(/\{\{\s*INLINE_CSS\s*\}\}/g, () => tailwindCss);
-          } else {
-            // No {{INLINE_CSS}} placeholder: inject the CSS before </head>
-            html = html.replace(
-              /<\/head>/i,
-              `<style data-generated="tailwind">${tailwindCss}</style></head>`
-            );
-          }
+        // Always add Tailwind CDN runtime in the head
+        html = html.replace(/<\/head>/i, `${TAILWIND_CDN_TAG}</head>`);
+        if (hoistedHeadLinks.length) {
+          html = html.replace(
+            /<\/head>/i,
+            `${hoistedHeadLinks.join("")}</head>`
+          );
         }
         if (!hasRoot) {
           console.warn(
@@ -451,12 +401,9 @@ export async function generateHtml(
 
     if (html === null) {
       html = `\n<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset="utf-8" />\n    <meta name="viewport" content="width=device-width, initial-scale=1" />\n    <title>Exported Site</title>\n    <meta name="description" content="SEO-friendly React export built client-side." />\n    ${preconnect}
-    ${
-      tailwindCss
-        ? `<style data-generated="tailwind">${tailwindCss}</style>`
-        : ""
-    }
-  </head>\n  <body>\n    <div id="root">${staticHtml}</div>\n    <script type="module">${inlineJsEscaped}</script>\n  </body>\n</html>\n`;
+    ${TAILWIND_CDN_TAG}
+    ${hoistedHeadLinks.join("")}
+  </head>\n  <body>\n    <div id="root">${staticHtmlWithoutHeadLinks}</div>\n    <script type="module">${inlineJsEscaped}</script>\n  </body>\n</html>\n`;
     }
 
     const finalResult: GenerateHtmlResult = {
