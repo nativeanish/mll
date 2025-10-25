@@ -27,10 +27,12 @@ export type MobileViewProps = {
   square?: boolean;
   // Show decorative notch/home indicator
   showDecorations?: boolean;
+  // Disable all anchor/link navigation inside the preview (recommended for demos)
+  disableLinks?: boolean;
 };
 
 // Ensure the provided HTML has a viewport meta for mobile-like layout
-function withViewport(html: string): string {
+function withViewport(html: string, opts?: { disableLinks?: boolean }): string {
   const hasHtml = /<html[\s>]/i.test(html);
   const hasHead = /<head[\s>]/i.test(html);
   const hasViewport = /<meta[^>]+name=["']viewport["']/i.test(html);
@@ -38,17 +40,50 @@ function withViewport(html: string): string {
   const viewportTag =
     '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />';
 
+  const disableLinksStyle = opts?.disableLinks
+    ? `<style id="__mv-disable-links">
+        a, area { pointer-events: none !important; cursor: not-allowed !important; }
+      </style>`
+    : "";
+
+  const disableLinksScript = opts?.disableLinks
+    ? `<script id="__mv-disable-links-script">
+        (function(){
+          try {
+            // Prevent all anchor navigations (just in case CSS is overridden)
+            document.addEventListener('click', function(ev){
+              var el = ev.target;
+              while (el && el !== document) {
+                if (el.tagName && el.tagName.toLowerCase() === 'a') {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  return false;
+                }
+                el = el.parentNode;
+              }
+            }, true);
+          } catch (e) {}
+        })();
+      </script>`
+    : "";
+
   if (hasHtml) {
     if (!hasHead) {
       return html.replace(
         /<html([^>]*)>/i,
-        (_m, attrs) => `<html${attrs}><head>${viewportTag}</head>`
+        (_m, attrs) =>
+          `<html${attrs}><head>${viewportTag}${disableLinksStyle}${disableLinksScript}</head>`,
       );
     }
+    // Ensure viewport, then inject disable-links assets right after <head>
+    let out = html;
     if (!hasViewport) {
-      return html.replace(/<head[^>]*>/i, (m) => `${m}${viewportTag}`);
+      out = out.replace(/<head[^>]*>/i, (m) => `${m}${viewportTag}`);
     }
-    return html;
+    return out.replace(
+      /<head[^>]*>/i,
+      (m) => `${m}${disableLinksStyle}${disableLinksScript}`,
+    );
   }
 
   // If fragment, wrap it into a full document with viewport
@@ -61,6 +96,7 @@ function withViewport(html: string): string {
         html, body, #root { height: 100%; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
       </style>
+      ${disableLinksStyle}
       <script>
         // Optional: notify parent of content height once ready
         window.addEventListener('load', function(){
@@ -70,6 +106,7 @@ function withViewport(html: string): string {
           } catch (e) {}
         });
       </script>
+      ${disableLinksScript}
     </head>
     <body>
       ${html}
@@ -91,6 +128,7 @@ export default function MobileView({
   overlayClassName,
   square = true,
   showDecorations = true,
+  disableLinks = true,
 }: MobileViewProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -110,7 +148,61 @@ export default function MobileView({
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  const srcDoc = html ? withViewport(html) : undefined;
+  const srcDoc = html ? withViewport(html, { disableLinks }) : undefined;
+
+  // If disabling links for remote src, attempt same-origin injection; also harden sandbox by stripping popup/navigation tokens.
+  function computeEffectiveSandbox(base: string, disable: boolean): string {
+    if (!disable) return base;
+    const tokens = new Set(
+      base
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter(Boolean),
+    );
+    const toRemove = [
+      "allow-popups",
+      "allow-popups-to-escape-sandbox",
+      "allow-top-navigation",
+      "allow-top-navigation-by-user-activation",
+    ];
+    toRemove.forEach((t) => tokens.delete(t));
+    return Array.from(tokens).join(" ");
+  }
+
+  const effectiveSandbox = computeEffectiveSandbox(sandbox, disableLinks);
+
+  function injectDisableLinks(doc: Document) {
+    try {
+      // Style safety net
+      const st = doc.createElement("style");
+      st.id = "__mv-disable-links";
+      st.textContent =
+        "a, area { pointer-events: none !important; cursor: not-allowed !important; }";
+      if (doc.head) {
+        doc.head.appendChild(st);
+      }
+
+      // JS safety net
+      doc.addEventListener(
+        "click",
+        (ev) => {
+          let el: HTMLElement | null = ev.target as HTMLElement | null;
+          while (el) {
+            const tag = el.tagName ? el.tagName.toLowerCase() : "";
+            if (tag === "a") {
+              ev.preventDefault();
+              ev.stopPropagation();
+              return;
+            }
+            el = el.parentElement;
+          }
+        },
+        true,
+      );
+    } catch {
+      // ignore
+    }
+  }
 
   // Square content area and separate top/bottom decorations so content isn't clipped
   const contentWidth = frameWidth;
@@ -140,10 +232,21 @@ export default function MobileView({
           title="Mobile Preview"
           src={src}
           srcDoc={srcDoc}
-          sandbox={sandbox}
+          sandbox={effectiveSandbox}
           allow={allow}
           onLoad={() => {
             if (onLoad && iframeRef.current) onLoad(iframeRef.current);
+            // Best effort: if same-origin and disableLinks, inject into remote src
+            if (disableLinks && iframeRef.current) {
+              try {
+                const doc =
+                  iframeRef.current.contentDocument ||
+                  iframeRef.current.contentWindow?.document;
+                if (doc) injectDisableLinks(doc);
+              } catch {
+                // Cross-origin, cannot inject
+              }
+            }
           }}
           style={{
             width: "100%",

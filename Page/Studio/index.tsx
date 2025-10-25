@@ -7,16 +7,24 @@ import PageGeneration from "@/Blocks/PageGeneration";
 import pageGenerationSource from "@/Blocks/PageGeneration/index.tsx?raw";
 import React, { useEffect } from "react";
 import { generateHtml } from "@/utils/build/generateHTML";
+import useBlockData from "@/store/useBlockData";
 function Studio() {
   const [html, setHtml] = React.useState<string>("");
   useEffect(() => {
-    async function gener() {
+    const generate = async () => {
+      const { name, description, avatarUrl, coverUrl } =
+        useBlockData.getState();
       const html = await generateHtml({
         deliveryMode: "network",
         input: {
           type: "component",
           component: PageGeneration as React.ComponentType<unknown>,
-          props: {},
+          props: {
+            name,
+            description,
+            avatarUrl,
+            coverUrl,
+          },
           moduleName: "./../Blocks/PageGeneration/index.tsx",
           moduleSource: pageGenerationSource,
         },
@@ -31,9 +39,37 @@ function Studio() {
           '<script type="module">{{INLINE_MODULE_JS}}</script>' +
           "</body></html>",
       });
+      console.log("Generated HTML:", html.html);
       setHtml(html.html);
-    }
-    gener();
+    };
+
+    // initial generate on mount
+    generate();
+
+    // subscribe to store changes and regenerate only when relevant fields change
+    const snapshot = () => {
+      const { name, description, avatarUrl, coverUrl } =
+        useBlockData.getState();
+      return { name, description, avatarUrl, coverUrl };
+    };
+
+    let prev = snapshot();
+    const unsubscribe = useBlockData.subscribe(() => {
+      const next = snapshot();
+      if (
+        prev.name !== next.name ||
+        prev.description !== next.description ||
+        prev.avatarUrl !== next.avatarUrl ||
+        prev.coverUrl !== next.coverUrl
+      ) {
+        prev = next;
+        generate();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
   return (
     <div className="flex flex-col min-h-screen">
@@ -54,6 +90,7 @@ function Studio() {
             sandbox="allow-scripts allow-same-origin" // stricter
             allow="clipboard-read; clipboard-write"
             square={false}
+            disableLinks={true}
           />
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface BasicBlockData {
+export interface BasicBlockData {
   name: string;
   description: string;
   coverUrl: string | null;
