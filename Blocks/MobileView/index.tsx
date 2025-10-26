@@ -72,7 +72,7 @@ function withViewport(html: string, opts?: { disableLinks?: boolean }): string {
       return html.replace(
         /<html([^>]*)>/i,
         (_m, attrs) =>
-          `<html${attrs}><head>${viewportTag}${disableLinksStyle}${disableLinksScript}</head>`,
+          `<html${attrs}><head>${viewportTag}${disableLinksStyle}${disableLinksScript}</head>`
       );
     }
     // Ensure viewport, then inject disable-links assets right after <head>
@@ -82,7 +82,7 @@ function withViewport(html: string, opts?: { disableLinks?: boolean }): string {
     }
     return out.replace(
       /<head[^>]*>/i,
-      (m) => `${m}${disableLinksStyle}${disableLinksScript}`,
+      (m) => `${m}${disableLinksStyle}${disableLinksScript}`
     );
   }
 
@@ -132,6 +132,8 @@ export default function MobileView({
 }: MobileViewProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  // If src is a blob: or data: URL, resolve it to HTML and use srcDoc to avoid browser restrictions
+  const [resolved, setResolved] = useState<{ src?: string; html?: string }>({});
 
   useEffect(() => {
     function handleMessage(ev: MessageEvent) {
@@ -148,7 +150,59 @@ export default function MobileView({
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  const srcDoc = html ? withViewport(html, { disableLinks }) : undefined;
+  // Resolve the content to either src or srcDoc. Prefer explicit html prop.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function resolve() {
+      // If html is provided, that wins
+      if (html != null) {
+        setResolved({ html });
+        return;
+      }
+
+      if (!src) {
+        setResolved({});
+        return;
+      }
+
+      const isBlob = src.startsWith("blob:");
+      const isDataHtml = src.startsWith("data:text/html");
+
+      // If we're on https and the blob url embeds http origin (blob:http://...), the browser will block it.
+      // We try to fetch the content and render via srcDoc instead.
+      const isLikelyMixedSchemeBlob =
+        isBlob &&
+        typeof window !== "undefined" &&
+        window.location.protocol === "https:" &&
+        src.startsWith("blob:http:");
+
+      if (isBlob || isDataHtml || isLikelyMixedSchemeBlob) {
+        try {
+          const res = await fetch(src);
+          const text = await res.text();
+          if (!cancelled) setResolved({ html: text });
+          return;
+        } catch {
+          // Fall back to using src directly if fetch fails (e.g., cross-origin blob)
+          if (!cancelled) setResolved({ src });
+          return;
+        }
+      }
+
+      // Default: use src as-is
+      setResolved({ src });
+    }
+
+    resolve();
+    return () => {
+      cancelled = true;
+    };
+  }, [html, src]);
+
+  const srcDoc = resolved.html
+    ? withViewport(resolved.html, { disableLinks })
+    : undefined;
 
   // If disabling links for remote src, attempt same-origin injection; also harden sandbox by stripping popup/navigation tokens.
   function computeEffectiveSandbox(base: string, disable: boolean): string {
@@ -157,7 +211,7 @@ export default function MobileView({
       base
         .split(/\s+/)
         .map((t) => t.trim())
-        .filter(Boolean),
+        .filter(Boolean)
     );
     const toRemove = [
       "allow-popups",
@@ -197,7 +251,7 @@ export default function MobileView({
             el = el.parentElement;
           }
         },
-        true,
+        true
       );
     } catch {
       // ignore
@@ -230,7 +284,7 @@ export default function MobileView({
         <iframe
           ref={iframeRef}
           title="Mobile Preview"
-          src={src}
+          src={srcDoc ? undefined : resolved.src}
           srcDoc={srcDoc}
           sandbox={effectiveSandbox}
           allow={allow}

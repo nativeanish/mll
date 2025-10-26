@@ -29,13 +29,22 @@ export default function BasicCard() {
     queryFn: getProfile,
     enabled: false,
   });
-  // Cover change handler
+  // Cover change handler - use data/base64 instead of blob URL
   const onCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Revoke any existing blob URL to avoid leaks from previous versions
     if (coverUrl?.startsWith("blob:")) URL.revokeObjectURL(coverUrl);
-    const next = URL.createObjectURL(file);
-    setData({ coverUrl: next });
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string | null;
+      if (result) {
+        // Persist as data URL (base64) to be portable and not dependent on runtime blob URLs
+        setData({ coverUrl: result });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   // Avatar change handler

@@ -12,7 +12,7 @@ function Studio() {
   const [html, setHtml] = React.useState<string>("");
   useEffect(() => {
     const generate = async () => {
-      const { name, description, avatarUrl, coverUrl } =
+      const { name, description, avatarUrl, coverUrl, blocks } =
         useBlockStore.getState();
       const html = await generateHtml({
         deliveryMode: "network",
@@ -20,10 +20,13 @@ function Studio() {
           type: "component",
           component: PageGeneration as React.ComponentType<unknown>,
           props: {
-            name,
-            description,
-            avatarUrl,
-            coverUrl,
+            basicData: {
+              name,
+              description,
+              avatarUrl,
+              coverUrl,
+            },
+            block: blocks,
           },
           moduleName: "./../Blocks/PageGeneration/index.tsx",
           moduleSource: pageGenerationSource,
@@ -48,9 +51,9 @@ function Studio() {
 
     // subscribe to store changes and regenerate only when relevant fields change
     const snapshot = () => {
-      const { name, description, avatarUrl, coverUrl } =
+      const { name, description, avatarUrl, coverUrl, blocks } =
         useBlockStore.getState();
-      return { name, description, avatarUrl, coverUrl };
+      return { name, description, avatarUrl, coverUrl, blocks };
     };
 
     let prev = snapshot();
@@ -60,7 +63,8 @@ function Studio() {
         prev.name !== next.name ||
         prev.description !== next.description ||
         prev.avatarUrl !== next.avatarUrl ||
-        prev.coverUrl !== next.coverUrl
+        prev.coverUrl !== next.coverUrl ||
+        prev.blocks !== next.blocks
       ) {
         prev = next;
         generate();
@@ -87,7 +91,7 @@ function Studio() {
             frameHeight={700}
             frameWidth={350}
             html={html}
-            sandbox="allow-scripts allow-same-origin" // stricter
+            sandbox="allow-scripts" // safer: avoid combining with allow-same-origin
             allow="clipboard-read; clipboard-write"
             square={false}
             disableLinks={true}

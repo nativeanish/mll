@@ -1,11 +1,77 @@
-import type { BasicBlockData } from "@/store/useBlockStore";
-
-export default function PageGeneration({
-  name,
-  description,
-  avatarUrl,
-  coverUrl,
-}: BasicBlockData) {
+import type { BasicBlockData, BlockData } from "@/store/useBlockStore";
+import Link from "./Link";
+interface Props {
+  basicData: BasicBlockData;
+  block: Array<BlockData>;
+}
+const Logo = () => (
+  <svg
+    width="2em"
+    height="2em"
+    viewBox="0 0 328 329"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      y="0.5"
+      width="328"
+      height="328"
+      rx="164"
+      fill="black"
+      className="dark:fill-white"
+    />
+    <path
+      d="M165.018 72.3008V132.771C165.018 152.653 148.9 168.771 129.018 168.771H70.2288"
+      stroke="white"
+      strokeWidth="20"
+      className="dark:stroke-black"
+    />
+    <path
+      d="M166.627 265.241L166.627 204.771C166.627 184.889 182.744 168.771 202.627 168.771L261.416 168.771"
+      stroke="white"
+      strokeWidth="20"
+      className="dark:stroke-black"
+    />
+    <line
+      x1="238.136"
+      y1="98.8184"
+      x2="196.76"
+      y2="139.707"
+      stroke="white"
+      strokeWidth="20"
+      className="dark:stroke-black"
+    />
+    <line
+      x1="135.688"
+      y1="200.957"
+      x2="94.3128"
+      y2="241.845"
+      stroke="white"
+      strokeWidth="20"
+      className="dark:stroke-black"
+    />
+    <line
+      x1="133.689"
+      y1="137.524"
+      x2="92.5566"
+      y2="96.3914"
+      stroke="white"
+      strokeWidth="20"
+      className="dark:stroke-black"
+    />
+    <line
+      x1="237.679"
+      y1="241.803"
+      x2="196.547"
+      y2="200.671"
+      stroke="white"
+      strokeWidth="20"
+      className="dark:stroke-black"
+    />
+  </svg>
+);
+export default function PageGeneration({ basicData, block }: Props) {
+  const { name, description, avatarUrl, coverUrl } = basicData;
   return (
     <>
       <style>{`
@@ -37,7 +103,9 @@ export default function PageGeneration({
         {/* Header */}
         <div className="flex justify-between items-center pt-4 px-4 pb-3 bg-white sticky top-0 z-50 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-white rounded border border-gray-300"></div>
+            <div className="">
+              <Logo />
+            </div>
             <span className="text-gray-900 font-semibold">metalinks</span>
           </div>
           <button className="text-gray-600 hover:text-gray-900 transition">
@@ -86,7 +154,7 @@ export default function PageGeneration({
         </div>
 
         {/* Main Content */}
-        <div className="mt-20 px-6 pb-8 md:mt-20 md:px-0">
+        <div className="mt-16 px-6 pb-8 md:mt-20 md:px-0">
           <div className="md:max-w-4xl md:mx-auto">
             {/* Avatar now overlaps cover on all breakpoints; extra container removed */}
 
@@ -107,7 +175,7 @@ export default function PageGeneration({
 
               {/* Social Links */}
               <div className="flex justify-center gap-4 mb-6 md:mb-4">
-                <button className="w-10 h-10 flex items-center justify-center relative overflow-hidden rounded-full bg-white shadow-md shadow-gray-200 group transition-all duration-300">
+                {/* <button className="w-10 h-10 flex items-center justify-center relative overflow-hidden rounded-full bg-white shadow-md shadow-gray-200 group transition-all duration-300">
                   <svg
                     className="relative z-10 fill-gray-900 transition-all duration-300 group-hover:fill-white"
                     xmlns="http://www.w3.org/2000/svg"
@@ -136,32 +204,21 @@ export default function PageGeneration({
                   </svg>
 
                   <div className="absolute top-full left-0 w-full h-full rounded-full bg-[#5865F2] z-0 transition-all duration-500 group-hover:top-0"></div>
-                </button>
-
-                <a
-                  href="#"
-                  className="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
-                  aria-label="Social link 2"
-                />
-                <a
-                  href="#"
-                  className="w-10 md:w-12 h-10 md:h-12 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition"
-                  aria-label="Social link 3"
-                />
-                <a
-                  href="#"
-                  className="w-10 md:w-12 h-10 md:h-12 bg-purple-600 rounded-full flex items-center justify-center text-white hover:bg-purple-700 transition"
-                  aria-label="Social link 4"
-                />
+                </button> */}
+                {block
+                  .filter((b) => b.node === "Social" && b.enabled === true)
+                  .map((link) => (
+                    <Link key={link.id} block={link} />
+                  ))}
               </div>
 
               {/* Visit Website Button */}
-              <button className="w-full bg-gray-900 text-white py-3 rounded-lg flex items-center justify-between px-4 hover:bg-gray-800 transition mb-4">
+              {/* <button className="w-full bg-gray-900 text-white py-3 rounded-lg flex items-center justify-between px-4 hover:bg-gray-800 transition mb-4">
                 <span>Visit my website</span>
-              </button>
+              </button> */}
 
               {/* Product Card 1 */}
-              <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+              {/* <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
                 <img
                   src="/harmonica-product.jpg"
                   alt="Harmonica"
@@ -174,15 +231,15 @@ export default function PageGeneration({
                 <span className="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">
                   IDR 690K
                 </span>
-              </div>
+              </div> */}
 
               {/* Visit Instagram Button */}
-              <button className="w-full bg-white border-2 border-gray-200 text-gray-900 py-3 rounded-lg flex items-center justify-between px-4 hover:border-gray-300 transition mb-4">
+              {/* <button className="w-full bg-white border-2 border-gray-200 text-gray-900 py-3 rounded-lg flex items-center justify-between px-4 hover:border-gray-300 transition mb-4">
                 <span>Visit my Instagram</span>
-              </button>
+              </button> */}
 
               {/* Product Card 2 */}
-              <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+              {/* <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
                 <img
                   src="/digital-marketing-ebook.png"
                   alt="Digital Marketing"
@@ -197,7 +254,7 @@ export default function PageGeneration({
                 <span className="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">
                   IDR 690K
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

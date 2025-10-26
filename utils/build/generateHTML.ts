@@ -150,6 +150,19 @@ function makeVirtualModulePlugin(
   return {
     name: "virtual-component-module",
     setup(build: PluginBuild) {
+      // Compute a base URL for resolving relative imports from the virtual module
+      const origin =
+        typeof location !== "undefined" ? location.origin : "http://localhost";
+      let moduleAbsUrl: string;
+      try {
+        moduleAbsUrl = new URL(
+          moduleName.replace(/^\.\//, ""),
+          origin + "/"
+        ).toString();
+      } catch {
+        moduleAbsUrl = origin + "/";
+      }
+      const baseHref = new URL("./", moduleAbsUrl).toString();
       build.onResolve(
         {
           filter: new RegExp(
@@ -161,6 +174,18 @@ function makeVirtualModulePlugin(
           namespace: "virtual-module",
         })
       );
+      // Resolve relative imports in the virtual module to absolute HTTP URLs so our http-fetch plugin can load them
+      build.onResolve(
+        { filter: /^\.\.?\//, namespace: "virtual-module" },
+        (args) => {
+          const hasExt = /\.[a-zA-Z0-9]+$/.test(args.path);
+          const candidate = hasExt ? args.path : `${args.path}.tsx`;
+          return {
+            path: new URL(candidate, baseHref).toString(),
+            namespace: "http-url",
+          };
+        }
+      );
       build.onLoad({ filter: /.*/, namespace: "virtual-module" }, () => ({
         contents: moduleSource,
         loader: moduleName.endsWith(".tsx")
@@ -168,6 +193,7 @@ function makeVirtualModulePlugin(
           : moduleName.endsWith(".ts")
             ? "ts"
             : "js",
+        resolveDir: baseHref,
       }));
     },
   };
@@ -320,6 +346,8 @@ export async function generateHtml(
           );
         },
       });
+      // Also fetch any http(s) modules (like your local files resolved to absolute URLs)
+      plugins.push(makeHttpFetchPlugin());
     }
 
     // Provide the virtual source for the component module used by hydration
