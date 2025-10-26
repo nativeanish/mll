@@ -142,5 +142,5 @@ const social = [
     description: "Feature your Odysee videos and channel",
     display: ["View", "Click"],
   },
-];
+] as const;
 export default social;

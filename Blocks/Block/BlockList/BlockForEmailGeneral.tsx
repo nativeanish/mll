@@ -1,6 +1,7 @@
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
+import { useBlockStore } from "@/store/useBlockStore";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Copy, Mail } from "lucide-react";
 import React, { useEffect } from "react";
@@ -9,12 +10,23 @@ import { toast } from "sonner";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
-function BlockForEmailGeneral({ isEdit, setError }: Props) {
+function BlockForEmailGeneral({ isEdit, setError, uuid }: Props) {
   const [email, setEmail] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
   const [title, setTitle] = React.useState("Email Me");
+  const updateBlockData = useBlockStore((state) => state.updateBlockData);
+  useEffect(() => {
+    if (isEdit === false) {
+      updateBlockData(uuid, {
+        email,
+        description,
+        title,
+      });
+    }
+  }, [isEdit, uuid, email, description, title, updateBlockData]);
   useEffect(() => {
     if (email && email.length > 0) {
       const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

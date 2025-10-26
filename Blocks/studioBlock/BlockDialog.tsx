@@ -74,22 +74,39 @@ export default function BlockDialog() {
 
   const handleAddBlock = (alt: string) => {
     // Find the block in the data structure
-    let foundBlock = null;
+    let foundBlock: (typeof data.nav)[number]["node"][number] | null = null;
+    let foundNavName: string | null = null;
     for (const navItem of data.nav) {
       const block = navItem.node.find((b) => b.alt === alt);
       if (block) {
         foundBlock = block;
+        foundNavName = navItem.name;
         break;
       }
     }
 
     if (foundBlock) {
-      addBlock(
-        foundBlock.alt,
-        foundBlock.name,
-        foundBlock.icon,
-        foundBlock.display
-      );
+      let placeholder = "";
+      // Check if found block belongs to the "Social" category
+      if (foundNavName === "Social") {
+        if (foundBlock.alt === "Url") {
+          placeholder = "Enter a valid URL";
+        } else {
+          placeholder = `Enter your ${foundBlock.name} URL`;
+        }
+      }
+      addBlock({
+        id: crypto.randomUUID(),
+        enabled: true,
+        clicks: 0,
+        views: 0,
+        placeholder: placeholder || `Enter your ${foundBlock.name} information`,
+        alt: foundBlock.alt,
+        name: foundBlock.name,
+        icon: foundBlock.icon,
+        display: foundBlock.display as string[] | string,
+        node: foundNavName!,
+      });
     }
 
     setTimeout(() => {

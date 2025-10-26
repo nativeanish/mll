@@ -7,13 +7,13 @@ import PageGeneration from "@/Blocks/PageGeneration";
 import pageGenerationSource from "@/Blocks/PageGeneration/index.tsx?raw";
 import React, { useEffect } from "react";
 import { generateHtml } from "@/utils/build/generateHTML";
-import useBlockData from "@/store/useBlockData";
+import { useBlockStore } from "@/store/useBlockStore";
 function Studio() {
   const [html, setHtml] = React.useState<string>("");
   useEffect(() => {
     const generate = async () => {
       const { name, description, avatarUrl, coverUrl } =
-        useBlockData.getState();
+        useBlockStore.getState();
       const html = await generateHtml({
         deliveryMode: "network",
         input: {
@@ -39,8 +39,8 @@ function Studio() {
           '<script type="module">{{INLINE_MODULE_JS}}</script>' +
           "</body></html>",
       });
+
       setHtml(html.html);
-      console.log("Generated HTML:", html.html);
     };
 
     // initial generate on mount
@@ -49,12 +49,12 @@ function Studio() {
     // subscribe to store changes and regenerate only when relevant fields change
     const snapshot = () => {
       const { name, description, avatarUrl, coverUrl } =
-        useBlockData.getState();
+        useBlockStore.getState();
       return { name, description, avatarUrl, coverUrl };
     };
 
     let prev = snapshot();
-    const unsubscribe = useBlockData.subscribe(() => {
+    const unsubscribe = useBlockStore.subscribe(() => {
       const next = snapshot();
       if (
         prev.name !== next.name ||
@@ -97,5 +97,4 @@ function Studio() {
     </div>
   );
 }
-
 export default Studio;

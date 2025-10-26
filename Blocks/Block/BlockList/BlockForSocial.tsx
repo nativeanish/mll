@@ -2,6 +2,8 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
+import { useBlockStore } from "@/store/useBlockStore";
+import type social from "@/utils/block/social";
 import { Copy, ExternalLink } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
@@ -9,11 +11,20 @@ import { toast } from "sonner";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  alt: (typeof social)[number]["alt"];
+  placeholder?: string;
+  uuid: string;
 }
-function BlockForSocial({ isEdit, setError: SetError }: Props) {
+function BlockForSocial({
+  isEdit,
+  setError: SetError,
+  placeholder,
+  uuid,
+}: Props) {
   const [url, setUrl] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [error, setError] = React.useState(false);
+  const updateBlockData = useBlockStore((state) => state.updateBlockData);
   React.useEffect(() => {
     if (url && url.length > 0) {
       const urlPattern =
@@ -27,6 +38,14 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
     setError(false);
     SetError(false);
   }, [url, SetError]);
+  React.useEffect(() => {
+    if (isEdit === false) {
+      updateBlockData(uuid, {
+        url,
+        description,
+      });
+    }
+  }, [isEdit, uuid, url, description, updateBlockData]);
   return (
     <div>
       {isEdit ? (
@@ -40,7 +59,7 @@ function BlockForSocial({ isEdit, setError: SetError }: Props) {
             </Label>
             <Input
               //   id={`url-${data.id}`}
-              placeholder={`Enter Twitter URL`}
+              placeholder={placeholder || "https://example.com/your-profile"}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="bg-muted/40"

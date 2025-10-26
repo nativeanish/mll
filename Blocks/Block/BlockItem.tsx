@@ -72,7 +72,15 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "BlueSky":
       case "Odysee":
       case "Url":
-        return <BlockForSocial isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForSocial
+            isEdit={isEdit}
+            setError={setError}
+            alt={block.alt}
+            placeholder={block.placeholder}
+            uuid={block.id}
+          />
+        );
       case "Url-Card":
         return <BlockForUrl isEdit={isEdit} setError={setError} />;
       case "Image-Card":
@@ -84,9 +92,17 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "NewsLetter-Card":
         return <BlockForNewsLetter isEdit={isEdit} setError={setError} />;
       case "Email-Card":
-        return <BlockForEmailGeneral isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForEmailGeneral
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
       case "Email":
-        return <BlockForEmail isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForEmail isEdit={isEdit} setError={setError} uuid={block.id} />
+        );
       case "Phone-Card":
         return <BlockForNumber isEdit={isEdit} setError={setError} />;
       case "File":
