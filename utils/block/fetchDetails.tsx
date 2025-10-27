@@ -58,6 +58,7 @@ export async function getContentTypes(
 
 export async function fetchProfilewithAssets(profileId: string) {
   try {
+    //@ts-expect-error I have not defined the types
     const data = await permaweb.getProfileByWalletAddress(profileId);
     const finalArray: Array<{
       type: "image" | "video" | "unknown" | "token";
