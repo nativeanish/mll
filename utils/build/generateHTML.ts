@@ -148,10 +148,8 @@ function makeHttpFetchPlugin(): Plugin {
 // (Old single-module virtual plugin removed in favor of the multi-module version below)
 function makeVirtualModulePlugin(moduleMap: Record<string, string>): Plugin {
   // Provide one or more virtual modules (in-memory) so esbuild never tries to fetch TS/TSX files over HTTP in production.
-  // The keys in moduleMap should be the exact specifiers used by imports, and we support resolving relative imports
-  // between these virtual modules using POSIX-like paths.
+  // Normalize all paths to POSIX-like specifiers without leading './' so matching is stable.
   const normalize = (p: string) => {
-    // convert backslashes to slashes and collapse .. and . segments
     const parts = p.replace(/\\/g, "/").split("/");
     const out: string[] = [];
     for (const part of parts) {
@@ -168,15 +166,20 @@ function makeVirtualModulePlugin(moduleMap: Record<string, string>): Plugin {
   };
   const join = (a: string, b: string) => normalize((a ? a + "/" : "") + b);
 
+  // Build a normalized map for lookups
+  const vmap = new Map<string, string>();
+  for (const [k, v] of Object.entries(moduleMap)) {
+    vmap.set(normalize(k), v);
+  }
+
   return {
     name: "virtual-component-module",
     setup(build: PluginBuild) {
-      // 1) Resolve exact virtual modules by id
+      // 1) Resolve virtual modules and their relative imports
       build.onResolve({ filter: /.*/ }, (args) => {
+        // Handle imports within the virtual namespace first
         if (args.namespace === "virtual-module") {
-          // Resolve relative imports within virtual modules
           if (/^\.?\.\//.test(args.path)) {
-            // args.importer is prefixed as `${namespace}:${path}`; strip the prefix
             const importerPath = args.importer.replace(/^virtual-module:/, "");
             const baseDir = dirname(importerPath);
             const resolved = join(baseDir, args.path);
@@ -188,34 +191,35 @@ function makeVirtualModulePlugin(moduleMap: Record<string, string>): Plugin {
               `${resolved}.js`,
             ];
             for (const c of candidates) {
-              if (moduleMap[c]) {
-                return { path: c, namespace: "virtual-module" };
+              const key = normalize(c);
+              if (vmap.has(key)) {
+                return { path: key, namespace: "virtual-module" };
               }
             }
           }
-          // Fallthrough: let other plugins handle (e.g., http-fetch) if not found
+          // Let other resolvers try
           return undefined;
         }
 
-        // Entry points (exact matches) get captured into virtual namespace
-        if (moduleMap[args.path]) {
-          return { path: args.path, namespace: "virtual-module" };
+        // Match entry/imports that refer to a provided virtual module exactly
+        const key = normalize(args.path);
+        if (vmap.has(key)) {
+          return { path: key, namespace: "virtual-module" };
         }
         return undefined;
       });
 
-      // 2) Serve module contents from the map
+      // 2) Serve module contents from the normalized map
       build.onLoad({ filter: /.*/, namespace: "virtual-module" }, (args) => {
-        const source = moduleMap[args.path];
+        const source = vmap.get(args.path);
         if (typeof source !== "string") return null;
         const loader = args.path.endsWith(".tsx")
           ? "tsx"
           : args.path.endsWith(".ts")
             ? "ts"
-            : "js";
-        // Provide a resolveDir so esbuild can resolve relative imports
-        // (even though we also handle them in onResolve). Make it look like
-        // a POSIX path from the virtual root.
+            : args.path.endsWith(".jsx")
+              ? "jsx"
+              : "js";
         const baseDir = "/" + dirname(args.path);
         return { contents: source, loader, resolveDir: baseDir };
       });
