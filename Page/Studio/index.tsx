@@ -5,6 +5,7 @@ import BasicCard from "@/Blocks/studioBlock/BasicBlock";
 import NavBar from "@/Blocks/UI/NavBar";
 import PageGeneration from "@/Blocks/PageGeneration";
 import pageGenerationSource from "@/Blocks/PageGeneration/index.tsx?raw";
+import linkSource from "@/Blocks/PageGeneration/Link.tsx?raw";
 import React, { useEffect } from "react";
 import { generateHtml } from "@/utils/build/generateHTML";
 import { useBlockStore } from "@/store/useBlockStore";
@@ -30,6 +31,9 @@ function Studio() {
           },
           moduleName: "./../Blocks/PageGeneration/index.tsx",
           moduleSource: pageGenerationSource,
+        },
+        virtualModules: {
+          "./../Blocks/PageGeneration/Link.tsx": linkSource,
         },
         htmlTemplate:
           '<!DOCTYPE html><html><head><meta charset="utf-8" />' +

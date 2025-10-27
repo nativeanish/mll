@@ -51,6 +51,9 @@ export interface GenerateHtmlOptions {
   isGenerating?: (generating: boolean) => void;
   // Notify error or success once: { error: 1, data: message } on failure; { error: 0, data: null } on success
   isError?: (payload: { error: 0 | 1; data: string | null }) => void;
+  // Optional additional virtual modules to provide to the bundler so relative imports don't hit the network
+  // Keys should match the import specifiers used by your entry virtual module (e.g. './../Blocks/PageGeneration/Link.tsx')
+  virtualModules?: Record<string, string>;
 }
 
 export type GenerateHtmlResult = {
@@ -142,59 +145,74 @@ function makeHttpFetchPlugin(): Plugin {
   };
 }
 
-function makeVirtualModulePlugin(
-  moduleName: string,
-  moduleSource: string
-): Plugin {
-  // Provide a virtual module with the given source under a stable module id so the hydration bundle can import it.
+// (Old single-module virtual plugin removed in favor of the multi-module version below)
+function makeVirtualModulePlugin(moduleMap: Record<string, string>): Plugin {
+  // Provide one or more virtual modules (in-memory) so esbuild never tries to fetch TS/TSX files over HTTP in production.
+  // The keys in moduleMap should be the exact specifiers used by imports, and we support resolving relative imports
+  // between these virtual modules using POSIX-like paths.
+  const normalize = (p: string) => {
+    // convert backslashes to slashes and collapse .. and . segments
+    const parts = p.replace(/\\/g, "/").split("/");
+    const out: string[] = [];
+    for (const part of parts) {
+      if (!part || part === ".") continue;
+      if (part === "..") out.pop();
+      else out.push(part);
+    }
+    return out.join("/");
+  };
+  const dirname = (p: string) => {
+    const s = normalize(p);
+    const idx = s.lastIndexOf("/");
+    return idx >= 0 ? s.slice(0, idx) : "";
+  };
+  const join = (a: string, b: string) => normalize((a ? a + "/" : "") + b);
+
   return {
     name: "virtual-component-module",
     setup(build: PluginBuild) {
-      // Compute a base URL for resolving relative imports from the virtual module
-      const origin =
-        typeof location !== "undefined" ? location.origin : "http://localhost";
-      let moduleAbsUrl: string;
-      try {
-        moduleAbsUrl = new URL(
-          moduleName.replace(/^\.\//, ""),
-          origin + "/"
-        ).toString();
-      } catch {
-        moduleAbsUrl = origin + "/";
-      }
-      const baseHref = new URL("./", moduleAbsUrl).toString();
-      build.onResolve(
-        {
-          filter: new RegExp(
-            `^${moduleName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`
-          ),
-        },
-        () => ({
-          path: moduleName,
-          namespace: "virtual-module",
-        })
-      );
-      // Resolve relative imports in the virtual module to absolute HTTP URLs so our http-fetch plugin can load them
-      build.onResolve(
-        { filter: /^\.\.?\//, namespace: "virtual-module" },
-        (args) => {
-          const hasExt = /\.[a-zA-Z0-9]+$/.test(args.path);
-          const candidate = hasExt ? args.path : `${args.path}.tsx`;
-          return {
-            path: new URL(candidate, baseHref).toString(),
-            namespace: "http-url",
-          };
+      // 1) Resolve exact virtual modules by id
+      build.onResolve({ filter: /.*/ }, (args) => {
+        if (args.namespace === "virtual-module") {
+          // Resolve relative imports within virtual modules
+          if (/^\.\.?\//.test(args.path)) {
+            const baseDir = dirname(args.importer);
+            const resolved = join(baseDir, args.path);
+            const candidates = [
+              resolved,
+              `${resolved}.tsx`,
+              `${resolved}.ts`,
+              `${resolved}.jsx`,
+              `${resolved}.js`,
+            ];
+            for (const c of candidates) {
+              if (moduleMap[c]) {
+                return { path: c, namespace: "virtual-module" };
+              }
+            }
+          }
+          // Fallthrough: let other plugins handle (e.g., http-fetch) if not found
+          return undefined;
         }
-      );
-      build.onLoad({ filter: /.*/, namespace: "virtual-module" }, () => ({
-        contents: moduleSource,
-        loader: moduleName.endsWith(".tsx")
+
+        // Entry points (exact matches) get captured into virtual namespace
+        if (moduleMap[args.path]) {
+          return { path: args.path, namespace: "virtual-module" };
+        }
+        return undefined;
+      });
+
+      // 2) Serve module contents from the map
+      build.onLoad({ filter: /.*/, namespace: "virtual-module" }, (args) => {
+        const source = moduleMap[args.path];
+        if (typeof source !== "string") return null;
+        const loader = args.path.endsWith(".tsx")
           ? "tsx"
-          : moduleName.endsWith(".ts")
+          : args.path.endsWith(".ts")
             ? "ts"
-            : "js",
-        resolveDir: baseHref,
-      }));
+            : "js";
+        return { contents: source, loader };
+      });
     },
   };
 }
@@ -350,8 +368,12 @@ export async function generateHtml(
       plugins.push(makeHttpFetchPlugin());
     }
 
-    // Provide the virtual source for the component module used by hydration
-    plugins.push(makeVirtualModulePlugin(input.moduleName, input.moduleSource));
+    // Provide the virtual source for the component module + any additional modules used by hydration
+    const virtualModuleMap: Record<string, string> = {
+      [input.moduleName]: input.moduleSource,
+      ...(options.virtualModules || {}),
+    };
+    plugins.push(makeVirtualModulePlugin(virtualModuleMap));
 
     const result = await esbuild.build({
       bundle: true,
