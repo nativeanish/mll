@@ -185,13 +185,11 @@ export const getFullCollections = async () => {
     return null;
   }
 
-  //@ts-expect-error I have not defined the types
   const creatorId = await permaweb.getProfileByWalletAddress(address);
   if (creatorId.collections && creatorId.collections.length > 0) {
     creatorId.collections = [...new Set(creatorId.collections)];
     const results = await Promise.all(
       creatorId.collections.map(async (e: string) => {
-        //@ts-expect-error I have not defined the types
         const push = await permaweb.getCollection(e);
         return push ? { ...push, id: e } : null;
       })
@@ -205,7 +203,6 @@ export const getFullCollections = async () => {
 export const getCollectionAssets = async (collectionId: string) => {
   console.log("Fetching assets for collection:", collectionId);
   try {
-    //@ts-expect-error I have not defined the types
     const collection = (await permaweb.getCollection(
       collectionId
     )) as CollectionDetailType | null;
