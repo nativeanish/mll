@@ -175,8 +175,10 @@ function makeVirtualModulePlugin(moduleMap: Record<string, string>): Plugin {
       build.onResolve({ filter: /.*/ }, (args) => {
         if (args.namespace === "virtual-module") {
           // Resolve relative imports within virtual modules
-          if (/^\.\.?\//.test(args.path)) {
-            const baseDir = dirname(args.importer);
+          if (/^\.?\.\//.test(args.path)) {
+            // args.importer is prefixed as `${namespace}:${path}`; strip the prefix
+            const importerPath = args.importer.replace(/^virtual-module:/, "");
+            const baseDir = dirname(importerPath);
             const resolved = join(baseDir, args.path);
             const candidates = [
               resolved,
@@ -211,7 +213,11 @@ function makeVirtualModulePlugin(moduleMap: Record<string, string>): Plugin {
           : args.path.endsWith(".ts")
             ? "ts"
             : "js";
-        return { contents: source, loader };
+        // Provide a resolveDir so esbuild can resolve relative imports
+        // (even though we also handle them in onResolve). Make it look like
+        // a POSIX path from the virtual root.
+        const baseDir = "/" + dirname(args.path);
+        return { contents: source, loader, resolveDir: baseDir };
       });
     },
   };
