@@ -18,6 +18,7 @@ import {
   Phone,
   SquareSplitVertical,
   Coffee,
+  BadgeCent,
 } from "lucide-react";
 import { SiFarcaster } from "react-icons/si";
 import Paragraph from "@/assets/Paragraph";
@@ -37,6 +38,7 @@ import {
 } from "react-icons/fa";
 import { RiNftFill } from "react-icons/ri";
 import social from "./social";
+import Permaswap from "@/assets/Permaswap";
 export const node = {
   nav: [
     { name: "Social", icon: MessageCircle, node: social },
@@ -270,6 +272,19 @@ export const node = {
           icon: User,
           description: "A profile showcasing your unique digital assets",
           display: ["View", "Click"],
+        },
+      ],
+    },
+    {
+      name: "Coin",
+      icon: BadgeCent,
+      node: [
+        {
+          name: "Permaswap",
+          alt: "permaswap",
+          icon: Permaswap,
+          description: "A Unified Financial Protocol on Permaweb",
+          display: ["View", "Trade"],
         },
       ],
     },

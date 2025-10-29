@@ -100,6 +100,7 @@ export default function BlockDialog() {
         enabled: true,
         clicks: 0,
         views: 0,
+        trade: 0,
         placeholder: placeholder || `Enter your ${foundBlock.name} information`,
         alt: foundBlock.alt,
         name: foundBlock.name,

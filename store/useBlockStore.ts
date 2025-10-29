@@ -19,6 +19,13 @@ export interface BlockData {
   data: Record<string, unknown>;
   placeholder?: string;
   node: (typeof node.nav)[number]["name"];
+  subscribers?: number;
+  join?: number;
+  read?: number;
+  download?: number;
+  schedule?: number;
+  tip?: number;
+  trade?: number;
 }
 type params = {
   alt: (typeof node.nav)[number]["node"][number]["alt"];
@@ -31,6 +38,13 @@ type params = {
   views: number;
   placeholder: string;
   node: (typeof node.nav)[number]["name"];
+  trade?: number;
+  subscribers?: number;
+  join?: number;
+  read?: number;
+  download?: number;
+  schedule?: number;
+  tip?: number;
 };
 interface BlockStore extends BasicBlockData {
   setBasicData: (data: Partial<BasicBlockData>) => void;

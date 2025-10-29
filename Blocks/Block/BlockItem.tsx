@@ -12,7 +12,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/src/components/ui/tooltip";
-import { Edit3, Eye, MousePointerClick, Save, Trash2 } from "lucide-react";
+import {
+  ChartCandlestick,
+  Edit3,
+  Eye,
+  MousePointerClick,
+  Save,
+  Trash2,
+} from "lucide-react";
 import React, { useEffect } from "react";
 import type { BlockData } from "@/store/useBlockStore";
 import BlockForDivider from "./BlockList/BlockForDivider";
@@ -177,11 +184,11 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
                   <Eye className="h-3 w-3" />
-                  <span>0 subscribers</span>
+                  <span>{block.subscribers} subscribers</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent sideOffset={4}>
-                0 subscribers in Total
+                {block.subscribers} subscribers in Total
               </TooltipContent>
             </Tooltip>
           </div>
@@ -192,10 +199,12 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
                   <MousePointerClick className="h-3 w-3" />
-                  <span>0 joins</span>
+                  <span>{block.join} joins</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent sideOffset={4}>0 joins in Total</TooltipContent>
+              <TooltipContent sideOffset={4}>
+                {block.join} joins in Total
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
@@ -205,10 +214,12 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
                   <Eye className="h-3 w-3" />
-                  <span>0 reads</span>
+                  <span>{block.read} reads</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent sideOffset={4}>0 reads in Total</TooltipContent>
+              <TooltipContent sideOffset={4}>
+                {block.read} reads in Total
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
@@ -218,11 +229,11 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
                   <MousePointerClick className="h-3 w-3" />
-                  <span>0 downloads</span>
+                  <span>{block.download} downloads</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent sideOffset={4}>
-                0 downloads in Total
+                {block.download} downloads in Total
               </TooltipContent>
             </Tooltip>
           </div>
@@ -233,11 +244,11 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
                   <MousePointerClick className="h-3 w-3" />
-                  <span>0 scheduled</span>
+                  <span>{block.schedule} scheduled</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent sideOffset={4}>
-                0 scheduled in Total
+                {block.schedule} scheduled in Total
               </TooltipContent>
             </Tooltip>
           </div>
@@ -248,10 +259,27 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
                   <MousePointerClick className="h-3 w-3" />
-                  <span>0 tips</span>
+                  <span>{block.tip} tips</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent sideOffset={4}>0 tips in Total</TooltipContent>
+              <TooltipContent sideOffset={4}>
+                {block.tip} tips in Total
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
+        {displayArray.includes("Trade") && (
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1">
+                  <ChartCandlestick className="h-3 w-3" />
+                  <span>0 {block.trade}</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={4}>
+                {block.trade} trades in Total
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
