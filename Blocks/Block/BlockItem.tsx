@@ -39,6 +39,7 @@ import BlockForBazarCollection from "./BlockList/BlockForBazarCollection";
 import BlockForBazarProfile from "./BlockList/BlockForBazarProfile";
 import BlockForEmailGeneral from "./BlockList/BlockForEmailGeneral";
 import BlockForFundMyBrew from "./BlockList/BlockForFundMyBrew";
+import BlockForTokenInfo from "./BlockList/BlockForTokenInfo";
 
 interface BlockItemProps {
   block: BlockData;
@@ -136,6 +137,8 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
         return <BlockForBazarProfile isEdit={isEdit} setError={setError} />;
       case "FundMyBrew-Card":
         return <BlockForFundMyBrew isEdit={isEdit} setError={setError} />;
+      case "permaswap-info":
+        return <BlockForTokenInfo isEdit={isEdit} setError={setError} />;
       default:
         return <BlockForText isEdit={isEdit} setError={setError} />;
     }
