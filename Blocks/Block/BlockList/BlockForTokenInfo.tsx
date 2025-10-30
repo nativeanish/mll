@@ -10,9 +10,7 @@ import {
   RefreshCw,
   TrendingUp,
   AlertTriangle,
-  ExternalLink,
 } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import {
   Select,
@@ -22,6 +20,7 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { Input } from "@/src/components/ui/input";
 
 interface Props {
   isEdit: boolean;
@@ -66,6 +65,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
     string | null
   >(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const tokensQuery = useQuery({
     queryKey: ["permaswap-tokens"],
@@ -112,6 +112,19 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
       tokensQuery.data.find((t) => t.process === selectedTokenProcess) || null
     );
   }, [selectedTokenProcess, tokensQuery.data]);
+
+  const filteredTokens = useMemo(() => {
+    if (!tokensQuery.data) return [];
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return tokensQuery.data;
+
+    return tokensQuery.data.filter((token) => {
+      const symbolMatch = token.symbol?.toLowerCase().includes(term);
+      const nameMatch = token.fullName?.toLowerCase().includes(term);
+      const logoMatch = token.logo?.toLowerCase().includes(term);
+      return symbolMatch || nameMatch || logoMatch;
+    });
+  }, [tokensQuery.data, searchTerm]);
 
   const aggregatedStats = useMemo<AggregatedStats | null>(() => {
     if (!selectedTokenProcess || !poolsQuery.data) return null;
@@ -233,43 +246,64 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
             <>
               <Select
                 value={selectedTokenProcess || ""}
-                onValueChange={(value) => setSelectedTokenProcess(value)}
+                onValueChange={(value) => {
+                  setSelectedTokenProcess(value);
+                  setSearchTerm("");
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Choose a token..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-80">
-                  {tokensQuery.data?.map((token) => (
-                    <SelectItem
-                      key={token.process}
-                      value={token.process}
-                      className="cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 w-full">
-                        {token.logo ? (
-                          <img
-                            src={`https://arweave.net/${token.logo}`}
-                            alt={token.symbol}
-                            className="h-5 w-5 rounded-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                            <span className="text-xs font-bold text-primary">
-                              {token.symbol[0]}
-                            </span>
-                          </div>
-                        )}
-                        <span className="font-medium">{token.symbol}</span>
-                        <span className="text-xs text-muted-foreground truncate">
-                          {token.fullName}
-                        </span>
-                        {getStatusIcon(token.status)}
-                      </div>
-                    </SelectItem>
-                  ))}
+                  <div
+                    className="p-2 pb-1"
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                  >
+                    <Input
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Search by name or logo..."
+                      className="h-8"
+                    />
+                  </div>
+                  {filteredTokens.length === 0 ? (
+                    <div className="px-3 py-2 text-xs text-muted-foreground">
+                      No tokens match your search.
+                    </div>
+                  ) : (
+                    filteredTokens.map((token) => (
+                      <SelectItem
+                        key={token.process}
+                        value={token.process}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 w-full">
+                          {token.logo ? (
+                            <img
+                              src={`https://arweave.net/${token.logo}`}
+                              alt={token.symbol}
+                              className="h-5 w-5 rounded-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                              <span className="text-xs font-bold text-primary">
+                                {token.symbol[0]}
+                              </span>
+                            </div>
+                          )}
+                          <span className="font-medium">{token.symbol}</span>
+                          <span className="text-xs text-muted-foreground truncate">
+                            {token.fullName}
+                          </span>
+                          {getStatusIcon(token.status)}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
 
@@ -407,7 +441,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
       <div className="p-3 rounded-lg bg-muted/30 border border-muted">
         <div className="flex items-center gap-2 mb-2">
           <div className="p-1.5 rounded-md bg-primary/10">
-            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-primary -mt-1" />
           </div>
           <span className="text-xs font-medium">Token Status</span>
         </div>
@@ -514,15 +548,6 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
           <Clock className="h-3 w-3" />
           <span>Updated {lastUpdated.toLocaleTimeString()}</span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => window.open("https://permaswap.network", "_blank")}
-          className="h-7 text-xs"
-        >
-          <ExternalLink className="h-3 w-3 mr-1" />
-          Permaswap
-        </Button>
       </div>
 
       <div className="p-2 rounded-md bg-muted/50 text-center">
