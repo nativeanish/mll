@@ -18,7 +18,6 @@ import {
   Phone,
   SquareSplitVertical,
   Coffee,
-  BadgeCent,
 } from "lucide-react";
 import { SiFarcaster } from "react-icons/si";
 import Paragraph from "@/assets/Paragraph";
@@ -28,6 +27,7 @@ import {
   FaDiscord,
   FaFacebook,
   FaFile,
+  FaInfoCircle,
   FaInstagram,
   FaMedium,
   FaReddit,
@@ -36,9 +36,10 @@ import {
   FaTwitch,
   FaYoutube,
 } from "react-icons/fa";
-import { RiNftFill } from "react-icons/ri";
+import { RiTokenSwapFill } from "react-icons/ri";
 import social from "./social";
 import Permaswap from "@/assets/Permaswap";
+import Bazar from "@/assets/Bazar";
 export const node = {
   nav: [
     { name: "Social", icon: MessageCircle, node: social },
@@ -256,8 +257,8 @@ export const node = {
       ],
     },
     {
-      name: "NFT",
-      icon: RiNftFill,
+      name: "Bazar",
+      icon: Bazar,
       node: [
         {
           name: "Bazar Collection",
@@ -276,14 +277,21 @@ export const node = {
       ],
     },
     {
-      name: "Coin",
-      icon: BadgeCent,
+      name: "Permaswap",
+      icon: Permaswap,
       node: [
         {
-          name: "Permaswap",
-          alt: "permaswap",
-          icon: Permaswap,
-          description: "A Unified Financial Protocol on Permaweb",
+          name: "Token Info",
+          alt: "permaswap-info",
+          icon: FaInfoCircle,
+          description: "Display information about a specific token",
+          display: ["View"],
+        },
+        {
+          name: "Swap",
+          alt: "permaswap-swap",
+          icon: RiTokenSwapFill,
+          description: "Swap token using Permaswap DEX",
           display: ["View", "Trade"],
         },
       ],
