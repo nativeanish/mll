@@ -21,6 +21,7 @@ import {
 } from "@/src/components/ui/select";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { Input } from "@/src/components/ui/input";
+import { Switch } from "@/src/components/ui/switch";
 
 interface Props {
   isEdit: boolean;
@@ -58,6 +59,51 @@ interface AggregatedStats {
   poolCount: number;
 }
 
+type DisplayOptionKey =
+  | "decimals"
+  | "totalSupply"
+  | "tokenStatus"
+  | "aggregatedStats"
+  | "lastUpdated"
+  | "refreshNote";
+
+const DISPLAY_OPTION_CONFIG: Array<{
+  key: DisplayOptionKey;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "decimals",
+    label: "Decimals",
+    description: "Show the token's decimal precision value.",
+  },
+  {
+    key: "totalSupply",
+    label: "Total Supply",
+    description: "Display the circulating supply adjusted for decimals.",
+  },
+  {
+    key: "tokenStatus",
+    label: "Token Status",
+    description: "Show whether trading is active along with status badge.",
+  },
+  {
+    key: "aggregatedStats",
+    label: "Aggregated Pool Stats",
+    description: "Include 24H trades, volume and 7-day volume cards.",
+  },
+  {
+    key: "lastUpdated",
+    label: "Last Updated",
+    description: "Display the timestamp of the most recent data refresh.",
+  },
+  {
+    key: "refreshNote",
+    label: "Auto Refresh Note",
+    description: "Show the informational note about auto-refresh cadence.",
+  },
+];
+
 const REFETCH_INTERVAL = 10 * 60 * 1000;
 
 function BlockForTokenInfo({ isEdit, setError }: Props) {
@@ -66,6 +112,16 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
   >(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [displayOptions, setDisplayOptions] = useState<
+    Record<DisplayOptionKey, boolean>
+  >({
+    decimals: true,
+    totalSupply: true,
+    tokenStatus: true,
+    aggregatedStats: true,
+    lastUpdated: true,
+    refreshNote: true,
+  });
 
   const tokensQuery = useQuery({
     queryKey: ["permaswap-tokens"],
@@ -91,7 +147,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
     },
     refetchInterval: REFETCH_INTERVAL,
     staleTime: REFETCH_INTERVAL,
-    enabled: !!selectedTokenProcess,
+    enabled: !!selectedTokenProcess && displayOptions.aggregatedStats,
   });
 
   useEffect(() => {
@@ -102,9 +158,18 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
 
   useEffect(() => {
     const hasError =
-      tokensQuery.isError || (!!selectedTokenProcess && poolsQuery.isError);
+      tokensQuery.isError ||
+      (!!selectedTokenProcess &&
+        displayOptions.aggregatedStats &&
+        poolsQuery.isError);
     setError(hasError);
-  }, [tokensQuery.isError, poolsQuery.isError, selectedTokenProcess, setError]);
+  }, [
+    tokensQuery.isError,
+    poolsQuery.isError,
+    selectedTokenProcess,
+    displayOptions.aggregatedStats,
+    setError,
+  ]);
 
   const selectedToken = useMemo(() => {
     if (!selectedTokenProcess || !tokensQuery.data) return null;
@@ -127,6 +192,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
   }, [tokensQuery.data, searchTerm]);
 
   const aggregatedStats = useMemo<AggregatedStats | null>(() => {
+    if (!displayOptions.aggregatedStats) return null;
     if (!selectedTokenProcess || !poolsQuery.data) return null;
 
     const relevantPools = poolsQuery.data.filter(
@@ -150,7 +216,14 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
     );
 
     return stats;
-  }, [selectedTokenProcess, poolsQuery.data]);
+  }, [displayOptions.aggregatedStats, selectedTokenProcess, poolsQuery.data]);
+
+  const handleDisplayOptionChange = (
+    option: DisplayOptionKey,
+    value: boolean
+  ) => {
+    setDisplayOptions((prev) => ({ ...prev, [option]: value }));
+  };
 
   const getStatusIcon = (status: Token["status"]) => {
     switch (status) {
@@ -309,7 +382,8 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
 
               {selectedTokenProcess && (
                 <p className="text-xs text-muted-foreground">
-                  Token selected. Preview below to see aggregated stats.
+                  Token selected. Use the toggles below to control what gets
+                  displayed in the published block.
                 </p>
               )}
             </>
@@ -341,6 +415,39 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
                   {selectedToken.fullName}
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {selectedToken && (
+          <div className="space-y-3 rounded-lg border border-muted bg-muted/20 p-4">
+            <div>
+              <h4 className="text-sm font-semibold">Display Options</h4>
+              <p className="text-xs text-muted-foreground">
+                Toggle sections below the token header to match your layout.
+              </p>
+            </div>
+            <div className="space-y-3">
+              {DISPLAY_OPTION_CONFIG.map((option) => (
+                <div
+                  key={option.key}
+                  className="flex items-center justify-between gap-3 rounded-md border border-muted bg-background/50 px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{option.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {option.description}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={displayOptions[option.key]}
+                    onCheckedChange={(checked) =>
+                      handleDisplayOptionChange(option.key, checked)
+                    }
+                    aria-label={`Toggle ${option.label}`}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -410,151 +517,168 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="p-3 rounded-lg bg-muted/30 border border-muted">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 rounded-md bg-primary/10">
-              <Activity className="h-3.5 w-3.5 text-primary" />
+      {(displayOptions.decimals || displayOptions.totalSupply) && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {displayOptions.decimals && (
+            <div className="p-3 rounded-lg bg-muted/30 border border-muted">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <Activity className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Decimals
+                </span>
+              </div>
+              <p className="text-lg font-bold">{selectedToken.decimals}</p>
             </div>
-            <span className="text-xs font-medium text-muted-foreground">
-              Decimals
-            </span>
-          </div>
-          <p className="text-lg font-bold">{selectedToken.decimals}</p>
-        </div>
+          )}
 
-        <div className="p-3 rounded-lg bg-muted/30 border border-muted">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 rounded-md bg-primary/10">
-              <BarChart3 className="h-3.5 w-3.5 text-primary" />
+          {displayOptions.totalSupply && (
+            <div className="p-3 rounded-lg bg-muted/30 border border-muted">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Total Supply
+                </span>
+              </div>
+              <p className="text-lg font-bold">
+                {formatSupply(
+                  selectedToken.totalSupply,
+                  selectedToken.decimals
+                )}
+              </p>
             </div>
-            <span className="text-xs font-medium text-muted-foreground">
-              Total Supply
-            </span>
+          )}
+        </div>
+      )}
+
+      {displayOptions.tokenStatus && (
+        <div className="p-3 rounded-lg bg-muted/30 border border-muted">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-md bg-primary/10">
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary -mt-1" />
+            </div>
+            <span className="text-xs font-medium">Token Status</span>
           </div>
-          <p className="text-lg font-bold">
-            {formatSupply(selectedToken.totalSupply, selectedToken.decimals)}
+          <div className="flex items-center justify-between">
+            <span className="text-sm">
+              {selectedToken.tokenAccessible
+                ? "Trading Active"
+                : "Trading Paused"}
+            </span>
+            <Badge
+              variant={selectedToken.tokenAccessible ? "default" : "secondary"}
+              className="text-xs"
+            >
+              {selectedToken.tokenAccessible ? "Available" : "Unavailable"}
+            </Badge>
+          </div>
+        </div>
+      )}
+
+      {displayOptions.aggregatedStats && (
+        <>
+          {poolsQuery.isLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : poolsQuery.isError ? (
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+                <div>
+                  <p className="text-sm font-medium text-destructive">
+                    Failed to Load Pool Data
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Unable to fetch trading statistics
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : aggregatedStats ? (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Aggregated Pool Statistics
+              </h4>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        24H Trade Count
+                      </p>
+                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        {formatNumber(aggregatedStats.totalTrades24H, 0)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-blue-500/20">
+                      <Activity className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        24H Volume
+                      </p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        ${formatNumber(aggregatedStats.totalVolume24H)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-green-500/20">
+                      <BarChart3 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        7D Volume
+                      </p>
+                      <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        ${formatNumber(aggregatedStats.totalVolume7D)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-purple-500/20">
+                      <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
+                <span>Active in {aggregatedStats.poolCount} pools</span>
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
+
+      {displayOptions.lastUpdated && (
+        <div className="flex items-center justify-between pt-2 border-t border-muted">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>Updated {lastUpdated.toLocaleTimeString()}</span>
+          </div>
+        </div>
+      )}
+
+      {displayOptions.refreshNote && (
+        <div className="p-2 rounded-md bg-muted/50 text-center">
+          <p className="text-xs text-muted-foreground">
+            Data refreshes automatically every 10 minutes
           </p>
         </div>
-      </div>
-
-      <div className="p-3 rounded-lg bg-muted/30 border border-muted">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 rounded-md bg-primary/10">
-            <CheckCircle2 className="h-3.5 w-3.5 text-primary -mt-1" />
-          </div>
-          <span className="text-xs font-medium">Token Status</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm">
-            {selectedToken.tokenAccessible
-              ? "Trading Active"
-              : "Trading Paused"}
-          </span>
-          <Badge
-            variant={selectedToken.tokenAccessible ? "default" : "secondary"}
-            className="text-xs"
-          >
-            {selectedToken.tokenAccessible ? "Available" : "Unavailable"}
-          </Badge>
-        </div>
-      </div>
-
-      {poolsQuery.isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-      ) : poolsQuery.isError ? (
-        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-destructive" />
-            <div>
-              <p className="text-sm font-medium text-destructive">
-                Failed to Load Pool Data
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Unable to fetch trading statistics
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : aggregatedStats ? (
-        <>
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              Aggregated Pool Statistics
-            </h4>
-            <div className="grid grid-cols-1 gap-3">
-              <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      24H Trade Count
-                    </p>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {formatNumber(aggregatedStats.totalTrades24H, 0)}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-blue-500/20">
-                    <Activity className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      24H Volume
-                    </p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      ${formatNumber(aggregatedStats.totalVolume24H)}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-green-500/20">
-                    <BarChart3 className="h-6 w-6 text-green-600 dark:text-green-400" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      7D Volume
-                    </p>
-                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      ${formatNumber(aggregatedStats.totalVolume7D)}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-purple-500/20">
-                    <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
-              <span>Active in {aggregatedStats.poolCount} pools</span>
-            </div>
-          </div>
-        </>
-      ) : null}
-
-      <div className="flex items-center justify-between pt-2 border-t border-muted">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          <span>Updated {lastUpdated.toLocaleTimeString()}</span>
-        </div>
-      </div>
-
-      <div className="p-2 rounded-md bg-muted/50 text-center">
-        <p className="text-xs text-muted-foreground">
-          Data refreshes automatically every 10 minutes
-        </p>
-      </div>
+      )}
     </div>
   );
 }
