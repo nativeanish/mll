@@ -141,7 +141,14 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "permaswap-info":
         return <BlockForTokenInfo isEdit={isEdit} setError={setError} />;
       case "permaswap-swap":
-        return <BlockForTokenSwap isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForTokenSwap
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+            onExitEdit={() => setIsEdit(false)}
+          />
+        );
       default:
         return <BlockForText isEdit={isEdit} setError={setError} />;
     }
