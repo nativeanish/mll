@@ -27,7 +27,6 @@ function BlockForDivider({ isEdit }: Props) {
     useState<NonNullable<dividerThickness>>("1");
   const [spacingTop, setSpacingTop] = useState<string>("16");
   const [spacingBottom, setSpacingBottom] = useState<string>("16");
-
   return (
     <div>
       {isEdit ? (

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="black"/>
+  <g fill="none" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Vertical and horizontal main lines -->
+    <line x1="256" y1="32" x2="256" y2="192"/>
+    <line x1="256" y1="320" x2="256" y2="480"/>
+    <line x1="32" y1="256" x2="192" y2="256"/>
+    <line x1="320" y1="256" x2="480" y2="256"/>
+
+    <!-- Corner arrows -->
+    <path d="M192 256c0-64 0-64 64-64" />
+    <path d="M256 192c64 0 64 0 64 64" />
+    <path d="M192 256c0 64 0 64 64 64" />
+    <path d="M256 320c64 0 64 0 64-64" />
+
+    <!-- Diagonal arrowheads -->
+    <polyline points="208,144 256,192 304,144"/>
+    <polyline points="144,208 192,256 144,304"/>
+    <polyline points="304,368 256,320 208,368"/>
+    <polyline points="368,304 320,256 368,208"/>
+  </g>
+</svg>

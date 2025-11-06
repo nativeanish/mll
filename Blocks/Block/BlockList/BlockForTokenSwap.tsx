@@ -14,6 +14,7 @@ import { Button } from "@/src/components/ui/button";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useBlockStore } from "@/store/useBlockStore";
+import { toast } from "sonner";
 
 interface BlockForTokenSwapProps {
   isEdit: boolean;
@@ -336,21 +337,33 @@ function BlockForTokenSwap({
     );
   };
 
-  const canTrade = useMemo(() => {
-    if (!selectedPool || !pricesAvailable || isFetching) return false;
-    if (calculationError) return false;
-    if (!selectedPool.accessible) return false;
+  const canTrade = () => {
+    if (!selectedPool || !pricesAvailable || isFetching) {
+      toast.error("Cannot trade: pool not selected or prices unavailable.");
+      return false;
+    }
+    if (calculationError) {
+      toast.error(`Cannot trade: ${calculationError}`);
+      return false;
+    }
+    if (!selectedPool.accessible) {
+      toast.error("Cannot trade: selected pool is restricted.");
+      return false;
+    }
+    if (selectedPool.poolStatus === "evil") {
+      toast.error("Cannot trade: selected pool is marked as evil.");
+      return false;
+    }
     const activeValue = inputs[lastEdited];
     const numeric = Number(activeValue);
+    window
+      .open(
+        `https://www.permaswap.network/#/ao/${selectedPool.x}%26${selectedPool.y}`,
+        "_blank"
+      )
+      ?.focus();
     return !!activeValue && !Number.isNaN(numeric) && numeric > 0;
-  }, [
-    selectedPool,
-    pricesAvailable,
-    isFetching,
-    calculationError,
-    inputs,
-    lastEdited,
-  ]);
+  };
 
   const renderSwapInterface = () => {
     if (!selectedPool) {
@@ -429,20 +442,8 @@ function BlockForTokenSwap({
           </span>
         </div>
 
-        <Button
-          className="w-full"
-          disabled={!canTrade}
-          onClick={() => {
-            // Placeholder action for future integration
-            console.info("Simulated trade", {
-              pool: selectedPool.process,
-              inputToken: lastEdited,
-              amount: inputs[lastEdited],
-              outputAmount: inputs[lastEdited === "x" ? "y" : "x"],
-            });
-          }}
-        >
-          Trade
+        <Button className="w-full" onClick={() => canTrade()}>
+          Swap
         </Button>
       </div>
     );
@@ -468,7 +469,7 @@ function BlockForTokenSwap({
         disabled={isFetching || hasError}
       >
         <SelectTrigger size="lg" className="w-full">
-          <SelectValue className="sr-only" placeholder="Search pools…" />
+          <SelectValue className="sr-only" />
           {selectedPool ? (
             <div className="flex flex-1 items-center gap-3 overflow-hidden text-left">
               {/* <div className="flex items-center gap-1.5">

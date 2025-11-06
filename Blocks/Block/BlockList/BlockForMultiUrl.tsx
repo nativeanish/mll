@@ -108,7 +108,7 @@ function BlockForMultiUrl({ isEdit, setError }: Props) {
               // htmlFor={`desc-${data.id}`}
               className="text-sm font-medium"
             >
-              Custom Description (Tooltip)
+              Custom Description
             </Label>
             <Textarea
               // id={`desc-${data.id}`}

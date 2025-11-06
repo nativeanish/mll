@@ -99,7 +99,7 @@ export default function PageGeneration({ basicData, block }: Props) {
         }
       `}</style>
 
-      <div className="bg-white min-h-screen">
+      <div className="bg-white min-h-screen flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center pt-4 px-4 pb-3 bg-white sticky top-0 z-50 border-b border-gray-200">
           <div className="flex items-center gap-2">
@@ -124,17 +124,17 @@ export default function PageGeneration({ basicData, block }: Props) {
             </svg>
           </button>
         </div>
-
-        <div className="px-4 md:px-8 lg:px-16 py-4 md:py-6">
+        {/* Cover and Avatar Images  */}
+        <div className="px-4 md:px-8 lg:px-16">
           {(coverUrl || avatarUrl) && (
             <div
-              className="relative w-full  rounded-lg "
+              className="relative w-full rounded-lg md:hidden"
               style={{ aspectRatio: "3/1" }}
             >
               {/* Cover Image */}
               {coverUrl && (
                 <img
-                  src={coverUrl}
+                  src={coverUrl || "/placeholder.svg"}
                   alt="Cover"
                   className="w-full h-full object-cover"
                 />
@@ -143,7 +143,32 @@ export default function PageGeneration({ basicData, block }: Props) {
               {avatarUrl && (
                 <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
                   <img
-                    src={avatarUrl}
+                    src={avatarUrl || "/placeholder.svg"}
+                    alt="Profile avatar"
+                    className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          {(coverUrl || avatarUrl) && (
+            <div
+              className="relative w-full rounded-lg hidden md:block"
+              style={{ aspectRatio: "4.5/1" }}
+            >
+              {/* Cover Image */}
+              {coverUrl && (
+                <img
+                  src={coverUrl || "/placeholder.svg"}
+                  alt="Cover"
+                  className="w-full h-full object-cover"
+                />
+              )}
+              {/* Profile Image (overlaps cover on all breakpoints) */}
+              {avatarUrl && (
+                <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-10">
+                  <img
+                    src={avatarUrl || "/placeholder.svg"}
                     alt="Profile avatar"
                     className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg object-cover"
                   />
@@ -154,7 +179,7 @@ export default function PageGeneration({ basicData, block }: Props) {
         </div>
 
         {/* Main Content */}
-        <div className="mt-16 px-6 pb-8 md:mt-20 md:px-0">
+        <div className="flex-1 mt-20 px-6 pb-8 md:mt-20 md:px-0">
           <div className="md:max-w-4xl md:mx-auto">
             {/* Avatar now overlaps cover on all breakpoints; extra container removed */}
 
@@ -174,7 +199,7 @@ export default function PageGeneration({ basicData, block }: Props) {
               </div>
 
               {/* Social Links */}
-              <div className="flex justify-center gap-4 mb-6 md:mb-4">
+              <div className="flex justify-center gap-4 mb-6 md:mb-4 flex-wrap">
                 {/* <button className="w-10 h-10 flex items-center justify-center relative overflow-hidden rounded-full bg-white shadow-md shadow-gray-200 group transition-all duration-300">
                   <svg
                     className="relative z-10 fill-gray-900 transition-all duration-300 group-hover:fill-white"
@@ -258,6 +283,45 @@ export default function PageGeneration({ basicData, block }: Props) {
             </div>
           </div>
         </div>
+        {/* Footer - appears at the end of the page */}
+        <footer className="mt-8 border-t border-gray-100 bg-white">
+          <div className="md:max-w-4xl md:mx-auto px-6 py-8">
+            <div className="flex justify-center">
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.open(
+                    "https://ar.io/?utm_campaign=poweredbyario&utm_medium=affiliate&utm_source=metalinks",
+                    "_blank"
+                  );
+                }}
+                className="inline-flex items-center justify-center rounded-lg bg-[#96161d] text-white px-6 py-2 text-sm font-medium hover:bg-gray-800 transition"
+                aria-label="Footer action"
+              >
+                <div className="mr-1 mb-0.5">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 467 379"
+                    width="18"
+                    height="18"
+                  >
+                    <path
+                      fill="#B3B3B3"
+                      d="M446.779 222.277C446.779 99.639 347.932.221 225.999.221S.489 99.64.489 222.277v138.596a17.7 17.7 0 0 0 5.141 12.533 17.5 17.5 0 0 0 12.461 5.171h25.146a17.5 17.5 0 0 0 12.462-5.171 17.7 17.7 0 0 0 5.14-12.533V245.748c0-9.778 7.88-17.704 17.602-17.704h35.808c9.721 0 17.602 7.926 17.602 17.704v115.125a17.7 17.7 0 0 0 5.141 12.533 17.5 17.5 0 0 0 12.461 5.171h25.146a17.5 17.5 0 0 0 12.461-5.171 17.7 17.7 0 0 0 5.141-12.533v-34.952c0-34.968 18.548-67.28 48.657-84.764a96.83 96.83 0 0 1 97.314 0c30.109 17.484 48.657 49.796 48.657 84.764v34.952c0 9.778 7.881 17.704 17.602 17.704h24.846c9.721 0 17.602-7.926 17.602-17.704zM127.576 175.01a39.3 39.3 0 0 1-13.176 13.05 36.73 36.73 0 0 1-30.728 2.782 16.6 16.6 0 0 1-4.175-1.973c-11.6-6.406-18.808-18.658-18.808-31.968s7.209-25.562 18.808-31.968a16.4 16.4 0 0 1 4.376-1.973c13.2-4.668 27.893-1.371 37.869 8.498a34.39 34.39 0 0 1 10.964 25.291 35.26 35.26 0 0 1-5.13 18.261"
+                    ></path>
+                    <path
+                      fill="#FCFCFC"
+                      d="M466.41 222.277C466.41 99.639 367.564.221 245.63.221S20.121 99.64 20.121 222.277v138.596a17.7 17.7 0 0 0 5.14 12.533 17.5 17.5 0 0 0 12.462 5.171H62.87a17.5 17.5 0 0 0 12.461-5.171 17.7 17.7 0 0 0 5.14-12.533V245.748c0-9.778 7.882-17.704 17.603-17.704h35.807c9.722 0 17.603 7.926 17.603 17.704v115.125a17.7 17.7 0 0 0 5.14 12.533 17.5 17.5 0 0 0 12.462 5.171h25.145a17.5 17.5 0 0 0 12.462-5.171 17.7 17.7 0 0 0 5.14-12.533v-34.952c0-34.968 18.548-67.28 48.657-84.764a96.83 96.83 0 0 1 97.315 0c30.109 17.484 48.657 49.796 48.657 84.764v34.952c0 9.778 7.88 17.704 17.602 17.704h24.846c9.721 0 17.602-7.926 17.602-17.704zM147.208 175.01a39.3 39.3 0 0 1-13.177 13.05 36.73 36.73 0 0 1-30.728 2.782 16.6 16.6 0 0 1-4.174-1.973c-11.6-6.406-18.808-18.658-18.808-31.968s7.209-25.562 18.808-31.968a16.4 16.4 0 0 1 4.375-1.973c13.202-4.668 27.894-1.371 37.87 8.498a34.4 34.4 0 0 1 10.964 25.291 35.26 35.26 0 0 1-5.13 18.261"
+                    ></path>
+                  </svg>
+                </div>
+                Powered by <span className="ml-1">ar.io</span>
+              </a>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );
