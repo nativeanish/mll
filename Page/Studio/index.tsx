@@ -84,22 +84,25 @@ function Studio() {
       <div className="relative w-full">
         <NavBar />
       </div>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0 mt-16">
-        <div className="w-full min-h-screen flex flex-col lg:flex-row relative">
-          <div className="w-full lg:w-[70%] lg:mr-[30%] overflow-y-auto min-h-screen p-4">
-            <BasicCard />
-            <AddBlock />
-            <Block />
+      <div className="container mx-auto flex-1">
+        <div className="flex flex-1 flex-col gap-4 pt-0 mt-16">
+          <div className="w-full min-h-screen flex flex-col lg:flex-row relative">
+            <div className="w-full lg:w-[70%] lg:mr-[30%] overflow-y-auto min-h-screen pt-8">
+              <BasicCard />
+              <AddBlock />
+              <Block />
+            </div>
+            <MobileView
+              frameHeight={700}
+              frameWidth={350}
+              html={html}
+              sandbox="allow-scripts" // safer: avoid combining with allow-same-origin
+              allow="clipboard-read; clipboard-write"
+              square={false}
+              disableLinks={true}
+              className="pt-8"
+            />
           </div>
-          <MobileView
-            frameHeight={700}
-            frameWidth={350}
-            html={html}
-            sandbox="allow-scripts" // safer: avoid combining with allow-same-origin
-            allow="clipboard-read; clipboard-write"
-            square={false}
-            disableLinks={true}
-          />
         </div>
       </div>
     </div>
