@@ -32,3 +32,4 @@ lerna-lock.json
 *.sw?
 *cert
 .vercel
+.env
