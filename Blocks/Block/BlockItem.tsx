@@ -91,7 +91,9 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           />
         );
       case "Url-Card":
-        return <BlockForUrl isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForUrl uuid={block.id} isEdit={isEdit} setError={setError} />
+        );
       case "Image-Card":
         return <BlockForImage isEdit={isEdit} setError={setError} />;
       case "Maps-Card":

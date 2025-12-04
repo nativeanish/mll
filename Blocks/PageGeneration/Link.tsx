@@ -1,4 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
+import getStringField from "./utils/getStringField";
 
 interface Props {
   block: BlockData;
@@ -32,18 +33,6 @@ function Link({ block }: Props) {
   const name = block.name;
   const uuid = block.id;
   const tooltipLabel = `${name || alt || "link"}`;
-
-  const getStringField = (obj: unknown, key: string): string | undefined => {
-    if (
-      obj &&
-      typeof obj === "object" &&
-      key in (obj as Record<string, unknown>)
-    ) {
-      const value = (obj as Record<string, unknown>)[key];
-      return typeof value === "string" ? value : undefined;
-    }
-    return undefined;
-  };
 
   const isEmail = typeof alt === "string" && alt.toLowerCase() === "email";
   const email = getStringField(block.data, "email");
@@ -89,7 +78,7 @@ function Link({ block }: Props) {
           {getIconFor(alt)}
         </button>
       </a>
-      <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full rounded-md px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-200 group-hover:opacity-100 bg-black text-white max-w-64 whitespace-normal break-words text-center">
+      <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full rounded-md px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-200 group-hover:opacity-100 bg-black text-white max-w-64 whitespace-normal warp-break-words text-center">
         <div className="font-medium">{tooltipLabel}</div>
         {desc && <div className="opacity-80 mt-0.5">{desc}</div>}
       </div>

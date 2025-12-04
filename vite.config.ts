@@ -13,16 +13,16 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react({
-      babel: {
-        plugins: [
-          [
-            "babel-plugin-react-compiler",
-            {
-              target: "19",
-            },
-          ],
-        ],
-      },
+      // babel: {
+      //   plugins: [
+      //     [
+      //       "babel-plugin-react-compiler",
+      //       {
+      //         target: "19",
+      //       },
+      //     ],
+      //   ],
+      // },
     }),
     tailwindcss(),
   ],
@@ -52,5 +52,10 @@ export default defineConfig({
       }
       return undefined;
     })(),
+  },
+  build: {
+    rollupOptions: {
+      external: ["data.html"],
+    },
   },
 });

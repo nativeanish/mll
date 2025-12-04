@@ -2,7 +2,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Copy, Edit, ExternalLink, Trash2 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { uuidv7 } from "uuidv7";
 import {
   InputGroup,
@@ -11,9 +11,11 @@ import {
 } from "@/src/components/ui/input-group";
 import { Textarea } from "@/src/components/ui/textarea";
 import { toast } from "sonner";
+import { useBlockStore } from "@/store/useBlockStore";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 interface LocalImageMeta {
   id: string;
@@ -22,10 +24,12 @@ interface LocalImageMeta {
   title: string; // user provided title
   size: number;
   type: string;
+  base64?: string; // base64 encoded image
 }
-function BlockForImage({ isEdit }: Props) {
+function BlockForImage({ isEdit, uuid }: Props) {
   const [galleryTitle, setGalleryTitle] = useState("Image Gallery");
   const [images, setImages] = useState<LocalImageMeta[]>([]);
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const dragItem = useRef<string | null>(null);
   const [description, setDescription] = useState("");
 
@@ -86,6 +90,16 @@ function BlockForImage({ isEdit }: Props) {
           continue;
         }
 
+        // Read file as base64
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve(reader.result as string);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
         metas.push({
           id: uuidv7(),
           url,
@@ -93,6 +107,7 @@ function BlockForImage({ isEdit }: Props) {
           title: file.name.replace(/\.[^.]+$/, ""),
           size: file.size,
           type: file.type,
+          base64,
         });
       }
 
@@ -133,6 +148,16 @@ function BlockForImage({ isEdit }: Props) {
       return prev.filter((i) => i.id !== id);
     });
   };
+
+  useEffect(() => {
+    if (!isEdit) {
+      updateBlock(uuid, {
+        galleryTitle,
+        description,
+        images,
+      });
+    }
+  }, [isEdit, galleryTitle, description, images, updateBlock, uuid]);
   return (
     <div>
       {isEdit ? (

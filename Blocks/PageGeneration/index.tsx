@@ -1,5 +1,6 @@
 import type { BasicBlockData, BlockData } from "@/store/useBlockStore";
 import Link from "./Link";
+import UrlCard from "./Bloc/UrlCard";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -125,7 +126,7 @@ export default function PageGeneration({ basicData, block }: Props) {
           </button>
         </div>
         {/* Cover and Avatar Images  */}
-        <div className="px-4 md:px-8 lg:px-16">
+        <div className="px-0 md:px-8 lg:px-16">
           {(coverUrl || avatarUrl) && (
             <div
               className="relative w-full rounded-lg md:hidden"
@@ -200,86 +201,18 @@ export default function PageGeneration({ basicData, block }: Props) {
 
               {/* Social Links */}
               <div className="flex justify-center gap-4 mb-6 md:mb-4 flex-wrap">
-                {/* <button className="w-10 h-10 flex items-center justify-center relative overflow-hidden rounded-full bg-white shadow-md shadow-gray-200 group transition-all duration-300">
-                  <svg
-                    className="relative z-10 fill-gray-900 transition-all duration-300 group-hover:fill-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="28"
-                    height="28"
-                    viewBox="0 0 72 72"
-                    fill="none"
-                  >
-                    <path
-                      d="M46.4927 38.6403L47.7973 30.3588H39.7611V24.9759C39.7611 22.7114 40.883 20.4987 44.4706 20.4987H48.1756V13.4465C46.018 13.1028 43.8378 12.9168 41.6527 12.8901C35.0385 12.8901 30.7204 16.8626 30.7204 24.0442V30.3588H23.3887V38.6403H30.7204V58.671H39.7611V38.6403H46.4927Z"
-                      fill=""
-                    />
-                  </svg>
-                  <div className="absolute top-full left-0 w-full h-full rounded-full bg-blue-500 z-0 transition-all duration-500 group-hover:top-0"></div>
-                </button>
-                <button className="w-10 h-10 flex items-center justify-center relative overflow-hidden rounded-full bg-white shadow-md shadow-gray-200 group transition-all duration-300">
-                  <svg
-                    className="relative z-10 transition-all duration-300 group-hover:fill-[#5865F2]"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512 512"
-                  >
-                    <path
-                      fill="black"
-                      d="M256 0c141.385 0 256 114.615 256 256S397.385 512 256 512 0 397.385 0 256 114.615 0 256 0zm104.932 160.621a250.428 250.428 0 00-62.383-19.182 173.883 173.883 0 00-7.966 16.243 232.557 232.557 0 00-34.619-2.603c-11.569 0-23.195.879-34.622 2.58-2.334-5.509-5.044-10.971-7.986-16.223a252.58 252.58 0 00-62.397 19.222c-39.483 58.408-50.183 115.357-44.833 171.497a251.49 251.49 0 0076.502 38.398c6.169-8.327 11.695-17.192 16.386-26.417a161.682 161.682 0 01-25.813-12.319c2.164-1.569 4.281-3.186 6.325-4.756 23.912 11.231 50.039 17.088 76.473 17.088 26.436 0 52.562-5.857 76.475-17.089 2.069 1.688 4.186 3.305 6.325 4.755a162.693 162.693 0 01-25.86 12.352 183.969 183.969 0 0016.387 26.397 250.498 250.498 0 0076.553-38.392l-.006.007c6.277-65.104-10.725-121.53-44.941-171.558zM205.78 297.63c-14.908 0-27.226-13.53-27.226-30.175 0-16.645 11.889-30.293 27.178-30.293 15.29 0 27.511 13.648 27.25 30.293-.262 16.645-12.008 30.175-27.202 30.175zm100.439 0c-14.933 0-27.202-13.53-27.202-30.175 0-16.645 11.889-30.293 27.202-30.293 15.313 0 27.44 13.648 27.178 30.293-.261 16.645-11.984 30.175-27.178 30.175z"
-                    />
-                  </svg>
-
-                  <div className="absolute top-full left-0 w-full h-full rounded-full bg-[#5865F2] z-0 transition-all duration-500 group-hover:top-0"></div>
-                </button> */}
                 {block
                   .filter((b) => b.node === "Social" && b.enabled === true)
                   .map((link) => (
                     <Link key={link.id} block={link} />
                   ))}
+
+                {block.map((b) => {
+                  if (b.alt === "Url-Card" && b.enabled === true) {
+                    return <UrlCard key={b.id} props={b} />;
+                  }
+                })}
               </div>
-
-              {/* Visit Website Button */}
-              {/* <button className="w-full bg-gray-900 text-white py-3 rounded-lg flex items-center justify-between px-4 hover:bg-gray-800 transition mb-4">
-                <span>Visit my website</span>
-              </button> */}
-
-              {/* Product Card 1 */}
-              {/* <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                <img
-                  src="/harmonica-product.jpg"
-                  alt="Harmonica"
-                  className="w-16 h-16 rounded object-cover"
-                />
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">Harmonica</p>
-                  <p className="text-sm text-gray-600">Limited Series</p>
-                </div>
-                <span className="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">
-                  IDR 690K
-                </span>
-              </div> */}
-
-              {/* Visit Instagram Button */}
-              {/* <button className="w-full bg-white border-2 border-gray-200 text-gray-900 py-3 rounded-lg flex items-center justify-between px-4 hover:border-gray-300 transition mb-4">
-                <span>Visit my Instagram</span>
-              </button> */}
-
-              {/* Product Card 2 */}
-              {/* <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                <img
-                  src="/digital-marketing-ebook.png"
-                  alt="Digital Marketing"
-                  className="w-16 h-16 rounded object-cover"
-                />
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">
-                    Digital Marketing
-                  </p>
-                  <p className="text-sm text-gray-600">E-Book</p>
-                </div>
-                <span className="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">
-                  IDR 690K
-                </span>
-              </div> */}
             </div>
           </div>
         </div>

@@ -17,10 +17,12 @@ import {
   TooltipTrigger,
 } from "@/src/components/ui/tooltip";
 import { toast } from "sonner";
+import { useBlockStore } from "@/store/useBlockStore";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 type DisplayType = "button" | "image";
 interface UrlBlockData {
@@ -33,7 +35,7 @@ interface UrlBlockData {
   imageUrl: string;
   imageText: string;
 }
-function BlockForUrl({ isEdit, setError: SetError }: Props) {
+function BlockForUrl({ isEdit, setError: SetError, uuid }: Props) {
   const [blockData, setBlockData] = useState<UrlBlockData>({
     displayType: "button",
     url: "",
@@ -43,7 +45,7 @@ function BlockForUrl({ isEdit, setError: SetError }: Props) {
     imageText: "",
   });
   const [error, setError] = useState(false);
-
+  const updateBlockData = useBlockStore((state) => state.updateBlockData);
   useEffect(() => {
     setError(false);
     if (isEdit && blockData.url && blockData.url.length > 0) {
@@ -57,6 +59,13 @@ function BlockForUrl({ isEdit, setError: SetError }: Props) {
     }
     SetError(false);
   }, [blockData.url, isEdit, SetError]);
+  useEffect(() => {
+    if (isEdit === false) {
+      updateBlockData(uuid, {
+        ...blockData,
+      });
+    }
+  }, [isEdit, blockData, updateBlockData, uuid]);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -66,17 +75,20 @@ function BlockForUrl({ isEdit, setError: SetError }: Props) {
       return;
     }
 
-    // Clean up previous object URL
+    // Clean up previous object URL (no longer needed for base64, but keep for safety)
     if (blockData.imageUrl && blockData.imageUrl.startsWith("blob:")) {
       URL.revokeObjectURL(blockData.imageUrl);
     }
 
-    const objectUrl = URL.createObjectURL(file);
-    setBlockData((prev) => ({
-      ...prev,
-      imageUrl: objectUrl,
-      imageText: prev.imageText || file.name.replace(/\.[^.]+$/, ""),
-    }));
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBlockData((prev) => ({
+        ...prev,
+        imageUrl: reader.result as string,
+        imageText: prev.imageText || file.name.replace(/\.[^.]+$/, ""),
+      }));
+    };
+    reader.readAsDataURL(file);
 
     // Reset input
     e.target.value = "";

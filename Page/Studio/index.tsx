@@ -9,45 +9,57 @@ import linkSource from "@/Blocks/PageGeneration/Link.tsx?raw";
 import React, { useEffect } from "react";
 import { generateHtml } from "@/utils/build/generateHTML";
 import { useBlockStore } from "@/store/useBlockStore";
+import urlCardSource from "@/Blocks/PageGeneration/Bloc/UrlCard.tsx?raw";
+import getstringfieldsrc from "@/Blocks/PageGeneration/utils/getStringField.ts?raw";
 function Studio() {
+  const blocks = useBlockStore((state) => state.blocks);
   const [html, setHtml] = React.useState<string>("");
   useEffect(() => {
     const generate = async () => {
-      const { name, description, avatarUrl, coverUrl, blocks } =
-        useBlockStore.getState();
-      const html = await generateHtml({
-        deliveryMode: "network",
-        input: {
-          type: "component",
-          component: PageGeneration as React.ComponentType<unknown>,
-          props: {
-            basicData: {
-              name,
-              description,
-              avatarUrl,
-              coverUrl,
+      try {
+        const { name, description, avatarUrl, coverUrl, blocks } =
+          useBlockStore.getState();
+        const html = await generateHtml({
+          deliveryMode: "network",
+          input: {
+            type: "component",
+            component: PageGeneration as React.ComponentType<unknown>,
+            props: {
+              basicData: {
+                name,
+                description,
+                avatarUrl,
+                coverUrl,
+              },
+              block: blocks,
             },
-            block: blocks,
+            moduleName: "./../Blocks/PageGeneration/index.tsx",
+            moduleSource: pageGenerationSource,
           },
-          moduleName: "./../Blocks/PageGeneration/index.tsx",
-          moduleSource: pageGenerationSource,
-        },
-        virtualModules: {
-          "./../Blocks/PageGeneration/Link.tsx": linkSource,
-        },
-        htmlTemplate:
-          '<!DOCTYPE html><html><head><meta charset="utf-8" />' +
-          '<meta name="viewport" content="width=device-width, initial-scale=1" />' +
-          "<title>Exported Site</title>" +
-          '<meta name="description" content="SEO-friendly React export built client-side." />' +
-          "{{PRECONNECT}}" +
-          "</head><body>" +
-          "{{STATIC_HTML}}" +
-          '<script type="module">{{INLINE_MODULE_JS}}</script>' +
-          "</body></html>",
-      });
-
-      setHtml(html.html);
+          virtualModules: {
+            "./../Blocks/PageGeneration/Link.tsx": linkSource,
+            "./../Blocks/PageGeneration/Bloc/UrlCard.tsx": urlCardSource,
+            "./../Blocks/PageGeneration/utils/getStringField.ts":
+              getstringfieldsrc,
+          },
+          htmlTemplate:
+            '<!DOCTYPE html><html><head><meta charset="utf-8" />' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1" />' +
+            "<title>Exported Site</title>" +
+            '<meta name="description" content="SEO-friendly React export built client-side." />' +
+            "{{PRECONNECT}}" +
+            "</head><body>" +
+            "{{STATIC_HTML}}" +
+            '<script type="module">{{INLINE_MODULE_JS}}</script>' +
+            "</body></html>",
+        });
+        setHtml(html.html);
+      } catch (error) {
+        console.error("Error generating HTML:", error);
+        setHtml(
+          "<div style='color:red'>Failed to generate page: " + error + "</div>"
+        );
+      }
     };
 
     // initial generate on mount
@@ -78,7 +90,7 @@ function Studio() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [blocks, urlCardSource]);
   return (
     <div className="flex flex-col min-h-screen">
       <div className="relative w-full">
