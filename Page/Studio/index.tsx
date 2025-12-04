@@ -11,6 +11,7 @@ import { generateHtml } from "@/utils/build/generateHTML";
 import { useBlockStore } from "@/store/useBlockStore";
 import urlCardSource from "@/Blocks/PageGeneration/Bloc/UrlCard.tsx?raw";
 import getstringfieldsrc from "@/Blocks/PageGeneration/utils/getStringField.ts?raw";
+import imagecarsrc from "@/Blocks/PageGeneration/Bloc/ImageCar.tsx?raw";
 function Studio() {
   const blocks = useBlockStore((state) => state.blocks);
   const [html, setHtml] = React.useState<string>("");
@@ -41,6 +42,7 @@ function Studio() {
             "./../Blocks/PageGeneration/Bloc/UrlCard.tsx": urlCardSource,
             "./../Blocks/PageGeneration/utils/getStringField.ts":
               getstringfieldsrc,
+            "./../Blocks/PageGeneration/Bloc/ImageCar.tsx": imagecarsrc,
           },
           htmlTemplate:
             '<!DOCTYPE html><html><head><meta charset="utf-8" />' +
@@ -90,7 +92,7 @@ function Studio() {
     return () => {
       unsubscribe();
     };
-  }, [blocks, urlCardSource]);
+  }, [blocks, imagecarsrc]);
   return (
     <div className="flex flex-col min-h-screen">
       <div className="relative w-full">
@@ -108,7 +110,7 @@ function Studio() {
               frameHeight={700}
               frameWidth={350}
               html={html}
-              sandbox="allow-scripts" // safer: avoid combining with allow-same-origin
+              sandbox="allow-scripts allow-same-origin" // needed for module imports + hydration
               allow="clipboard-read; clipboard-write"
               square={false}
               disableLinks={true}

@@ -1,6 +1,7 @@
 import type { BasicBlockData, BlockData } from "@/store/useBlockStore";
 import Link from "./Link";
 import UrlCard from "./Bloc/UrlCard";
+import ImageCar from "./Bloc/ImageCar";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -210,6 +211,9 @@ export default function PageGeneration({ basicData, block }: Props) {
                 {block.map((b) => {
                   if (b.alt === "Url-Card" && b.enabled === true) {
                     return <UrlCard key={b.id} props={b} />;
+                  }
+                  if (b.alt === "Image-Card" && b.enabled === true) {
+                    return <ImageCar key={b.id} props={b} />;
                   }
                 })}
               </div>

@@ -355,11 +355,13 @@ export async function generateHtml(
           );
         },
       });
+      // Fetch and inline any http(s) modules
       plugins.push(makeHttpFetchPlugin());
     } else {
-      // Network delivery: leave React imports as external CDN URLs, reducing the inlined JS size
+      // Network delivery: rewrite bare imports to CDN URLs and mark them external
+      // so esbuild emits `import ... from "https://..."` which the browser loads.
       plugins.push({
-        name: "cdn-react-alias-external",
+        name: "bare-to-cdn-external",
         setup(build: PluginBuild) {
           build.onResolve(
             {
@@ -374,8 +376,7 @@ export async function generateHtml(
           );
         },
       });
-      // Also fetch any http(s) modules (like your local files resolved to absolute URLs)
-      plugins.push(makeHttpFetchPlugin());
+      // Do not add http-fetch here; let the browser fetch externals at runtime
     }
 
     // Provide the virtual source for the component module + any additional modules used by hydration
@@ -395,7 +396,11 @@ export async function generateHtml(
       // Safety net: ensure a React binding exists for any modules that still emit React.createElement
       // and expose it globally for third-party code that expects window.React.
       banner: {
-        js: `import React from 'react'; try { (globalThis as any).React = React; } catch {}`,
+        js: `import React from 'react';
+try {
+  var g = (typeof globalThis !== 'undefined') ? globalThis : (typeof window !== 'undefined' ? window : self);
+  if (g) g.React = React;
+} catch {}`,
       },
       define: {
         "process.env.NODE_ENV": '"production"',

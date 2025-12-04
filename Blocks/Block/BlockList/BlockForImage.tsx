@@ -24,7 +24,7 @@ interface LocalImageMeta {
   title: string; // user provided title
   size: number;
   type: string;
-  base64?: string; // base64 encoded image
+  base64: string; // base64 encoded image
 }
 function BlockForImage({ isEdit, uuid }: Props) {
   const [galleryTitle, setGalleryTitle] = useState("Image Gallery");
@@ -151,6 +151,7 @@ function BlockForImage({ isEdit, uuid }: Props) {
 
   useEffect(() => {
     if (!isEdit) {
+      console.log("Updating block data for uuid:", uuid);
       updateBlock(uuid, {
         galleryTitle,
         description,
@@ -306,7 +307,7 @@ function BlockForImage({ isEdit, uuid }: Props) {
                       className="w-full h-auto object-cover"
                       draggable={false}
                     />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-1.5">
+                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent p-1.5">
                       <p className="text-[11px] text-white font-medium truncate">
                         {img.title || img.name}
                       </p>
