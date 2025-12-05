@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "./utils/getStringField";
+import getStringField from "../utils/getStringField";
 
 interface Props {
   block: BlockData;

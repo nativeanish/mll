@@ -7,7 +7,7 @@ import {
   sizeMap,
   fontMap,
 } from "@/utils/block/text";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -15,17 +15,31 @@ import {
   SelectItem,
   SelectValue,
 } from "@/src/components/ui/select";
+import { useBlockStore } from "@/store/useBlockStore";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
-function BlockForText({ isEdit }: Props) {
+function BlockForText({ isEdit, uuid }: Props) {
   const [text, setText] = useState<string>("");
   const [color, setColor] = useState<string>("#000000");
   const [size, setSize] = useState<NonNullable<textSize>>("base");
   const [font, setFont] = useState<NonNullable<textFont>>("sans");
   const [align, setAlign] = useState<NonNullable<textAlign>>("left");
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
+  useEffect(() => {
+    if (!isEdit) {
+      updateBlock(uuid, {
+        text,
+        color,
+        size,
+        font,
+        align,
+      });
+    }
+  }, [isEdit, text, color, size, font, align, updateBlock, uuid]);
   return (
     <div>
       {isEdit ? (
@@ -64,9 +78,15 @@ function BlockForText({ isEdit }: Props) {
                   <SelectValue placeholder="Select font" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="sans">Sans</SelectItem>
-                  <SelectItem value="serif">Serif</SelectItem>
-                  <SelectItem value="mono">Mono</SelectItem>
+                  <SelectItem value="sans" className="font-sans">
+                    Sans
+                  </SelectItem>
+                  <SelectItem value="serif" className="font-serif">
+                    Serif
+                  </SelectItem>
+                  <SelectItem value="mono" className="font-mono">
+                    Mono
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -63,7 +63,9 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "Divider":
         return <BlockForDivider isEdit={isEdit} setError={setError} />;
       case "Text-Card":
-        return <BlockForText isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForText isEdit={isEdit} setError={setError} uuid={block.id} />
+        );
       case "Twitter":
       case "Telegram":
       case "Discord":
@@ -154,7 +156,9 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           />
         );
       default:
-        return <BlockForText isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForText isEdit={isEdit} setError={setError} uuid={block.id} />
+        );
     }
   };
 
