@@ -25,7 +25,6 @@
     "noUncheckedSideEffectImports": true,
 
     /* Source Maps */
-    "baseUrl": ".",
     "paths": {
       "@/src/*": ["./src/*"],
       "@/assets/*": ["./assets/*"],
@@ -33,8 +32,18 @@
       "@/hooks/*": ["./hooks/*"],
       "@/Blocks/*": ["./Blocks/*"],
       "@/utils/*": ["./utils/*"],
-      "@/store/*": ["./store/*"]
+      "@/store/*": ["./store/*"],
+      "@/PageGeneration/*": ["./PageGeneration/*"]
     }
   },
-  "include": ["src", "hooks", "assets", "Page", "Blocks", "utils", "store"]
+  "include": [
+    "src",
+    "hooks",
+    "assets",
+    "Page",
+    "Blocks",
+    "utils",
+    "store",
+    "PageGeneration"
+  ]
 }

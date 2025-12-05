@@ -18,7 +18,8 @@
       "@/hooks/*": ["./hooks/*"],
       "@/Blocks/*": ["./Blocks/*"],
       "@/utils/*": ["./utils/*"],
-      "@/store/*": ["./store/*"]
+      "@/store/*": ["./store/*"],
+      "@/PageGeneration/*": ["./PageGeneration/*"]
     }
   }
 }

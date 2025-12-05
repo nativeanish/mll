@@ -3,96 +3,122 @@ import MobileView from "@/Blocks/MobileView";
 import AddBlock from "@/Blocks/studioBlock/AddBlock";
 import BasicCard from "@/Blocks/studioBlock/BasicBlock";
 import NavBar from "@/Blocks/UI/NavBar";
-import PageGeneration from "@/Blocks/PageGeneration";
-import pageGenerationSource from "@/Blocks/PageGeneration/index.tsx?raw";
-import linkSource from "@/Blocks/PageGeneration/Link.tsx?raw";
 import React, { useEffect } from "react";
-import { generateHtml } from "@/utils/build/generateHTML";
 import { useBlockStore } from "@/store/useBlockStore";
-import urlCardSource from "@/Blocks/PageGeneration/Bloc/UrlCard.tsx?raw";
-import getstringfieldsrc from "@/Blocks/PageGeneration/utils/getStringField.ts?raw";
-import imagecarsrc from "@/Blocks/PageGeneration/Bloc/ImageCar.tsx?raw";
+import {
+  compileToHTML,
+  isEsbuildReady,
+  type SeoMeta,
+  initializeEsbuild,
+} from "@/utils/compiler";
+const DEFAULT_SEO_META = `{
+  "title": "My Awesome Website - SEO Optimized",
+  "description": "A fully SEO-optimized website built with React and server-side rendering",
+  "keywords": "react, seo, website, optimized",
+  "author": "Your Name",
+  "ogTitle": "My Awesome Website",
+  "ogDescription": "Check out my amazing website!",
+  "ogImage": "https://example.com/image.jpg"
+}`;
+const templateFiles = import.meta.glob(
+  "../../PageGeneration/**/*.{tsx,ts,jsx,js}",
+  {
+    query: "?raw",
+    import: "default",
+  }
+);
 function Studio() {
-  const blocks = useBlockStore((state) => state.blocks);
   const [html, setHtml] = React.useState<string>("");
-  useEffect(() => {
-    const generate = async () => {
+  const [seoMeta] = React.useState(DEFAULT_SEO_META);
+  const [selectedFile, setSelectedFile] = React.useState<string>("");
+  const name = useBlockStore((s) => s.name);
+  const description = useBlockStore((s) => s.description);
+  const avatarUrl = useBlockStore((s) => s.avatarUrl);
+  const coverUrl = useBlockStore((s) => s.coverUrl);
+  const blocks = useBlockStore((s) => s.blocks);
+  React.useEffect(() => {
+    const files = Object.keys(templateFiles).map((path) =>
+      path.replace("../../PageGeneration/", "")
+    );
+    if (files.length > 0) {
+      setSelectedFile("index.tsx");
+    }
+  }, []);
+  const loadAllTemplateFiles = React.useCallback(async (): Promise<
+    Map<string, string>
+  > => {
+    const files = new Map<string, string>();
+
+    for (const [path, loader] of Object.entries(templateFiles)) {
+      const content = (await loader()) as string;
+      // Convert from ../../PageGeneration/... to /src/PageGeneration/...
+      const normalizedPath = path.replace(
+        "../../PageGeneration/",
+        "/src/PageGeneration/"
+      );
+      files.set(normalizedPath, content);
+    }
+
+    return files;
+  }, []);
+
+  React.useEffect(() => {
+    const handlecompile = async () => {
       try {
-        const { name, description, avatarUrl, coverUrl, blocks } =
-          useBlockStore.getState();
-        const html = await generateHtml({
-          deliveryMode: "network",
-          input: {
-            type: "component",
-            component: PageGeneration as React.ComponentType<unknown>,
-            props: {
-              basicData: {
-                name,
-                description,
-                avatarUrl,
-                coverUrl,
-              },
-              block: blocks,
+        if (!isEsbuildReady()) {
+          console.log("Esbuild is not ready yet.");
+        }
+
+        if (!selectedFile) {
+          console.log("No file selected for compilation.");
+          return;
+        }
+        const parsedSeoMeta: SeoMeta = JSON.parse(seoMeta);
+
+        const files = await loadAllTemplateFiles();
+        const entryFile = `/src/PageGeneration/${selectedFile}`;
+
+        const result = await compileToHTML({
+          files,
+          entryFile,
+          props: {
+            basicData: {
+              name,
+              description,
+              avatarUrl,
+              coverUrl,
             },
-            moduleName: "./../Blocks/PageGeneration/index.tsx",
-            moduleSource: pageGenerationSource,
+            block: blocks,
           },
-          virtualModules: {
-            "./../Blocks/PageGeneration/Link.tsx": linkSource,
-            "./../Blocks/PageGeneration/Bloc/UrlCard.tsx": urlCardSource,
-            "./../Blocks/PageGeneration/utils/getStringField.ts":
-              getstringfieldsrc,
-            "./../Blocks/PageGeneration/Bloc/ImageCar.tsx": imagecarsrc,
-          },
-          htmlTemplate:
-            '<!DOCTYPE html><html><head><meta charset="utf-8" />' +
-            '<meta name="viewport" content="width=device-width, initial-scale=1" />' +
-            "<title>Exported Site</title>" +
-            '<meta name="description" content="SEO-friendly React export built client-side." />' +
-            "{{PRECONNECT}}" +
-            "</head><body>" +
-            "{{STATIC_HTML}}" +
-            '<script type="module">{{INLINE_MODULE_JS}}</script>' +
-            "</body></html>",
+          seoMeta: parsedSeoMeta,
+          mode: "network",
         });
-        setHtml(html.html);
+        setHtml(result.html);
       } catch (error) {
-        console.error("Error generating HTML:", error);
-        setHtml(
-          "<div style='color:red'>Failed to generate page: " + error + "</div>"
-        );
+        console.error("Error compiling:", error);
       }
     };
-
-    // initial generate on mount
-    generate();
-
-    // subscribe to store changes and regenerate only when relevant fields change
-    const snapshot = () => {
-      const { name, description, avatarUrl, coverUrl, blocks } =
-        useBlockStore.getState();
-      return { name, description, avatarUrl, coverUrl, blocks };
-    };
-
-    let prev = snapshot();
-    const unsubscribe = useBlockStore.subscribe(() => {
-      const next = snapshot();
-      if (
-        prev.name !== next.name ||
-        prev.description !== next.description ||
-        prev.avatarUrl !== next.avatarUrl ||
-        prev.coverUrl !== next.coverUrl ||
-        prev.blocks !== next.blocks
-      ) {
-        prev = next;
-        generate();
+    handlecompile();
+  }, [
+    blocks,
+    name,
+    description,
+    avatarUrl,
+    coverUrl,
+    selectedFile,
+    seoMeta,
+    loadAllTemplateFiles,
+  ]);
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await initializeEsbuild();
+      } catch (err) {
+        console.log("Failed to initialize esbuild: " + (err as Error).message);
       }
-    });
-
-    return () => {
-      unsubscribe();
     };
-  }, [blocks, imagecarsrc]);
+    init();
+  }, []);
   return (
     <div className="flex flex-col min-h-screen">
       <div className="relative w-full">
@@ -110,7 +136,7 @@ function Studio() {
               frameHeight={700}
               frameWidth={350}
               html={html}
-              sandbox="allow-scripts allow-same-origin" // needed for module imports + hydration
+              sandbox="allow-scripts allow-same-origin allow-modals" // needed for module imports + hydration
               allow="clipboard-read; clipboard-write"
               square={false}
               disableLinks={true}

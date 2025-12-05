@@ -1,10 +1,9 @@
 import type { BlockData } from "@/store/useBlockStore";
 import getStringField from "../utils/getStringField";
-import { useState } from "react";
-
+import React from "react";
 function ImageCar({ props }: { props: BlockData }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [stat, setStat] = useState(0);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [stat, setStat] = React.useState(0);
   const goToPrevious = () => {
     alert("Previous");
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));

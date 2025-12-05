@@ -35,6 +35,7 @@ export default defineConfig({
       "@/Blocks": path.resolve(__dirname, "./Blocks"),
       "@/utils": path.resolve(__dirname, "./utils"),
       "@/store": path.resolve(__dirname, "./store"),
+      "@/PageGeneration": path.resolve(__dirname, "./PageGeneration"),
     },
   },
   server: {
