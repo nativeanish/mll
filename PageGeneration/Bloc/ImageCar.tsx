@@ -3,7 +3,6 @@ import getStringField from "../utils/getStringField";
 import React from "react";
 function ImageCar({ props }: { props: BlockData }) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [stat, setStat] = React.useState(0);
   const goToPrevious = () => {
     alert("Previous");
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -19,7 +18,7 @@ function ImageCar({ props }: { props: BlockData }) {
     setCurrentIndex(index);
   };
   console.log("Current Index:", currentIndex);
-  const galleryTitle = getStringField(props.data, "galleryTitle");
+  // const galleryTitle = getStringField(props.data, "galleryTitle");
   const description = getStringField(props.data, "description");
   const images = props.data["images"] as Array<{
     base64: string;
@@ -119,20 +118,6 @@ function ImageCar({ props }: { props: BlockData }) {
           </div>
         </div>
       )}
-
-      <button
-        onClick={() => setStat(stat + 1)}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        Increment Stat
-      </button>
-      <p>Current Stat: {stat}</p>
-      <button
-        onClick={() => alert("Stat value: " + stat)}
-        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-      >
-        Show Stat
-      </button>
     </div>
   );
 }

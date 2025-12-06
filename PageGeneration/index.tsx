@@ -3,6 +3,7 @@ import Link from "./Bloc/Link";
 import UrlCard from "./Bloc/UrlCard";
 import ImageCar from "./Bloc/ImageCar";
 import Text from "./Bloc/Text";
+import Maps from "./Bloc/Maps";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -218,6 +219,9 @@ export default function PageGeneration({ basicData, block }: Props) {
                   }
                   if (b.alt === "Text-Card" && b.enabled === true) {
                     return <Text key={b.id} props={b} />;
+                  }
+                  if (b.alt === "Maps-Card" && b.enabled === true) {
+                    return <Maps key={b.id} props={b} />;
                   }
                 })}
               </div>

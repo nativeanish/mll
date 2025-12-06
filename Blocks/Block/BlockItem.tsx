@@ -101,7 +101,9 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           <BlockForImage isEdit={isEdit} setError={setError} uuid={block.id} />
         );
       case "Maps-Card":
-        return <BlockForMap isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForMap isEdit={isEdit} setError={setError} uuid={block.id} />
+        );
       case "Calendar-Card":
         return <BlockForCalendar isEdit={isEdit} setError={setError} />;
       case "NewsLetter-Card":
@@ -122,7 +124,6 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
         return <BlockForNumber isEdit={isEdit} setError={setError} />;
       case "File":
         return <BlockForFile isEdit={isEdit} setError={setError} />;
-        return <BlockForMap isEdit={isEdit} setError={setError} />;
       case "Medium-Post":
       case "Paragraph-Post":
       case "Mirror-Post":

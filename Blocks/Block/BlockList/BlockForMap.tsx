@@ -2,7 +2,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Copy, ExternalLink, MapPin, Navigation } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   MapContainer,
@@ -14,6 +14,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Textarea } from "@/src/components/ui/textarea";
+import { useBlockStore } from "@/store/useBlockStore";
 
 // Fix for default markers in react-leaflet
 interface IconDefaultPrototype {
@@ -31,13 +32,12 @@ L.Icon.Default.mergeOptions({
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 interface MapData {
   latitude: number;
   longitude: number;
   zoom: number;
-  title: string;
-  description: string;
 }
 
 function MapClickHandler({
@@ -66,21 +66,36 @@ function MapZoomHandler({
   });
   return null;
 }
+function fixLatitude(lat: number): number {
+  return Math.min(90, Math.max(-90, lat));
+}
 
-function BlockForMap({ isEdit }: Props) {
+function fixLongitude(lng: number): number {
+  return ((((lng + 180) % 360) + 360) % 360) - 180;
+}
+
+function BlockForMap({ isEdit, uuid }: Props) {
   const [mapTitle, setMapTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const [mapData, setMapData] = useState<MapData>(() => {
     // Default to New York City
     return {
       latitude: 40.7128,
       longitude: -74.006,
       zoom: 13,
-      title: "",
-      description: "",
     };
   });
+  useEffect(() => {
+    updateBlock(uuid, {
+      description: description,
+      latitude: JSON.stringify(mapData.latitude),
+      longitude: JSON.stringify(mapData.longitude),
+      zoom: JSON.stringify(mapData.zoom),
+      title: mapTitle,
+    });
+  }, [mapData, description, mapTitle, updateBlock, uuid]);
   const [mapKey, setMapKey] = useState(0); // Add key to force map re-render
   const detectCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -99,8 +114,8 @@ function BlockForMap({ isEdit }: Props) {
       (position) => {
         setMapData((prev) => ({
           ...prev,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: fixLatitude(position.coords.latitude),
+          longitude: fixLongitude(position.coords.longitude),
           zoom: 13,
         }));
         setMapKey((prev) => prev + 1); // Force map re-render with new center
@@ -127,8 +142,8 @@ function BlockForMap({ isEdit }: Props) {
   const handleMapClick = (lat: number, lng: number) => {
     setMapData((prev) => ({
       ...prev,
-      latitude: lat,
-      longitude: lng,
+      latitude: fixLatitude(lat),
+      longitude: fixLongitude(lng),
     }));
   };
 
