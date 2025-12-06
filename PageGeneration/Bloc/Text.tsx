@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "../utils/getStringField";
+import getStringFields from "../utils/getStringFields";
 export type textSize =
   | "sm"
   | "base"
@@ -31,16 +31,19 @@ const fontMap: Record<NonNullable<textFont>, string> = {
   mono: "font-mono",
 };
 function Text({ props }: { props: BlockData }) {
-  const uuid = props.id;
-  const text = getStringField(props.data, "text") || "";
-  const align = getStringField(props.data, "align") || "left";
-  const font = (getStringField(props.data, "font") || "sans") as textFont;
-  const color = getStringField(props.data, "color") || "#000000";
-  const size = (getStringField(props.data, "size") || "base") as textSize;
+  const {
+    text = "",
+    align = "left",
+    font: fontValue = "sans",
+    color = "#000000",
+    size: sizeValue = "base",
+  } = getStringFields(props.data, ["text", "align", "font", "color", "size"]);
+  const font = fontValue as textFont;
+  const size = sizeValue as textSize;
   return (
     <div className="w-full p-2">
       <span
-        id={uuid}
+        id={props.id}
         className={`w-full block ${sizeMap[size]} ${fontMap[font]} text-${align}`}
         style={{ color: color }}
       >

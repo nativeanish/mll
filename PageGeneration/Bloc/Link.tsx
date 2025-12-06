@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "../utils/getStringField";
+import getStringFields from "../utils/getStringFields";
 
 interface Props {
   block: BlockData;
@@ -35,13 +35,13 @@ function Link({ block }: Props) {
   const tooltipLabel = `${name || alt || "link"}`;
 
   const isEmail = typeof alt === "string" && alt.toLowerCase() === "email";
-  const email = getStringField(block.data, "email");
-  const rawUrl = isEmail
-    ? email
-      ? `mailto:${email}`
-      : "#"
-    : getStringField(block.data, "url") || "#";
-  const desc = (getStringField(block.data, "description") || "").trim();
+  const { email, url, description } = getStringFields(block.data, [
+    "email",
+    "url",
+    "description",
+  ]);
+  const rawUrl = isEmail ? (email ? `mailto:${email}` : "#") : url || "#";
+  const desc = (description || "").trim();
 
   const refDomain = "metalinks.ar.io";
   const finalUrl = (() => {

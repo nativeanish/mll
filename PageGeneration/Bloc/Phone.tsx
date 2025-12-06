@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "../utils/getStringField";
+import getStringFields from "../utils/getStringFields";
 
 function Svg({ className = "" }: { className?: string }) {
   return (
@@ -19,10 +19,17 @@ function Svg({ className = "" }: { className?: string }) {
 }
 
 function Phone({ props }: { props: BlockData }) {
-  const countryCode = getStringField(props.data, "countryCode") ?? "";
-  const phoneNumber = getStringField(props.data, "phoneNumber") ?? "";
-  const flags = getStringField(props.data, "flag") ?? "";
-  const description = getStringField(props.data, "description") ?? "";
+  const {
+    countryCode = "",
+    phoneNumber = "",
+    flag: flags = "",
+    description = "",
+  } = getStringFields(props.data, [
+    "countryCode",
+    "phoneNumber",
+    "flag",
+    "description",
+  ]);
   const displayNumber = phoneNumber
     ? `${countryCode ? countryCode + " " : ""}${phoneNumber}`
     : "No number";

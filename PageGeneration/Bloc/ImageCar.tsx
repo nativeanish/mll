@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "../utils/getStringField";
+import getStringFields from "../utils/getStringFields";
 import React from "react";
 function ImageCar({ props }: { props: BlockData }) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -19,7 +19,7 @@ function ImageCar({ props }: { props: BlockData }) {
   };
   console.log("Current Index:", currentIndex);
   // const galleryTitle = getStringField(props.data, "galleryTitle");
-  const description = getStringField(props.data, "description");
+  const description = getStringFields(props.data, ["description"]);
   const images = props.data["images"] as Array<{
     base64: string;
     id: string;

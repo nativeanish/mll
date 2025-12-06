@@ -61,7 +61,13 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
   const renderBlockContent = () => {
     switch (block.alt) {
       case "Divider":
-        return <BlockForDivider isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForDivider
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
       case "Text-Card":
         return (
           <BlockForText isEdit={isEdit} setError={setError} uuid={block.id} />

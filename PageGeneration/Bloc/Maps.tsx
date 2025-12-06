@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "../utils/getStringField";
+import getStringFields from "../utils/getStringFields";
 import React from "react";
 
 // Minimal local types for Leaflet pieces we use to avoid `any`.
@@ -85,9 +85,11 @@ function loadLeaflet(): Promise<LeafletStatic | undefined> {
 }
 
 function Maps({ props }: { props: BlockData }) {
-  const latStr = getStringField(props.data, "latitude") ?? "0";
-  const lngStr = getStringField(props.data, "longitude") ?? "0";
-  const zoomStr = getStringField(props.data, "zoom") ?? "2";
+  const {
+    latitude: latStr = "0",
+    longitude: lngStr = "0",
+    zoom: zoomStr = "2",
+  } = getStringFields(props.data, ["latitude", "longitude", "zoom"]);
   const lat = parseFloat(latStr) || 0;
   const lng = parseFloat(lngStr) || 0;
   const zoom = parseFloat(zoomStr) || 2;

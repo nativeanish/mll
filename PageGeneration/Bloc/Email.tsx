@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "../utils/getStringField";
+import getStringFields from "../utils/getStringFields";
 function Svg() {
   return (
     <svg
@@ -20,9 +20,11 @@ function Svg() {
   );
 }
 function Email({ props }: { props: BlockData }) {
-  const description = getStringField(props.data, "description") ?? "";
-  const email = getStringField(props.data, "email") ?? "";
-  const title = getStringField(props.data, "title") ?? "No email";
+  const {
+    description = "",
+    email = "",
+    title = "No email",
+  } = getStringFields(props.data, ["description", "email", "title"]);
 
   const openMail = () => window.open(`mail:${email}`, "_blank");
 

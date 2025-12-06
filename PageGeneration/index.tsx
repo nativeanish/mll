@@ -6,6 +6,7 @@ import Text from "./Bloc/Text";
 import Maps from "./Bloc/Maps";
 import Phone from "./Bloc/Phone";
 import Email from "./Bloc/Email";
+import Divider from "./Bloc/Divider";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -213,23 +214,24 @@ export default function PageGeneration({ basicData, block }: Props) {
                   ))}
 
                 {block.map((b) => {
-                  if (b.alt === "Url-Card" && b.enabled === true) {
-                    return <UrlCard key={b.id} props={b} />;
-                  }
-                  if (b.alt === "Image-Card" && b.enabled === true) {
-                    return <ImageCar key={b.id} props={b} />;
-                  }
-                  if (b.alt === "Text-Card" && b.enabled === true) {
-                    return <Text key={b.id} props={b} />;
-                  }
-                  if (b.alt === "Maps-Card" && b.enabled === true) {
-                    return <Maps key={b.id} props={b} />;
-                  }
-                  if (b.alt === "Phone-Card" && b.enabled === true) {
-                    return <Phone key={b.id} props={b} />;
-                  }
-                  if (b.alt === "Email-Card" && b.enabled === true) {
-                    return <Email key={b.id} props={b} />;
+                  if (b.enabled !== true) return null;
+                  switch (b.alt) {
+                    case "Url-Card":
+                      return <UrlCard key={b.id} props={b} />;
+                    case "Image-Card":
+                      return <ImageCar key={b.id} props={b} />;
+                    case "Text-Card":
+                      return <Text key={b.id} props={b} />;
+                    case "Maps-Card":
+                      return <Maps key={b.id} props={b} />;
+                    case "Phone-Card":
+                      return <Phone key={b.id} props={b} />;
+                    case "Email-Card":
+                      return <Email key={b.id} props={b} />;
+                    case "Divider":
+                      return <Divider key={b.id} props={b} />;
+                    default:
+                      return null;
                   }
                 })}
               </div>

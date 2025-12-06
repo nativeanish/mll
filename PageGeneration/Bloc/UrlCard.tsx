@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import getStringField from "../utils/getStringField";
+import getStringFields from "../utils/getStringFields";
 interface UrlCardProps {
   props: BlockData;
 }
@@ -23,12 +23,15 @@ function Browser({ size = 24 }: { size?: number }) {
   );
 }
 function UrlCard({ props }: UrlCardProps) {
-  const buttonText = getStringField(props.data, "buttonText");
-  const url = getStringField(props.data, "url");
-  const description = getStringField(props.data, "description");
-  const displayType = getStringField(props.data, "displayType");
-  const imageUrl = getStringField(props.data, "imageUrl");
-  const imageText = getStringField(props.data, "imageText");
+  const { buttonText, url, description, displayType, imageUrl, imageText } =
+    getStringFields(props.data, [
+      "buttonText",
+      "url",
+      "description",
+      "displayType",
+      "imageUrl",
+      "imageText",
+    ]);
   return (
     <div
       className="w-full"

@@ -6,7 +6,7 @@ import {
   widthMap,
   thicknessMap,
 } from "@/utils/block/divider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -14,19 +14,31 @@ import {
   SelectItem,
   SelectValue,
 } from "@/src/components/ui/select";
+import { useBlockStore } from "@/store/useBlockStore";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 
-function BlockForDivider({ isEdit }: Props) {
+function BlockForDivider({ isEdit, uuid }: Props) {
   const [color, setColor] = useState<string>("#e5e7eb");
   const [width, setWidth] = useState<NonNullable<dividerWidth>>("100");
   const [thickness, setThickness] =
     useState<NonNullable<dividerThickness>>("1");
   const [spacingTop, setSpacingTop] = useState<string>("16");
   const [spacingBottom, setSpacingBottom] = useState<string>("16");
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
+  useEffect(() => {
+    updateBlock(uuid, {
+      color,
+      width,
+      thickness,
+      spacingTop,
+      spacingBottom,
+    });
+  }, [color, width, thickness, spacingTop, spacingBottom, updateBlock, uuid]);
   return (
     <div>
       {isEdit ? (
@@ -106,13 +118,7 @@ function BlockForDivider({ isEdit }: Props) {
           </div>
         </div>
       ) : (
-        <div
-          style={{
-            paddingTop: `${spacingTop || 16}px`,
-            paddingBottom: `${spacingBottom || 16}px`,
-          }}
-          className="flex justify-center w-full"
-        >
+        <div className="flex justify-center w-full">
           <div
             className={`${widthMap[width || "100"]} ${thicknessMap[thickness || "1"]} rounded-full`}
             style={{ backgroundColor: color || "#e5e7eb" }}
