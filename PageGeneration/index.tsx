@@ -5,6 +5,7 @@ import ImageCar from "./Bloc/ImageCar";
 import Text from "./Bloc/Text";
 import Maps from "./Bloc/Maps";
 import Phone from "./Bloc/Phone";
+import Email from "./Bloc/Email";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -226,6 +227,9 @@ export default function PageGeneration({ basicData, block }: Props) {
                   }
                   if (b.alt === "Phone-Card" && b.enabled === true) {
                     return <Phone key={b.id} props={b} />;
+                  }
+                  if (b.alt === "Email-Card" && b.enabled === true) {
+                    return <Email key={b.id} props={b} />;
                   }
                 })}
               </div>

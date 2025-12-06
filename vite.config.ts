@@ -40,7 +40,6 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: true,
     https: (() => {
       const certDir = path.resolve(__dirname, "./cert");
       const keyPath = path.join(certDir, "key.pem");

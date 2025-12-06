@@ -56,7 +56,9 @@ function UrlCard({ props }: UrlCardProps) {
           }}
         >
           <Browser />
-          {buttonText && <span className="ml-2 truncate">{buttonText}</span>}
+          {buttonText && (
+            <span className="ml-2 truncate font-semibold">{buttonText}</span>
+          )}
         </div>
       ) : (
         <div>
