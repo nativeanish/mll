@@ -121,7 +121,9 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           <BlockForEmail isEdit={isEdit} setError={setError} uuid={block.id} />
         );
       case "Phone-Card":
-        return <BlockForNumber isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForNumber isEdit={isEdit} setError={setError} uuid={block.id} />
+        );
       case "File":
         return <BlockForFile isEdit={isEdit} setError={setError} />;
       case "Medium-Post":

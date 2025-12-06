@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 import {
   Select,
@@ -18,6 +19,7 @@ import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 import { toast } from "sonner";
 import { Copy, Phone } from "lucide-react";
+import { useBlockStore } from "@/store/useBlockStore";
 interface NumberBlockData {
   description: string;
   countryCode: string;
@@ -46,8 +48,9 @@ interface CountryData {
   };
   timezones?: string[];
 }
-function BlockForNumber({ isEdit, setError }: Props) {
+function BlockForNumber({ isEdit, setError, uuid }: Props) {
   const [description, setDescription] = useState("");
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const [countries, setCountries] = useState<CountryData[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<{
     countryCode: string;
@@ -64,8 +67,16 @@ function BlockForNumber({ isEdit, setError }: Props) {
     };
   });
   useEffect(() => {
-    console.log("Block Data:", blockData);
-  }, [blockData]);
+    if (!isEdit) {
+      updateBlock(uuid, {
+        description: description,
+        countryCode: blockData.countryCode,
+        phoneNumber: blockData.phoneNumber,
+        selectedCountry: blockData.selectedCountry,
+        flag: blockData.selectedCountry?.flags.svg,
+      });
+    }
+  }, [uuid, isEdit, description, blockData, updateBlock]);
   useEffect(() => {
     if (blockData.phoneNumber && blockData.phoneNumber.length > 0) {
       const test = /^\d{7,15}$/;
