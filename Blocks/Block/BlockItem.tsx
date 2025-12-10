@@ -113,7 +113,13 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "Calendar-Card":
         return <BlockForCalendar isEdit={isEdit} setError={setError} />;
       case "NewsLetter-Card":
-        return <BlockForNewsLetter isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForNewsLetter
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
       case "Email-Card":
         return (
           <BlockForEmailGeneral

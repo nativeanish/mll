@@ -31,14 +31,24 @@ function BlockForDivider({ isEdit, uuid }: Props) {
   const [spacingBottom, setSpacingBottom] = useState<string>("16");
   const updateBlock = useBlockStore((state) => state.updateBlockData);
   useEffect(() => {
-    updateBlock(uuid, {
-      color,
-      width,
-      thickness,
-      spacingTop,
-      spacingBottom,
-    });
-  }, [color, width, thickness, spacingTop, spacingBottom, updateBlock, uuid]);
+    if (!isEdit)
+      updateBlock(uuid, {
+        color,
+        width,
+        thickness,
+        spacingTop,
+        spacingBottom,
+      });
+  }, [
+    color,
+    width,
+    thickness,
+    spacingTop,
+    spacingBottom,
+    updateBlock,
+    uuid,
+    isEdit,
+  ]);
   return (
     <div>
       {isEdit ? (

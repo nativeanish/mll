@@ -1,6 +1,6 @@
 import { Textarea } from "@/src/components/ui/textarea";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   InputGroup,
   InputGroupAddon,
@@ -8,23 +8,43 @@ import {
 } from "@/src/components/ui/input-group";
 import { Command, Mail, Newspaper } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { useBlockStore } from "@/store/useBlockStore";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 interface NewsletterData {
   title: string;
   description: string;
   emailPlaceholder: string;
   buttonText: string;
+  successTitle: string;
+  successDescription: string;
 }
-function BlockForNewsLetter({ isEdit }: Props) {
+function BlockForNewsLetter({ isEdit, uuid }: Props) {
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const [newsletterData, setNewsletterData] = useState<NewsletterData>({
     title: "Subscribe to our Newsletter",
     description: "Get the latest updates and offers.",
     emailPlaceholder: "Enter your email",
     buttonText: "Subscribe",
+    successTitle: "Thanks for joining our list!",
+    successDescription: "Expect exclusive updates in your inbox soon.",
   });
+  useEffect(() => {
+    console.log("Newsletter Data Updated:", newsletterData);
+    if (!isEdit) {
+      updateBlock(uuid, {
+        title: newsletterData.title,
+        description: newsletterData.description,
+        emailPlaceholder: newsletterData.emailPlaceholder,
+        buttonText: newsletterData.buttonText,
+        successTitle: newsletterData.successTitle,
+        successDescription: newsletterData.successDescription,
+      });
+    }
+  }, [isEdit, newsletterData, updateBlock, uuid]);
   return (
     <div>
       {isEdit ? (
@@ -106,7 +126,7 @@ function BlockForNewsLetter({ isEdit }: Props) {
               <Label
               // htmlFor={`newsletter-desc-${data.id}`}
               >
-                Description
+                Description Title
               </Label>
               <Textarea
                 // id={`newsletter-desc-${data.id}`}
@@ -116,6 +136,48 @@ function BlockForNewsLetter({ isEdit }: Props) {
                   setNewsletterData((prev) => ({
                     ...prev,
                     description: e.target.value,
+                  }))
+                }
+                className="min-h-20 bg-muted/40"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label
+              // htmlFor={`newsletter-success-title-${data.id}`}
+              >
+                Success Title
+              </Label>
+              <InputGroup>
+                <InputGroupInput
+                  placeholder="Enter success title"
+                  value={newsletterData.successTitle}
+                  onChange={(e) =>
+                    setNewsletterData((prev) => ({
+                      ...prev,
+                      successTitle: e.target.value,
+                    }))
+                  }
+                />
+                <InputGroupAddon>
+                  <Command className="size-4" />
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label
+              // htmlFor={`newsletter-success-desc-${data.id}`}
+              >
+                Success Description
+              </Label>
+              <Textarea
+                placeholder="Enter success description"
+                value={newsletterData.successDescription}
+                onChange={(e) =>
+                  setNewsletterData((prev) => ({
+                    ...prev,
+                    successDescription: e.target.value,
                   }))
                 }
                 className="min-h-20 bg-muted/40"
@@ -153,6 +215,14 @@ function BlockForNewsLetter({ isEdit }: Props) {
                 >
                   {newsletterData.buttonText}
                 </Button>
+              </div>
+              <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 text-center">
+                <p className="text-sm font-semibold text-emerald-700">
+                  {newsletterData.successTitle}
+                </p>
+                <p className="text-xs text-emerald-700/70">
+                  {newsletterData.successDescription}
+                </p>
               </div>
             </div>
           </div>

@@ -1,6 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
 import getStringFields from "../utils/getStringFields";
-import { useEffect } from "react";
 
 function formatPx(value: string | undefined, fallback: string) {
   const effective = (value?.trim() ?? fallback).trim();
@@ -26,10 +25,6 @@ function Divider({ props }: { props: BlockData }) {
     "spacingTop",
     "spacingBottom",
   ]);
-
-  useEffect(() => {
-    console.log(spacingTop, spacingBottom);
-  }, [spacingTop, spacingBottom]);
 
   return (
     <div

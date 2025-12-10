@@ -19,7 +19,7 @@ function BlockForEmailGeneral({ isEdit, setError, uuid }: Props) {
   const [title, setTitle] = React.useState("Email Me");
   const updateBlockData = useBlockStore((state) => state.updateBlockData);
   useEffect(() => {
-    if (isEdit === false) {
+    if (!isEdit) {
       updateBlockData(uuid, {
         email,
         description,

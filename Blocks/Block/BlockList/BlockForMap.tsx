@@ -88,14 +88,15 @@ function BlockForMap({ isEdit, uuid }: Props) {
     };
   });
   useEffect(() => {
-    updateBlock(uuid, {
-      description: description,
-      latitude: JSON.stringify(mapData.latitude),
-      longitude: JSON.stringify(mapData.longitude),
-      zoom: JSON.stringify(mapData.zoom),
-      title: mapTitle,
-    });
-  }, [mapData, description, mapTitle, updateBlock, uuid]);
+    if (!isEdit)
+      updateBlock(uuid, {
+        description: description,
+        latitude: JSON.stringify(mapData.latitude),
+        longitude: JSON.stringify(mapData.longitude),
+        zoom: JSON.stringify(mapData.zoom),
+        title: mapTitle,
+      });
+  }, [mapData, description, mapTitle, updateBlock, uuid, isEdit]);
   const [mapKey, setMapKey] = useState(0); // Add key to force map re-render
   const detectCurrentLocation = () => {
     if (!navigator.geolocation) {

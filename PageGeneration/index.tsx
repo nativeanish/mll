@@ -7,6 +7,7 @@ import Maps from "./Bloc/Maps";
 import Phone from "./Bloc/Phone";
 import Email from "./Bloc/Email";
 import Divider from "./Bloc/Divider";
+import Newsletter from "./Bloc/Newsletter";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -230,6 +231,8 @@ export default function PageGeneration({ basicData, block }: Props) {
                       return <Email key={b.id} props={b} />;
                     case "Divider":
                       return <Divider key={b.id} props={b} />;
+                    case "NewsLetter-Card":
+                      return <Newsletter key={b.id} props={b} />;
                     default:
                       return null;
                   }
