@@ -136,7 +136,7 @@ function Studio() {
               frameHeight={700}
               frameWidth={350}
               html={html}
-              sandbox="allow-scripts allow-same-origin allow-modals allow-forms" // needed for module imports + hydration
+              sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups" // needed for module imports + hydration
               allow="clipboard-read; clipboard-write"
               square={false}
               disableLinks={true}

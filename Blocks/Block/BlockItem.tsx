@@ -83,7 +83,6 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "Instagram":
       case "Facebook":
       case "Linkedin":
-      case "Twitch":
       case "Reddit":
       case "Snapchat":
       case "BlueSky":
@@ -137,28 +136,59 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           <BlockForNumber isEdit={isEdit} setError={setError} uuid={block.id} />
         );
       case "File":
-        return <BlockForFile isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForFile isEdit={isEdit} setError={setError} uuid={block.id} />
+        );
       case "Medium-Post":
       case "Paragraph-Post":
-      case "Mirror-Post":
       case "Youtube-Video":
       case "Odysee-Video":
+      case "Twitch-Video":
+        return (
+          <BlockForSocial
+            isEdit={isEdit}
+            setError={setError}
+            alt={block.alt}
+            uuid={block.id}
+          />
+        );
+
       case "Twitter-Post":
       case "Facebook-Post":
       case "Farcaster-Post":
       case "Instagram-Post":
       case "Tweet-Post":
-        return <BlockForMultiUrl isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForMultiUrl
+            isEdit={isEdit}
+            setError={setError}
+            alt={block.alt}
+            uuid={block.id}
+          />
+        );
       case "Telegram-Community":
       case "Discord-Community":
       case "Reddit-Community":
-        return <BlockForCommunity isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForCommunity
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+            alt={block.alt}
+          />
+        );
       case "Bazar-Collection":
         return <BlockForBazarCollection isEdit={isEdit} setError={setError} />;
       case "Bazar-Profile":
         return <BlockForBazarProfile isEdit={isEdit} setError={setError} />;
       case "FundMyBrew-Card":
-        return <BlockForFundMyBrew isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForFundMyBrew
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
       case "permaswap-info":
         return <BlockForTokenInfo isEdit={isEdit} setError={setError} />;
       case "permaswap-swap":

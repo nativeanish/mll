@@ -8,10 +8,18 @@ import { Copy, ExternalLink } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
+type SocialAlt = (typeof social)[number]["alt"];
+type BlockForSocialAlt =
+  | SocialAlt
+  | "Medium-Post"
+  | "Paragraph-Post"
+  | "Youtube-Video"
+  | "Twitch-Video"
+  | "Odysee-Video";
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
-  alt: (typeof social)[number]["alt"];
+  alt: BlockForSocialAlt;
   placeholder?: string;
   uuid: string;
 }

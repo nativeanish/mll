@@ -2,19 +2,39 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
+import { useBlockStore } from "@/store/useBlockStore";
 import { Copy, ExternalLink } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { toast } from "sonner";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
+  alt?: string;
 }
-function BlockForCommunity({ isEdit, setError: SetError }: Props) {
+function BlockForCommunity({ isEdit, setError: SetError, uuid, alt }: Props) {
   const [url, setUrl] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [error, setError] = React.useState(false);
-  const [title, setTitle] = React.useState("");
+  const [title, setTitle] = React.useState(
+    alt === "Telegram-Community"
+      ? "Join Telegram"
+      : alt === "Discord-Community"
+        ? "Join Discord"
+        : alt === "Reddit-Community"
+          ? "Join Reddit"
+          : ""
+  );
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
+  useEffect(() => {
+    if (!isEdit)
+      updateBlock(uuid, {
+        url,
+        description,
+        title,
+      });
+  }, [url, description, title, updateBlock, uuid, isEdit]);
   React.useEffect(() => {
     if (url && url.length > 0) {
       const urlPattern =

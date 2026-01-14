@@ -4,17 +4,14 @@ import React from "react";
 function ImageCar({ props }: { props: BlockData }) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const goToPrevious = () => {
-    alert("Previous");
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const goToNext = () => {
-    alert("Next");
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const goToSlide = (index: number) => {
-    alert(`Go to slide ${index + 1}`);
     setCurrentIndex(index);
   };
   console.log("Current Index:", currentIndex);

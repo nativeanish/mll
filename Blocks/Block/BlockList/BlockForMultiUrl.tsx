@@ -2,19 +2,31 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
+import { useBlockStore } from "@/store/useBlockStore";
 import { Copy, ExternalLink, Trash2 } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { toast } from "sonner";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  alt: string;
+  uuid: string;
 }
-function BlockForMultiUrl({ isEdit, setError }: Props) {
+function BlockForMultiUrl({ isEdit, setError, uuid }: Props) {
   const [title, setTitle] = React.useState<string>("");
   const [urls, setUrls] = React.useState<string[]>([""]);
   const [description, setDescription] = React.useState<string>("");
   const [error, SetError] = React.useState<boolean>(false);
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
+  useEffect(() => {
+    if (!isEdit)
+      updateBlock(uuid, {
+        title,
+        urls: urls.filter((u) => u.trim() !== ""),
+        description,
+      });
+  }, [title, urls, description, updateBlock, uuid, isEdit]);
   const checkUrlandSave = (e: string) => {
     const urlPattern =
       /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;

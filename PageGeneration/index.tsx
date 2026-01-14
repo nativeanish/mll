@@ -8,6 +8,12 @@ import Phone from "./Bloc/Phone";
 import Email from "./Bloc/Email";
 import Divider from "./Bloc/Divider";
 import Newsletter from "./Bloc/Newsletter";
+import Brew from "./Bloc/Brew";
+import Tweet from "./Bloc/Tweet";
+import Community from "./Bloc/Community";
+import Post from "./Bloc/Post";
+import Video from "./Bloc/Video";
+import File from "./Bloc/File";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -233,6 +239,23 @@ export default function PageGeneration({ basicData, block }: Props) {
                       return <Divider key={b.id} props={b} />;
                     case "NewsLetter-Card":
                       return <Newsletter key={b.id} props={b} />;
+                    case "FundMyBrew-Card":
+                      return <Brew key={b.id} props={b} />;
+                    case "Twitter-Post":
+                      return <Tweet key={b.id} props={b} />;
+                    case "Telegram-Community":
+                    case "Discord-Community":
+                    case "Reddit-Community":
+                      return <Community key={b.id} blockData={b} />;
+                    case "Medium-Post":
+                    case "Paragraph-Post":
+                      return <Post key={b.id} props={b} />;
+                    case "Youtube-Video":
+                    case "Odysee-Video":
+                    case "Twitch-Video":
+                      return <Video key={b.id} props={b} />;
+                    case "File":
+                      return <File key={b.id} props={b} />;
                     default:
                       return null;
                   }

@@ -22,7 +22,6 @@ import {
 import { SiFarcaster } from "react-icons/si";
 import Paragraph from "@/assets/Paragraph";
 import Odysee from "@/assets/Odysee";
-import Mirror from "@/assets/Mirror";
 import {
   FaDiscord,
   FaFacebook,
@@ -159,13 +158,6 @@ export const node = {
           description: "Share your Paragraph blog posts",
           display: ["View", "Read"],
         },
-        {
-          name: "Mirror",
-          alt: "Mirror-Post",
-          icon: Mirror,
-          description: "Display your Mirror publications",
-          display: ["View", "Read"],
-        },
       ],
     },
     {
@@ -187,8 +179,8 @@ export const node = {
           display: ["View", "Click"],
         },
         {
-          name: "Twitch-Video",
-          alt: "Twitch",
+          name: "Twitch Video",
+          alt: "Twitch-Video",
           icon: FaTwitch,
           description: "Feature Twitch clips and highlights",
           display: ["View", "Click"],

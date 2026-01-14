@@ -14,10 +14,12 @@ import { Coffee, Coins } from "lucide-react";
 import useWallet from "@/store/useWallet";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/useTheme";
+import { useBlockStore } from "@/store/useBlockStore";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 
 interface TipAmount {
@@ -46,9 +48,10 @@ interface FundMyBrewData {
   selectedChain: string;
   tipAmounts: TipAmount[];
   customAmount: string;
+  thankMessage: string;
 }
 
-function BlockForFundMyBrew({ isEdit, setError }: Props) {
+function BlockForFundMyBrew({ isEdit, setError, uuid }: Props) {
   const { address } = useWallet();
   const theme = useTheme().theme;
   const renderChainLogo = (label: string) => {
@@ -87,6 +90,8 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
     }
     return null;
   };
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
+
   const [blockData, setBlockData] = useState<FundMyBrewData>({
     title: "Fund My Brew",
     description: "",
@@ -95,6 +100,7 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
     selectedChain: "AO",
     tipAmounts: DEFAULT_TIP_AMOUNTS,
     customAmount: "",
+    thankMessage: "",
   });
 
   const [showCustomAmount, setShowCustomAmount] = useState(false);
@@ -182,7 +188,20 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
     );
     return chain?.symbol || "Token";
   };
-
+  useEffect(() => {
+    if (!isEdit) {
+      updateBlock(uuid, {
+        title: blockData.title,
+        description: blockData.description,
+        buttonName: blockData.buttonName,
+        paymentAddress: blockData.paymentAddress,
+        selectedChain: blockData.selectedChain,
+        tipAmounts: blockData.tipAmounts,
+        customAmount: blockData.customAmount,
+        thankMessage: blockData.thankMessage,
+      });
+    }
+  }, [isEdit, blockData, updateBlock, uuid]);
   return (
     <div>
       {isEdit ? (
@@ -303,6 +322,7 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
             <Input
               placeholder="Enter payment address"
               value={blockData.paymentAddress}
+              disabled={true}
               onChange={(e) =>
                 setBlockData((prev) => ({
                   ...prev,
@@ -315,6 +335,28 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
               {address
                 ? "Using your connected wallet address"
                 : "Please connect your wallet or enter an address manually"}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Thanks / Reply Message
+            </Label>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                placeholder="Type a reply when someone funds the brew"
+                value={blockData.thankMessage}
+                onChange={(e) =>
+                  setBlockData((prev) => ({
+                    ...prev,
+                    thankMessage: e.target.value,
+                  }))
+                }
+                className="bg-muted/40 flex-1"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              This message will be shown to supporters after they tip.
             </p>
           </div>
 
@@ -479,6 +521,11 @@ function BlockForFundMyBrew({ isEdit, setError }: Props) {
                 <Coffee className="h-4 w-4 mr-2" />
                 {blockData.buttonName || "Buy me a coffee"}
               </Button>
+              {blockData.thankMessage && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  {blockData.thankMessage}
+                </p>
+              )}
             </>
           ) : (
             <div className="p-6 bg-muted/30 rounded-lg text-center">

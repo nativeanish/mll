@@ -7,14 +7,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/src/components/ui/tooltip";
+import { useBlockStore } from "@/store/useBlockStore";
 import { Copy, ExternalLink, Trash2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { uuidv7 } from "uuidv7";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid?: string;
 }
 interface LocalFileMeta {
   id: string; // local id
@@ -24,9 +26,10 @@ interface LocalFileMeta {
   size: number;
   type: string;
 }
-function BlockForFile({ isEdit }: Props) {
+function BlockForFile({ isEdit, uuid }: Props) {
   const [description, setDescription] = useState<string>("");
   const [files, setFiles] = useState<LocalFileMeta[]>([]);
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const onSelectFiles = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const list = e.target.files;
@@ -60,6 +63,22 @@ function BlockForFile({ isEdit }: Props) {
     });
   };
 
+  useEffect(() => {
+    if (!isEdit && uuid) {
+      // when switching from edit to view, update the block data
+      updateBlock(uuid, {
+        files: files.map(({ id, url, name, title, size, type }) => ({
+          id,
+          url,
+          name,
+          title,
+          size,
+          type,
+        })),
+        description,
+      });
+    }
+  }, [isEdit, uuid, files, description, updateBlock]);
   return (
     <div>
       {isEdit ? (
@@ -90,17 +109,20 @@ function BlockForFile({ isEdit }: Props) {
             {files.map((f, idx) => (
               <div
                 key={f.id}
-                className="flex flex-col sm:flex-row gap-2 p-3 bg-muted/30 rounded-lg"
+                className="flex flex-col sm:flex-row gap-2 p-3 bg-muted/30 rounded-lg min-w-0"
               >
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                <div className="flex-1 space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
                       {idx + 1}
                     </span>
-                    <span className="text-xs text-muted-foreground truncate">
+                    <span
+                      className="text-xs text-muted-foreground block truncate min-w-0 flex-1"
+                      title={f.name}
+                    >
                       {f.name}
                     </span>
-                    <span className="text-[10px] text-muted-foreground ml-auto">
+                    <span className="text-[10px] text-muted-foreground ml-auto shrink-0">
                       {(f.size / 1024).toFixed(1)} KB
                     </span>
                   </div>
@@ -114,10 +136,10 @@ function BlockForFile({ isEdit }: Props) {
                         )
                       )
                     }
-                    className="bg-background/50"
+                    className="bg-background/50 truncate min-w-0"
                   />
                 </div>
-                <div className="flex items-start gap-2">
+                <div className="flex items-start gap-2 shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -164,13 +186,19 @@ function BlockForFile({ isEdit }: Props) {
               files.map((f) => (
                 <div
                   key={f.id}
-                  className="flex items-center gap-3 p-3 dark:bg-muted/30 bg-black/30 rounded-lg"
+                  className="flex items-center gap-3 p-3 dark:bg-muted/30 bg-black/30 rounded-lg min-w-0"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <p
+                      className="text-sm font-medium truncate"
+                      title={f.title || f.name}
+                    >
                       {f.title || f.name}
                     </p>
-                    <p className="text-[10px] dark:text-muted-foreground truncate">
+                    <p
+                      className="text-[10px] dark:text-muted-foreground truncate"
+                      title={f.name}
+                    >
                       {f.name}
                     </p>
                   </div>
