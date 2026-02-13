@@ -87,6 +87,13 @@ export default function BlockDialog() {
 
     if (foundBlock) {
       let placeholder = "";
+      const postPlaceholders: Record<string, string> = {
+        "Twitter-Post": "https://x.com/aoTheComputer/status/2021694557423796248",
+        "Reddit-Post":
+          "https://www.reddit.com/r/Arweave/comments/1qz58k7/time_to_shut_up_and_build/",
+        "Farcaster-Post": "https://farcaster.xyz/jonnyringo.eth/0xbef66a87",
+        "Bluesky-Post": "https://bsky.app/profile/hackernoon.com/post/3lu5d6yrser25",
+      };
       // Check if found block belongs to the "Social" category
       if (foundNavName === "Social") {
         if (foundBlock.alt === "Url") {
@@ -94,6 +101,8 @@ export default function BlockDialog() {
         } else {
           placeholder = `Enter your ${foundBlock.name} URL`;
         }
+      } else if (foundNavName === "Post" && postPlaceholders[foundBlock.alt]) {
+        placeholder = postPlaceholders[foundBlock.alt];
       }
       addBlock({
         id: crypto.randomUUID(),

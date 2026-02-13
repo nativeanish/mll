@@ -15,10 +15,12 @@ import { Calendar as CalendarIcon, Clock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { DateRange } from "react-day-picker";
 import { useQuery } from "@tanstack/react-query";
+import { useBlockStore } from "@/store/useBlockStore";
 const discard_timezone = ["Europe/Uzhhorod", "Europe/Zaporizhzhia"];
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 
 interface TimeSlot {
@@ -32,7 +34,7 @@ interface DayAvailability {
   slots: TimeSlot[];
 }
 
-interface CalendarBlockData {
+interface CalendarBlockData extends Record<string, unknown> {
   title: string;
   description: string;
   timezone: string;
@@ -77,7 +79,7 @@ const WEEKDAYS = [
   { key: "saturday" as const, label: "Sat" },
 ];
 
-function BlockForCalendar({ isEdit, setError }: Props) {
+function BlockForCalendar({ isEdit, setError, uuid }: Props) {
   const toLocalDateKey = (d: Date) => {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -85,6 +87,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
     return `${year}-${month}-${day}`;
   };
 
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const [timezone, setTimezone] = useState<
     Array<{ value: string; label: string }>
   >([]);
@@ -108,12 +111,17 @@ function BlockForCalendar({ isEdit, setError }: Props) {
     customInterval: "",
     dayByDayAvailability: [],
   });
+  useEffect(() => {
+    if (isEdit) {
+      updateBlock(uuid, blockData);
+    }
+  }, [blockData, isEdit, updateBlock, uuid]);
 
   const timezone_data = useQuery({
     queryKey: ["timezones"],
     queryFn: async () => {
       const res = await fetch(
-        "https://arweave.net/8kcrMR_jflTOqkGED1EmQaTYjy1Jjj8lMZ7Qa4h2P7Q"
+        "https://arweave.net/8kcrMR_jflTOqkGED1EmQaTYjy1Jjj8lMZ7Qa4h2P7Q",
       );
       if (!res.ok) {
         toast.error("Failed to load timezone data");
@@ -162,7 +170,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
       const daysDiff = Math.ceil(
         (blockData.dateRange.to.getTime() -
           blockData.dateRange.from.getTime()) /
-          (1000 * 60 * 60 * 24)
+          (1000 * 60 * 60 * 24),
       );
       if (daysDiff > 60) {
         setError(true);
@@ -191,7 +199,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
           const isAvailableByDefault = prev.weeklyAvailability[weekdayKey];
 
           const existingDay = prev.dayByDayAvailability.find(
-            (d) => d.date === dateStr
+            (d) => d.date === dateStr,
           );
 
           if (existingDay) {
@@ -243,7 +251,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
       const start = new Date(from);
       const end = new Date(to);
       const diffDays = Math.ceil(
-        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       if (diffDays > 60) {
@@ -254,7 +262,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
           dateRange: { from: start, to: cappedEnd },
         }));
         toast.warning(
-          `You can select up to 60 days. End date adjusted to ${cappedEnd.toLocaleDateString()}.`
+          `You can select up to 60 days. End date adjusted to ${cappedEnd.toLocaleDateString()}.`,
         );
         return;
       }
@@ -264,7 +272,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
   };
 
   const toggleWeekday = (
-    day: keyof CalendarBlockData["weeklyAvailability"]
+    day: keyof CalendarBlockData["weeklyAvailability"],
   ) => {
     setBlockData((prev) => ({
       ...prev,
@@ -278,7 +286,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
   const updateDayAvailability = (
     dateStr: string,
     available: boolean,
-    slots?: TimeSlot[]
+    slots?: TimeSlot[],
   ) => {
     setBlockData((prev) => ({
       ...prev,
@@ -292,7 +300,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
                   ? slots
                   : prev.defaultTimeSlots.map((s) => ({ ...s })),
             }
-          : day
+          : day,
       ),
     }));
   };
@@ -317,12 +325,12 @@ function BlockForCalendar({ isEdit, setError }: Props) {
     dateStr: string,
     slotIndex: number,
     field: "start" | "end",
-    value: string
+    value: string,
   ) => {
     const day = blockData.dayByDayAvailability.find((d) => d.date === dateStr);
     if (day) {
       const newSlots = day.slots.map((slot, i) =>
-        i === slotIndex ? { ...slot, [field]: value } : slot
+        i === slotIndex ? { ...slot, [field]: value } : slot,
       );
       updateDayAvailability(dateStr, day.available, newSlots);
     }
@@ -349,12 +357,12 @@ function BlockForCalendar({ isEdit, setError }: Props) {
   const updateDefaultTimeSlot = (
     index: number,
     field: "start" | "end",
-    value: string
+    value: string,
   ) => {
     setBlockData((prev) => ({
       ...prev,
       defaultTimeSlots: prev.defaultTimeSlots.map((s, i) =>
-        i === index ? { ...s, [field]: value } : s
+        i === index ? { ...s, [field]: value } : s,
       ),
     }));
   };
@@ -365,7 +373,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
       dayByDayAvailability: prev.dayByDayAvailability.map((day) =>
         day.available
           ? { ...day, slots: prev.defaultTimeSlots.map((s) => ({ ...s })) }
-          : day
+          : day,
       ),
     }));
     toast.success("Default time slots applied to all available days.");
@@ -492,7 +500,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
                     (() => {
                       const availableDays =
                         blockData.dayByDayAvailability.filter(
-                          (d) => d.available
+                          (d) => d.available,
                         ).length;
                       const totalDays = blockData.dayByDayAvailability.length;
                       const statusType =
@@ -689,7 +697,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
                                   ? []
                                   : blockData.defaultTimeSlots.map((s) => ({
                                       ...s,
-                                    }))
+                                    })),
                               )
                             }
                           >
@@ -713,7 +721,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
                                       day.date,
                                       slotIndex,
                                       "start",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="bg-muted/40 w-32"
@@ -729,7 +737,7 @@ function BlockForCalendar({ isEdit, setError }: Props) {
                                       day.date,
                                       slotIndex,
                                       "end",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="bg-muted/40 w-32"

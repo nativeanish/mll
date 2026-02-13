@@ -33,7 +33,6 @@ import BlockForNewsLetter from "./BlockList/BlockForNewsLetter";
 import BlockForEmail from "./BlockList/BlockForEmail";
 import BlockForNumber from "./BlockList/BlockForNumber";
 import BlockForFile from "./BlockList/BlockForFile";
-import BlockForMultiUrl from "./BlockList/BlockForMultiUrl";
 import BlockForCommunity from "./BlockList/BlockForCommunity";
 import BlockForBazarCollection from "./BlockList/BlockForBazarCollection";
 import BlockForBazarProfile from "./BlockList/BlockForBazarProfile";
@@ -41,6 +40,7 @@ import BlockForEmailGeneral from "./BlockList/BlockForEmailGeneral";
 import BlockForFundMyBrew from "./BlockList/BlockForFundMyBrew";
 import BlockForTokenInfo from "./BlockList/BlockForTokenInfo";
 import BlockForTokenSwap from "./BlockList/BlockForTokenSwap";
+import BlockForSocialPost from "./BlockList/BlockForSocialPost";
 
 interface BlockItemProps {
   block: BlockData;
@@ -110,7 +110,13 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           <BlockForMap isEdit={isEdit} setError={setError} uuid={block.id} />
         );
       case "Calendar-Card":
-        return <BlockForCalendar isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForCalendar
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
       case "NewsLetter-Card":
         return (
           <BlockForNewsLetter
@@ -154,15 +160,15 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
         );
 
       case "Twitter-Post":
-      case "Facebook-Post":
       case "Farcaster-Post":
-      case "Instagram-Post":
-      case "Tweet-Post":
+      case "Reddit-Post":
+      case "Bluesky-Post":
         return (
-          <BlockForMultiUrl
+          <BlockForSocialPost
             isEdit={isEdit}
             setError={setError}
             alt={block.alt}
+            placeholder={block.placeholder}
             uuid={block.id}
           />
         );
@@ -180,7 +186,13 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "Bazar-Collection":
         return <BlockForBazarCollection isEdit={isEdit} setError={setError} />;
       case "Bazar-Profile":
-        return <BlockForBazarProfile isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForBazarProfile
+            uuid={block.id}
+            isEdit={isEdit}
+            setError={setError}
+          />
+        );
       case "FundMyBrew-Card":
         return (
           <BlockForFundMyBrew
@@ -190,7 +202,13 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           />
         );
       case "permaswap-info":
-        return <BlockForTokenInfo isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForTokenInfo
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
       case "permaswap-swap":
         return (
           <BlockForTokenSwap

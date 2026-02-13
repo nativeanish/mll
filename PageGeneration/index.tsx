@@ -9,11 +9,15 @@ import Email from "./Bloc/Email";
 import Divider from "./Bloc/Divider";
 import Newsletter from "./Bloc/Newsletter";
 import Brew from "./Bloc/Brew";
-import Tweet from "./Bloc/Tweet";
 import Community from "./Bloc/Community";
 import Post from "./Bloc/Post";
 import Video from "./Bloc/Video";
 import File from "./Bloc/File";
+import TokenInfo from "./Bloc/TokenInfo";
+import Swap from "./Bloc/Swap";
+import BazarProfile from "./Bloc/BazarProfile";
+import Calendar from "./Bloc/Calendar";
+import MediaPost from "./Bloc/MediaPost";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -242,7 +246,7 @@ export default function PageGeneration({ basicData, block }: Props) {
                     case "FundMyBrew-Card":
                       return <Brew key={b.id} props={b} />;
                     case "Twitter-Post":
-                      return <Tweet key={b.id} props={b} />;
+                      return <MediaPost key={b.id} props={b} />;
                     case "Telegram-Community":
                     case "Discord-Community":
                     case "Reddit-Community":
@@ -256,6 +260,19 @@ export default function PageGeneration({ basicData, block }: Props) {
                       return <Video key={b.id} props={b} />;
                     case "File":
                       return <File key={b.id} props={b} />;
+                    case "permaswap-info":
+                      return <TokenInfo key={b.id} pros={b} />;
+                    case "permaswap-swap":
+                      return <Swap key={b.id} props={b} />;
+                    case "Bazar-Profile":
+                      return <BazarProfile key={b.id} props={b} />;
+                    case "Calendar-Card":
+                      return <Calendar key={b.id} props={b} />;
+                    case "Farcaster-Post":
+                    case "Reddit-Post":
+                    case "Bluesky-Post":
+                      return <MediaPost key={b.id} props={b} />;
+
                     default:
                       return null;
                   }
@@ -274,7 +291,7 @@ export default function PageGeneration({ basicData, block }: Props) {
                   e.preventDefault();
                   window.open(
                     "https://ar.io/?utm_campaign=poweredbyario&utm_medium=affiliate&utm_source=metalinks",
-                    "_blank"
+                    "_blank",
                   );
                 }}
                 className="inline-flex items-center justify-center rounded-lg bg-[#96161d] text-white px-6 py-2 text-sm font-medium hover:bg-gray-800 transition"

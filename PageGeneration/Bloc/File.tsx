@@ -17,7 +17,7 @@ function formatBytes(bytes?: number) {
   const units = ["B", "KB", "MB", "GB", "TB"];
   const idx = Math.min(
     Math.floor(Math.log(b) / Math.log(1024)),
-    units.length - 1
+    units.length - 1,
   );
   const value = b / Math.pow(1024, idx);
   return `${value.toFixed(idx === 0 ? 0 : 1)} ${units[idx]}`;
@@ -58,7 +58,6 @@ function downloadViaAnchor(url: string, filename?: string) {
     if (filename) a.download = filename;
     a.click();
   } catch {
-    // Fallback
     window.open(url, "_blank", "noopener");
   }
 }
@@ -85,6 +84,30 @@ async function copyToClipboard(text: string) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Ext color mapping                                                 */
+/* ------------------------------------------------------------------ */
+
+function extColor(ext: string): string {
+  const e = ext.toLowerCase();
+  if (["pdf"].includes(e)) return "bg-red-100 text-red-700";
+  if (["doc", "docx"].includes(e)) return "bg-blue-100 text-blue-700";
+  if (["xls", "xlsx", "csv"].includes(e)) return "bg-green-100 text-green-700";
+  if (["png", "jpg", "jpeg", "gif", "svg", "webp"].includes(e))
+    return "bg-purple-100 text-purple-700";
+  if (["zip", "rar", "7z", "tar", "gz"].includes(e))
+    return "bg-amber-100 text-amber-700";
+  if (["mp4", "mov", "avi", "mkv", "webm"].includes(e))
+    return "bg-pink-100 text-pink-700";
+  if (["mp3", "wav", "ogg", "flac"].includes(e))
+    return "bg-cyan-100 text-cyan-700";
+  return "bg-slate-100 text-slate-600";
+}
+
+/* ------------------------------------------------------------------ */
+/*  FileCard                                                          */
+/* ------------------------------------------------------------------ */
+
 function FileCard({ file }: { file: LocalFileMeta }) {
   const [copied, setCopied] = React.useState(false);
 
@@ -92,61 +115,114 @@ function FileCard({ file }: { file: LocalFileMeta }) {
   const ext =
     getExtension(file.name) ||
     (file.type ? file.type.split("/")[1]?.toUpperCase() : "");
-  const meta = [formatBytes(file.size)].filter(Boolean).join(" • ");
+  const showOriginalName = label !== file.name;
 
   return (
-    <div
-      className="group w-full min-w-0 p-4 rounded-2xl text-slate-950 bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-yellow-400 dark:text-white dark:bg-slate-900/60 dark:border-white/10 dark:hover:border-yellow-400/50"
-      role="group"
-    >
-      <div className="h-1 w-full rounded-full bg-yellow-400 mb-4" />
-      <div className="flex items-start gap-4 min-w-0">
-        <div className="shrink-0 w-12 h-12 rounded-2xl bg-yellow-100 border border-yellow-200 flex items-center justify-center transition-colors group-hover:bg-yellow-200 dark:bg-yellow-400/15 dark:border-yellow-400/25 dark:group-hover:bg-yellow-400/20">
-          <span className="text-[10px] font-semibold tracking-wide select-none text-slate-950/80 dark:text-white/90">
-            {ext || "FILE"}
-          </span>
+    <div className="group w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-slate-300">
+      <div className="flex items-center gap-3.5 p-4">
+        {/* extension badge */}
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-[0.65rem] font-bold uppercase tracking-wider ${extColor(ext)}`}
+        >
+          {ext || "FILE"}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm truncate" title={label}>
+        {/* file info */}
+        <div className="min-w-0 flex-1">
+          <p
+            className="truncate text-sm font-semibold text-slate-800"
+            title={label}
+          >
             {label}
-          </div>
-          {meta && (
-            <div className="text-[10px] text-slate-600 dark:text-white/60 mt-1">
-              {meta}
-            </div>
+          </p>
+          {showOriginalName && (
+            <p
+              className="truncate text-xs text-slate-400 mt-0.5"
+              title={file.name}
+            >
+              {file.name}
+            </p>
           )}
+          <p className="text-[0.7rem] text-slate-400 mt-0.5">
+            {formatBytes(file.size)}
+            {file.type ? ` · ${file.type}` : ""}
+          </p>
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-3">
+      {/* actions */}
+      <div className="flex items-center border-t border-slate-100">
         <button
           type="button"
-          className="h-9 px-4 rounded-xl bg-white text-slate-950 text-sm font-semibold border border-slate-200 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-white/10 dark:text-white dark:border-white/15 dark:hover:bg-white/15 dark:focus-visible:ring-yellow-400/40 dark:focus-visible:ring-offset-slate-950"
           onClick={async () => {
             const ok = await copyToClipboard(file.url);
             if (!ok) return;
             setCopied(true);
-            window.setTimeout(() => setCopied(false), 1200);
+            setTimeout(() => setCopied(false), 1500);
           }}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors rounded-bl-xl cursor-pointer"
           aria-label="Copy file URL"
-          title="Copy link"
         >
-          {copied ? "Copied" : "Copy"}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0"
+          >
+            {copied ? (
+              <>
+                <path d="M20 6 9 17l-5-5" />
+              </>
+            ) : (
+              <>
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+              </>
+            )}
+          </svg>
+          {copied ? "Copied!" : "Copy link"}
         </button>
+
+        <div className="w-px h-5 bg-slate-100" />
+
         <button
           type="button"
-          className="shrink-0 h-9 px-4 rounded-xl bg-slate-950 text-white text-sm font-semibold transition-all duration-200 hover:bg-yellow-400 hover:text-slate-950 hover:shadow-md hover:shadow-yellow-400/25 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-white dark:text-slate-950 dark:hover:bg-yellow-400 dark:focus-visible:ring-yellow-400/40 dark:focus-visible:ring-offset-slate-950"
           onClick={() => downloadViaAnchor(file.url, file.name)}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors rounded-br-xl cursor-pointer"
           aria-label="Download file"
-          title="Download"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0 transition-transform group-hover:translate-y-0.5"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" x2="12" y1="15" y2="3" />
+          </svg>
           Download
         </button>
       </div>
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*  File (main)                                                       */
+/* ------------------------------------------------------------------ */
 
 function File({ props }: { props: BlockData }) {
   const { description } = getStringFields(props.data, ["description"]);
@@ -161,11 +237,29 @@ function File({ props }: { props: BlockData }) {
       data-description={description || undefined}
     >
       {!files.length ? (
-        <div className="p-4 rounded-2xl text-slate-950 text-sm bg-white border border-slate-200 shadow-sm dark:text-white dark:bg-slate-900/60 dark:border-white/10">
-          No files available.
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-slate-300 mb-3"
+          >
+            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+            <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+          </svg>
+          <p className="text-sm font-medium text-slate-500">No files yet</p>
+          <p className="text-xs text-slate-400 mt-1">
+            Files shared here will appear when available.
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {files.map((file) => (
             <FileCard key={file.id} file={file} />
           ))}

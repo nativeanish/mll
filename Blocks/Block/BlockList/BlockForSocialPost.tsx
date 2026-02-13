@@ -11,25 +11,18 @@ interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
   uuid: string;
-  alt?: "Telegram-Community" | "Discord-Community" | "Reddit-Community";
+  alt: "Twitter-Post" | "Farcaster-Post" | "Reddit-Post" | "Bluesky-Post";
+  placeholder?: string;
 }
-
-const COMMUNITY_EXAMPLES = {
-  "Telegram-Community": "https://t.me/permaraidz",
-  "Discord-Community": "https://discord.gg/your-server",
-  "Reddit-Community": "https://www.reddit.com/r/Arweave/",
+const POST_EXAMPLES = {
+  "Twitter-Post": "https://x.com/aoTheComputer/status/2021694557423796248",
+  "Reddit-Post":
+    "https://www.reddit.com/r/Arweave/comments/1qz58k7/time_to_shut_up_and_build/",
+  "Farcaster-Post": "https://farcaster.xyz/jonnyringo.eth/0xbef66a87",
+  "Bluesky-Post": "https://bsky.app/profile/hackernoon.com/post/3lu5d6yrser25",
 } as const;
 
-function getDefaultTitle(alt?: Props["alt"]) {
-  if (alt === "Telegram-Community") return "Join Telegram";
-  if (alt === "Discord-Community") return "Join Discord";
-  if (alt === "Reddit-Community") return "Join Reddit";
-  return "";
-}
-
-function isValidCommunityUrlByAlt(url: string, alt?: Props["alt"]) {
-  if (!alt) return false;
-
+function isValidPostUrlByAlt(url: string, alt: Props["alt"]) {
   try {
     const parsed = new URL(url);
     if (!/^https?:$/.test(parsed.protocol)) return false;
@@ -37,17 +30,24 @@ function isValidCommunityUrlByAlt(url: string, alt?: Props["alt"]) {
     const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
     const path = parsed.pathname;
 
-    if (alt === "Discord-Community") {
-      return host === "discord.com" || host === "discord.gg";
+    if (alt === "Twitter-Post") {
+      if (host !== "x.com" && host !== "twitter.com") return false;
+      return /^\/[^/]+\/status\/\d+\/?$/.test(path);
     }
 
-    if (alt === "Reddit-Community") {
-      if (host !== "reddit.com") return false;
-      return /^\/r\/[^/]+\/?$/.test(path);
+    if (alt === "Reddit-Post") {
+      if (host !== "reddit.com" && host !== "www.reddit.com") return false;
+      return /^\/r\/[^/]+\/comments\/[^/]+\/[^/]*\/?$/.test(path);
     }
 
-    if (alt === "Telegram-Community") {
-      return host === "t.me" || host === "telegram.org";
+    if (alt === "Farcaster-Post") {
+      if (host !== "farcaster.xyz") return false;
+      return /^\/[^/]+\/0x[a-fA-F0-9]+\/?$/.test(path);
+    }
+
+    if (alt === "Bluesky-Post") {
+      if (host !== "bsky.app") return false;
+      return /^\/profile\/[^/]+\/post\/[^/]+\/?$/.test(path);
     }
 
     return false;
@@ -56,90 +56,66 @@ function isValidCommunityUrlByAlt(url: string, alt?: Props["alt"]) {
   }
 }
 
-function BlockForCommunity({ isEdit, setError: SetError, uuid, alt }: Props) {
+function BlockForSocialPost({
+  isEdit,
+  setError: SetError,
+  uuid,
+  alt,
+  placeholder,
+}: Props) {
   const [url, setUrl] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [error, setError] = React.useState(false);
-  const [title, setTitle] = React.useState(getDefaultTitle(alt));
-  const exampleUrl =
-    (alt && COMMUNITY_EXAMPLES[alt]) || "https://example.com/community";
+  const [localError, setLocalError] = React.useState(false);
+  const exampleUrl = POST_EXAMPLES[alt];
   const updateBlock = useBlockStore((state) => state.updateBlockData);
   useEffect(() => {
     if (!isEdit)
       updateBlock(uuid, {
         url,
         description,
-        title,
       });
-  }, [url, description, title, updateBlock, uuid, isEdit]);
+  }, [url, description, updateBlock, uuid, isEdit]);
   React.useEffect(() => {
     if (url && url.length > 0) {
-      if (!isValidCommunityUrlByAlt(url, alt)) {
-        setError(true);
+      if (!isValidPostUrlByAlt(url, alt)) {
+        setLocalError(true);
         SetError(true);
         return;
       }
     }
-    setError(false);
+    setLocalError(false);
     SetError(false);
   }, [url, alt, SetError]);
   return (
     <div>
       {isEdit ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label
-                //   htmlFor={`title-${data.id}`}
-                className="text-sm font-medium"
-              >
-                Display Title
-              </Label>
-              <Input
-                //   id={`title-${data.id}`}
-                placeholder={getDefaultTitle(alt) || "Join Community"}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="bg-muted/40"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label
-                //   htmlFor={`url-${data.id}`}
-                className="text-sm font-medium"
-              >
-                URL/Link
-              </Label>
-              <Input
-                //   id={`url-${data.id}`}
-                placeholder={exampleUrl}
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="bg-muted/40"
-              />
-              <p className="text-xs text-muted-foreground">
-                Example: {exampleUrl}
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">URL/Link</Label>
+            <Input
+              placeholder={placeholder || exampleUrl}
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="bg-muted/40"
+            />
+            <p className="text-xs text-muted-foreground">
+              Example: {exampleUrl}
+            </p>
           </div>
           <div className="space-y-2">
-            <Label
-              //   htmlFor={`desc-${data.id}`}
-              className="text-sm font-medium"
-            >
+            <Label className="text-sm font-medium">
               Custom Description (Optional)
             </Label>
             <Textarea
-              //   id={`desc-${data.id}`}
               placeholder="Add a custom description for this block..."
               className="min-h-20 bg-muted/40"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          {error && (
+          {localError && (
             <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
-              Please enter a valid community URL for this platform.
+              Please enter a valid post URL for this platform.
             </div>
           )}
         </div>
@@ -184,16 +160,10 @@ function BlockForCommunity({ isEdit, setError: SetError, uuid, alt }: Props) {
               </Button>
             )}
           </div>
-          {title && (
-            <div>
-              <span className="text-xs dark:text-muted-foreground">Title:</span>
-              <p className="text-sm dark:text-foreground">{title}</p>
-            </div>
-          )}
         </div>
       )}
     </div>
   );
 }
 
-export default BlockForCommunity;
+export default BlockForSocialPost;

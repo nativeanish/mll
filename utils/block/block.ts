@@ -24,10 +24,8 @@ import Paragraph from "@/assets/Paragraph";
 import Odysee from "@/assets/Odysee";
 import {
   FaDiscord,
-  FaFacebook,
   FaFile,
   FaInfoCircle,
-  FaInstagram,
   FaMedium,
   FaReddit,
   FaRetweet,
@@ -39,6 +37,7 @@ import { RiTokenSwapFill } from "react-icons/ri";
 import social from "./social";
 import Permaswap from "@/assets/Permaswap";
 import Bazar from "@/assets/Bazar";
+import { FaBluesky } from "react-icons/fa6";
 export const node = {
   nav: [
     { name: "Social", icon: MessageCircle, node: social },
@@ -199,13 +198,6 @@ export const node = {
           display: ["View", "Click"],
         },
         {
-          name: "Facebook Post",
-          alt: "Facebook-Post",
-          icon: FaFacebook,
-          description: "Share Facebook posts and updates",
-          display: ["View", "Click"],
-        },
-        {
           name: "Farcaster",
           alt: "Farcaster-Post",
           icon: SiFarcaster,
@@ -213,10 +205,17 @@ export const node = {
           display: ["View", "Click"],
         },
         {
-          name: "Instagram Post",
-          alt: "Instagram-Post",
-          icon: FaInstagram,
-          description: "Feature Instagram posts and reels",
+          name: "Reddit",
+          alt: "Reddit-Post",
+          icon: FaReddit,
+          description: "Embed Reddit posts and comments",
+          display: ["View", "Click"],
+        },
+        {
+          name: "Bluesky",
+          alt: "Bluesky-Post",
+          icon: FaBluesky,
+          description: "Embed Bluesky (bsky) posts and threads",
           display: ["View", "Click"],
         },
       ],

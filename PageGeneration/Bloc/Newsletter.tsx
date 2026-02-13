@@ -1,19 +1,20 @@
 import type { BlockData } from "@/store/useBlockStore";
 import getStringFields from "../utils/getStringFields";
 import React from "react";
-function Svg({ size }: { size?: number }) {
+
+function MailCheckIcon({ className = "" }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      className="lucide lucide-mail-check-icon lucide-mail-check"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
     >
       <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8" />
       <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
@@ -21,10 +22,32 @@ function Svg({ size }: { size?: number }) {
     </svg>
   );
 }
+
+function MailIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
+  );
+}
+
 function Newsletter({ props }: { props: BlockData }) {
   const [isSubscribed, setIsSubscribed] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState("");
+
   const {
     title = "Subscribe to our Newsletter",
     description = "Join thousands getting emails in their inbox.",
@@ -40,38 +63,45 @@ function Newsletter({ props }: { props: BlockData }) {
     "successTitle",
     "successDescription",
   ]);
-  const check = (e: string) => {
-    //Regex for email validation
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(e);
-  };
+
+  const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
   return (
-    <div className="relative w-full max-w-md rounded-xl border border-slate-300 bg-white p-6 shadow-[0_20px_40px_rgba(15,23,42,0.15)]">
+    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
       {isSubscribed ? (
-        <div className="space-y-3 text-center">
-          <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-600">
-            <Svg size={24} />
-          </span>
-          <h2 className="text-lg font-semibold text-slate-800">
-            {successTitle}
-          </h2>
-          <p className="text-sm text-slate-500">{successDescription}</p>
+        <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
+            <MailCheckIcon className="h-6 w-6 text-green-600" />
+          </div>
+          <h2 className="text-base font-bold text-slate-800">{successTitle}</h2>
+          <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
+            {successDescription}
+          </p>
         </div>
       ) : (
-        <>
-          <h2 className="text-lg font-semibold text-slate-800 text-center">
-            {title}
-          </h2>
-          <p className="mt-2 text-sm text-slate-500 text-center">
-            {description}
-          </p>
+        <div className="px-5 py-6">
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <MailIcon className="h-5 w-5 text-slate-400 shrink-0" />
+            <h2 className="text-[0.95rem] font-bold text-slate-800">{title}</h2>
+          </div>
+
+          {description && (
+            <p className="text-sm text-slate-500 leading-relaxed mb-4 ml-[1.875rem]">
+              {description}
+            </p>
+          )}
+
           <form
-            onSubmit={(event) => {
-              console.log("Subscribed to newsletter");
-              event.preventDefault();
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!isValidEmail(email)) {
+                setError("Please enter a valid email");
+                return;
+              }
+              // TODO: actual subscribe logic
               setIsSubscribed(true);
             }}
-            className="mt-6 flex flex-col gap-3"
+            className="flex flex-col gap-2.5"
           >
             <label htmlFor="newsletter-email" className="sr-only">
               Email address
@@ -83,29 +113,26 @@ function Newsletter({ props }: { props: BlockData }) {
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (!check(e.target.value) && e.target.value.length > 0) {
-                  setError("Invalid email address");
-                } else {
-                  setError("");
-                }
+                if (error) setError("");
               }}
               placeholder={emailPlaceholder}
-              className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 transition-colors"
             />
+
             <button
               type="submit"
-              disabled={!!error}
-              className="rounded-xl bg-emerald-500 px-6 py-3 text-base font-semibold text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] transition hover:opacity-90"
+              className="w-full rounded-lg bg-gray-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 active:scale-[0.98] cursor-pointer"
             >
               {buttonText}
             </button>
+
             {error && (
-              <p className="mt-1 text-sm text-red-600" role="alert">
+              <p className="text-xs text-red-600 mt-0.5" role="alert">
                 {error}
               </p>
             )}
           </form>
-        </>
+        </div>
       )}
     </div>
   );

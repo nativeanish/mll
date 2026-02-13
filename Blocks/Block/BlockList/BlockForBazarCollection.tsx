@@ -17,12 +17,22 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
-import type { CollectionDetailType } from "node_modules/@permaweb/libs/dist/types/helpers";
 import BazarAssetViewer from "./nftutils/bazarAssetViewer";
 import { toast } from "sonner";
 import { Badge } from "@/src/components/ui/badge";
 import { Token } from "@/utils/ao/token";
-
+export type CollectionType = {
+  id: string;
+  title: string;
+  description: string | null;
+  creator: string;
+  dateCreated: string;
+  banner: string | null;
+  thumbnail: string | null;
+};
+export type CollectionDetailType = CollectionType & {
+  assetIds: string[];
+};
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
@@ -90,7 +100,7 @@ function BlockForBazarCollection({ isEdit }: Props) {
     queryFn: () =>
       getCollectionwithAssets(
         getMultipleCollectionQuery.data || [],
-        collectionId || ""
+        collectionId || "",
       ),
     enabled:
       !!collectionId &&
@@ -133,7 +143,7 @@ function BlockForBazarCollection({ isEdit }: Props) {
   };
 
   const selectedCollection = getMultipleCollectionQuery.data?.find(
-    (entry: CollectionDetailType) => entry.id === collectionId
+    (entry: CollectionDetailType) => entry.id === collectionId,
   ) as ExtendedCollectionDetail | undefined;
 
   const assetCount =
@@ -388,7 +398,7 @@ function BlockForBazarCollection({ isEdit }: Props) {
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                     {selectedAssets.map((assetId) => {
                       const asset = getCollectionAssetsQuery.data?.find(
-                        (a) => a.id === assetId
+                        (a) => a.id === assetId,
                       );
                       if (!asset) return null;
                       return (
@@ -451,7 +461,7 @@ function BlockForBazarCollection({ isEdit }: Props) {
                     onClick={() =>
                       window.open(
                         `https://bazar.arweave.dev/#/collection/${collectionId}`,
-                        "_blank"
+                        "_blank",
                       )
                     }
                   >

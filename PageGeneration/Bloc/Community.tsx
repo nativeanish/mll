@@ -327,8 +327,9 @@ function Community({ blockData }: { blockData: BlockData }) {
   return (
     <>
       {url.length > 0 && title.length > 0 && (
-        <div
-          className="w-full px-2 py-3 border bg-gray-50 border-black rounded-sm flex justify-between hover:bg-gray-100 cursor-pointer"
+        <button
+          type="button"
+          className="group w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-slate-300 active:scale-[0.98] cursor-pointer"
           data-uuid={blockData.id}
           data-description={description || undefined}
           onClick={() => {
@@ -337,18 +338,18 @@ function Community({ blockData }: { blockData: BlockData }) {
             }
           }}
         >
-          <div>
-            {comtype === "Telegram-Community" && <TelegramSvg size={32} />}
-            {comtype === "Discord-Community" && <DiscordSvg size={32} />}
-            {comtype === "Reddit-Community" && <RedditSvg size={32} />}
+          <div className="flex-shrink-0">
+            {comtype === "Telegram-Community" && <TelegramSvg size={28} />}
+            {comtype === "Discord-Community" && <DiscordSvg size={28} />}
+            {comtype === "Reddit-Community" && <RedditSvg size={28} />}
           </div>
-          <div className="flex-1 mx-4 font-semibold text-lg truncate text-center">
+          <span className="flex-1 text-left font-semibold text-[0.95rem] text-slate-800 truncate">
             {title}
+          </span>
+          <div className="flex-shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5">
+            <LinkIcon size={18} />
           </div>
-          <div className="flex items-center">
-            <LinkIcon size={24} />
-          </div>
-        </div>
+        </button>
       )}
     </>
   );

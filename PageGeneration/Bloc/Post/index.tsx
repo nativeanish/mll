@@ -1,5 +1,5 @@
 import type { BlockData } from "@/store/useBlockStore";
-import { getMediumPost, getParagaphPost } from "./utils";
+import { getMediumPost, getMediumPostFromRss, getParagaphPost } from "./utils";
 import getStringFields from "../../utils/getStringFields";
 import React from "react";
 import ParagraphIcon, { MediumIcon } from "./icon";
@@ -27,7 +27,7 @@ function getFaviconUrl(url: string): string | undefined {
   const host = getHostname(url);
   if (!host) return undefined;
   return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(
-    host
+    host,
   )}`;
 }
 
@@ -37,7 +37,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function getPath(
   root: unknown,
-  path: Array<string | number>
+  path: Array<string | number>,
 ): unknown | undefined {
   let cur: unknown = root;
   for (const key of path) {
@@ -97,7 +97,7 @@ function extractMediumSlug(url: string): string | undefined {
 }
 
 function extractParagraphSlugs(
-  url: string
+  url: string,
 ): { publicationSlug: string; postSlug: string } | null {
   try {
     const u = new URL(url);
@@ -321,15 +321,29 @@ function Post({ props }: { props: BlockData }) {
                   imageUrl: img,
                 };
               } catch {
-                // Medium frequently blocks client-side requests (401/403/CORS).
-                // Fallback: render a clean link card without treating it as an error.
-                return {
-                  ...it,
-                  title: extractMediumSlug(it.url) ?? getHostname(it.url),
-                  description: undefined,
-                  imageUrl: undefined,
-                  error: undefined,
-                };
+                try {
+                  const rssPreview = await getMediumPostFromRss(it.url);
+                  return {
+                    ...it,
+                    title:
+                      rssPreview.title ??
+                      extractMediumSlug(it.url) ??
+                      getHostname(it.url),
+                    description: rssPreview.description,
+                    imageUrl: rssPreview.imageUrl,
+                    error: undefined,
+                  };
+                } catch {
+                  // Medium frequently blocks client-side requests (401/403/CORS).
+                  // Fallback: render a clean link card without treating it as an error.
+                  return {
+                    ...it,
+                    title: extractMediumSlug(it.url) ?? getHostname(it.url),
+                    description: undefined,
+                    imageUrl: undefined,
+                    error: undefined,
+                  };
+                }
               }
             }
 
@@ -343,10 +357,10 @@ function Post({ props }: { props: BlockData }) {
 
             const data = await getParagaphPost(
               slugs.publicationSlug,
-              slugs.postSlug
+              slugs.postSlug,
             );
             const { title, description, imageUrl } = extractParagraphPreview(
-              data as unknown
+              data as unknown,
             );
             return {
               ...it,
@@ -361,7 +375,7 @@ function Post({ props }: { props: BlockData }) {
                 e instanceof Error ? e.message : "Failed to load post preview",
             };
           }
-        })
+        }),
       );
 
       if (!cancelled) setItems(next);

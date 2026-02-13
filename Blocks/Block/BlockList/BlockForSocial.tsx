@@ -23,29 +23,108 @@ interface Props {
   placeholder?: string;
   uuid: string;
 }
+
+const SPECIAL_URL_CONFIG: Partial<
+  Record<
+    BlockForSocialAlt,
+    {
+      placeholder: string;
+      pattern: RegExp;
+      label: string;
+    }
+  >
+> = {
+  "Medium-Post": {
+    placeholder:
+      "https://medium.com/ar-io/5-reasons-to-develop-with-permanent-data-3b7fa2fb4c6c",
+    pattern: /^https?:\/\/(www\.)?medium\.com\/.+/i,
+    label: "Medium",
+  },
+  "Paragraph-Post": {
+    placeholder:
+      "https://paragraph.com/@afmedia/year-one-in-arweave-learnings-and-progress",
+    pattern: /^https?:\/\/(www\.)?paragraph\.com\/.+/i,
+    label: "Paragraph",
+  },
+  "Youtube-Video": {
+    placeholder: "https://www.youtube.com/watch?v=3RIuwLYfzyQ",
+    pattern: /^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/i,
+    label: "YouTube",
+  },
+  "Twitch-Video": {
+    placeholder: "https://www.twitch.tv/videos/2634544292",
+    pattern: /^https?:\/\/(www\.)?twitch\.tv\/videos\/\d+/i,
+    label: "Twitch",
+  },
+  "Odysee-Video": {
+    placeholder: "https://odysee.com/@AO:4/Berlin-Sam:7",
+    pattern: /^https?:\/\/(www\.)?odysee\.com\/@[^/\s]+\/[^/\s]+$/i,
+    label: "Odysee",
+  },
+};
+
 function BlockForSocial({
   isEdit,
   setError: SetError,
+  alt,
   placeholder,
   uuid,
 }: Props) {
   const [url, setUrl] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [error, setError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState(
+    "Please enter a valid URL",
+  );
   const updateBlockData = useBlockStore((state) => state.updateBlockData);
+  const specialConfig = SPECIAL_URL_CONFIG[alt];
+  const resolvedPlaceholder =
+    placeholder ||
+    specialConfig?.placeholder ||
+    "https://example.com/your-profile";
+
   React.useEffect(() => {
     if (url && url.length > 0) {
-      const urlPattern =
-        /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
-      if (!urlPattern.test(url)) {
+      if (specialConfig) {
+        if (!specialConfig.pattern.test(url)) {
+          setErrorMessage(`Please enter a valid ${specialConfig.label} URL`);
+          setError(true);
+          SetError(true);
+          return;
+        }
+      } else {
+        const urlPattern =
+          /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
+        if (!urlPattern.test(url)) {
+          setErrorMessage(
+            "Please enter a valid URL (must start with https://example.com or example.com)",
+          );
+          setError(true);
+          SetError(true);
+          return;
+        }
+      }
+      try {
+        const parsedUrl = new URL(
+          url.startsWith("http") ? url : `https://${url}`,
+        );
+        if (!parsedUrl.hostname) {
+          setErrorMessage("Please enter a valid URL");
+          setError(true);
+          SetError(true);
+          return;
+        }
+      } catch {
+        setErrorMessage("Please enter a valid URL");
         setError(true);
         SetError(true);
         return;
       }
     }
     setError(false);
+    setErrorMessage("Please enter a valid URL");
     SetError(false);
-  }, [url, SetError]);
+  }, [url, SetError, specialConfig]);
   React.useEffect(() => {
     if (isEdit === false) {
       updateBlockData(uuid, {
@@ -67,7 +146,7 @@ function BlockForSocial({
             </Label>
             <Input
               //   id={`url-${data.id}`}
-              placeholder={placeholder || "https://example.com/your-profile"}
+              placeholder={resolvedPlaceholder}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="bg-muted/40"
@@ -90,8 +169,7 @@ function BlockForSocial({
           </div>
           {error && (
             <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
-              Please enter a valid URL (must start with https://example.com or
-              example.com)
+              {errorMessage}
             </div>
           )}
         </div>

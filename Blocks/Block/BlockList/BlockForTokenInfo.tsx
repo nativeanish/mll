@@ -22,10 +22,12 @@ import {
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { Input } from "@/src/components/ui/input";
 import { Switch } from "@/src/components/ui/switch";
+import { useBlockStore } from "@/store/useBlockStore";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 
 interface Token {
@@ -106,7 +108,7 @@ const DISPLAY_OPTION_CONFIG: Array<{
 
 const REFETCH_INTERVAL = 10 * 60 * 1000;
 
-function BlockForTokenInfo({ isEdit, setError }: Props) {
+function BlockForTokenInfo({ isEdit, setError, uuid }: Props) {
   const [selectedTokenProcess, setSelectedTokenProcess] = useState<
     string | null
   >(null);
@@ -127,7 +129,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
     queryKey: ["permaswap-tokens"],
     queryFn: async () => {
       const response = await fetch(
-        "https://api-ffpscan.permaswap.network/tokenList"
+        "https://api-ffpscan.permaswap.network/tokenList",
       );
       if (!response.ok) throw new Error("Failed to fetch tokens");
       return response.json() as Promise<Token[]>;
@@ -140,7 +142,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
     queryKey: ["permaswap-pools"],
     queryFn: async () => {
       const response = await fetch(
-        "https://api-ffpscan.permaswap.network/pools"
+        "https://api-ffpscan.permaswap.network/pools",
       );
       if (!response.ok) throw new Error("Failed to fetch pools");
       return response.json() as Promise<Pool[]>;
@@ -197,7 +199,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
 
     const relevantPools = poolsQuery.data.filter(
       (pool) =>
-        pool.x === selectedTokenProcess || pool.y === selectedTokenProcess
+        pool.x === selectedTokenProcess || pool.y === selectedTokenProcess,
     );
 
     const stats = relevantPools.reduce(
@@ -212,7 +214,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
         totalVolume24H: 0,
         totalVolume7D: 0,
         poolCount: relevantPools.length,
-      }
+      },
     );
 
     return stats;
@@ -220,7 +222,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
 
   const handleDisplayOptionChange = (
     option: DisplayOptionKey,
-    value: boolean
+    value: boolean,
   ) => {
     setDisplayOptions((prev) => ({ ...prev, [option]: value }));
   };
@@ -269,7 +271,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
 
   const formatNumber = (
     value: number | string,
-    decimals: number = 2
+    decimals: number = 2,
   ): string => {
     const num = typeof value === "string" ? parseFloat(value) : value;
     if (isNaN(num)) return "0";
@@ -286,7 +288,28 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
     const adjusted = num / Math.pow(10, decimals);
     return formatNumber(adjusted);
   };
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
 
+  useEffect(() => {
+    if (!isEdit) {
+      updateBlock(uuid, {
+        selectedTokenProcess,
+        token: selectedToken,
+        displayOptions,
+        aggregatedStats,
+        lastUpdated: lastUpdated.toISOString(),
+      });
+    }
+  }, [
+    aggregatedStats,
+    displayOptions,
+    isEdit,
+    lastUpdated,
+    selectedToken,
+    selectedTokenProcess,
+    updateBlock,
+    uuid,
+  ]);
   if (isEdit) {
     return (
       <div className="space-y-6">
@@ -362,7 +385,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
                               }}
                             />
                           ) : (
-                            <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                            <div className="h-5 w-5 rounded-full bg-linear-to-br from-primary/20 to-primary/40 flex items-center justify-center">
                               <span className="text-xs font-bold text-primary">
                                 {token.symbol[0]}
                               </span>
@@ -400,7 +423,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
                   className="h-12 w-12 rounded-full object-cover"
                 />
               ) : (
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/30 to-primary/60 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-linear-to-br from-primary/30 to-primary/60 flex items-center justify-center">
                   <span className="text-lg font-bold text-primary">
                     {selectedToken.symbol[0]}
                   </span>
@@ -470,8 +493,8 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-primary/5 via-primary/10 to-background border border-primary/20 p-4">
+    <div className="space-y-3 rounded-xl border border-muted bg-muted/30 p-4 shadow-sm">
+      <div className="relative overflow-hidden rounded-lg bg-linear-to-br from-primary/5 via-primary/10 to-background border border-primary/20 p-4">
         <div className="flex items-start gap-4">
           <div className="relative">
             {selectedToken.logo ? (
@@ -481,7 +504,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
                 className="h-16 w-16 rounded-full object-cover border-2 border-background shadow-lg"
               />
             ) : (
-              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary/40 to-primary/70 flex items-center justify-center border-2 border-background shadow-lg">
+              <div className="h-16 w-16 rounded-full bg-linear-to-br from-primary/40 to-primary/70 flex items-center justify-center border-2 border-background shadow-lg">
                 <span className="text-2xl font-bold text-primary-foreground">
                   {selectedToken.symbol[0]}
                 </span>
@@ -546,7 +569,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
               <p className="text-lg font-bold">
                 {formatSupply(
                   selectedToken.totalSupply,
-                  selectedToken.decimals
+                  selectedToken.decimals,
                 )}
               </p>
             </div>
@@ -606,7 +629,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
                 Aggregated Pool Statistics
               </h4>
               <div className="grid grid-cols-1 gap-3">
-                <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                <div className="p-4 rounded-lg bg-linear-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">
@@ -622,7 +645,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
+                <div className="p-4 rounded-lg bg-linear-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">
@@ -638,7 +661,7 @@ function BlockForTokenInfo({ isEdit, setError }: Props) {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                <div className="p-4 rounded-lg bg-linear-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">

@@ -9,13 +9,15 @@ import {
   AvatarImage,
 } from "@/src/components/ui/avatar";
 import BazarAssetViewer from "./nftutils/bazarAssetViewer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/src/components/ui/badge";
+import { useBlockStore } from "@/store/useBlockStore";
 
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 export interface BazarAsset {
   type: "image" | "video" | "unknown" | "token";
@@ -36,10 +38,10 @@ interface BazarProfile {
   collections: string[];
   thumbnail?: string;
 }
-function BlockForBazarProfile({ isEdit }: Props) {
+function BlockForBazarProfile({ isEdit, uuid }: Props) {
   const address = useWallet.getState().address;
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
-
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const {
     data: profileData,
     isLoading,
@@ -51,6 +53,47 @@ function BlockForBazarProfile({ isEdit }: Props) {
     enabled: address !== null,
     retry: 1,
   });
+
+  const profile = profileData as BazarProfile & {
+    assets: Array<{
+      type: "image" | "video" | "unknown" | "token";
+      id: string;
+      logoImage: string;
+      quantity: string;
+    }>;
+  };
+
+  const profileId = profile?.id;
+  const profileDisplayName = profile?.displayName;
+  const profileUsername = profile?.username;
+  const profileDescription = profile?.description;
+  const profileBanner = profile?.banner;
+  const profileThumbnail = profile?.thumbnail;
+
+  useEffect(() => {
+    if (isEdit || !profileId) return;
+
+    updateBlock(uuid, {
+      profileId,
+      displayName: profileDisplayName,
+      username: profileUsername,
+      description: profileDescription,
+      banner: profileBanner,
+      thumbnail: profileThumbnail,
+      selectedAssets,
+    });
+  }, [
+    isEdit,
+    profileId,
+    profileDisplayName,
+    profileUsername,
+    profileDescription,
+    profileBanner,
+    profileThumbnail,
+    selectedAssets,
+    updateBlock,
+    uuid,
+  ]);
 
   const toggleAssetSelection = (asset: BazarAsset) => {
     setSelectedAssets((prev) => {
@@ -132,14 +175,6 @@ function BlockForBazarProfile({ isEdit }: Props) {
       </div>
     );
   }
-  const profile = profileData as BazarProfile & {
-    assets: Array<{
-      type: "image" | "video" | "unknown" | "token";
-      id: string;
-      logoImage: string;
-      quantity: string;
-    }>;
-  };
   return (
     <div>
       {isEdit ? (
@@ -336,7 +371,7 @@ function BlockForBazarProfile({ isEdit }: Props) {
               onClick={() => {
                 window.open(
                   `https://bazar.arweave.dev/#/profile/${profile.id}`,
-                  "_blank"
+                  "_blank",
                 );
                 toast.success("Opening profile on bazar");
               }}

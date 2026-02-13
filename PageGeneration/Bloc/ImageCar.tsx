@@ -1,21 +1,13 @@
 import type { BlockData } from "@/store/useBlockStore";
 import getStringFields from "../utils/getStringFields";
 import React from "react";
+
 function ImageCar({ props }: { props: BlockData }) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const [lightbox, setLightbox] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
 
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
-  console.log("Current Index:", currentIndex);
-  // const galleryTitle = getStringField(props.data, "galleryTitle");
   const description = getStringFields(props.data, ["description"]);
   const images = props.data["images"] as Array<{
     base64: string;
@@ -25,95 +17,387 @@ function ImageCar({ props }: { props: BlockData }) {
     type: string;
   }>;
 
+  const goTo = (index: number) => {
+    if (index === currentIndex || isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex(index);
+    setTimeout(() => setIsTransitioning(false), 300);
+  };
+
+  const goToPrevious = () => {
+    goTo(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
+  };
+
+  const goToNext = () => {
+    goTo(currentIndex === images.length - 1 ? 0 : currentIndex + 1);
+  };
+
+  const openLightbox = () => {
+    setLightbox(true);
+    setCopied(false);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeLightbox = () => {
+    setLightbox(false);
+    document.body.style.overflow = "";
+  };
+
+  const copyUrl = async () => {
+    const url = images[currentIndex].base64;
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // fallback
+      const el = document.createElement("textarea");
+      el.value = url;
+      el.style.position = "fixed";
+      el.style.left = "-9999px";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
+  const downloadImage = () => {
+    const url = images[currentIndex].base64;
+    const name = images[currentIndex].name || "image";
+    try {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.click();
+    } catch {
+      window.open(url, "_blank", "noopener");
+    }
+  };
+
+  // Close lightbox on Escape
+  React.useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") goToPrevious();
+      if (e.key === "ArrowRight") goToNext();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [lightbox, currentIndex]);
+
+  if (!images || images.length === 0) return null;
+
   return (
     <div
-      className="w-full flex flex-col items-center space-y-6 p-4"
+      className="w-full"
       data-uuid={props.id}
       data-description={description || undefined}
     >
-      {images && images.length > 0 && (
-        <div className="w-full max-w-5xl">
-          {/* Main Image Container */}
-          <div className="relative rounded-2xl overflow-hidden mb-4">
-            {/* Main Image */}
-            <div className="aspect-video w-full">
+      {/* Main image */}
+      <div className="relative w-full rounded-xl overflow-hidden bg-slate-100">
+        <div
+          className="aspect-video w-full cursor-pointer"
+          onClick={openLightbox}
+        >
+          <img
+            src={images[currentIndex].base64 || "/placeholder.svg"}
+            alt={images[currentIndex].name}
+            className="w-full h-full object-cover transition-opacity duration-300"
+            style={{ opacity: isTransitioning ? 0.6 : 1 }}
+          />
+        </div>
+
+        {/* Image title overlay */}
+        {images[currentIndex].title && (
+          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-4 pb-3 pt-8 pointer-events-none">
+            <p className="text-sm font-medium text-white truncate">
+              {images[currentIndex].title}
+            </p>
+          </div>
+        )}
+
+        {/* Nav arrows */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={goToPrevious}
+              type="button"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+              aria-label="Previous image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              onClick={goToNext}
+              type="button"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+              aria-label="Next image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+
+            {/* Counter pill */}
+            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/50 text-[0.7rem] font-medium text-white tabular-nums">
+              {currentIndex + 1} / {images.length}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Thumbnails */}
+      {images.length > 1 && (
+        <div className="mt-2.5 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {images.map((image, index) => (
+            <button
+              key={image.id}
+              onClick={() => goTo(index)}
+              type="button"
+              className={`relative shrink-0 w-16 h-11 rounded-lg overflow-hidden transition-all cursor-pointer ${
+                currentIndex === index
+                  ? "ring-2 ring-slate-800 ring-offset-1 opacity-100"
+                  : "opacity-50 hover:opacity-80"
+              }`}
+              aria-label={`Go to image ${index + 1}`}
+            >
+              <img
+                src={image.base64 || "/placeholder.svg"}
+                alt={image.name}
+                className="w-full h-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ---- Lightbox Modal ---- */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeLightbox();
+          }}
+        >
+          <div
+            className="relative w-full max-h-[95dvh] sm:max-w-3xl sm:max-h-[90dvh] bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-[slideUp_0.2s_ease-out] sm:animate-[scaleIn_0.15s_ease-out]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Mobile drag bar */}
+            <div className="block sm:hidden w-9 h-1 mx-auto mt-2 rounded-full bg-slate-300 shrink-0" />
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                {images.length > 1 && (
+                  <span className="text-xs font-medium text-slate-400 tabular-nums shrink-0">
+                    {currentIndex + 1} / {images.length}
+                  </span>
+                )}
+                {images[currentIndex].title && (
+                  <p className="text-sm font-semibold text-slate-700 truncate">
+                    {images[currentIndex].title}
+                  </p>
+                )}
+                {!images[currentIndex].title && images[currentIndex].name && (
+                  <p className="text-sm text-slate-500 truncate">
+                    {images[currentIndex].name}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={closeLightbox}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                aria-label="Close"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Image */}
+            <div className="relative flex-1 min-h-0 bg-slate-50 flex items-center justify-center overflow-hidden">
               <img
                 src={images[currentIndex].base64 || "/placeholder.svg"}
                 alt={images[currentIndex].name}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-[60dvh] sm:max-h-[65dvh] object-contain select-none"
+                draggable={false}
               />
+
+              {/* Prev/Next inside lightbox */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={goToPrevious}
+                    type="button"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+                    aria-label="Previous image"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m15 18-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={goToNext}
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+                    aria-label="Next image"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
 
-            {/* Previous Button */}
-            <button
-              onClick={() => goToPrevious()}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-slate-900/80 hover:bg-slate-900 rounded-full flex items-center justify-center transition-colors touch-action-manipulation z-10"
-              aria-label="Previous image"
-              style={{ touchAction: "manipulation" }}
-              type="button"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-6 h-6 text-white"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
-                />
-              </svg>
-            </button>
-
-            {/* Next Button */}
-            <button
-              onClick={() => goToNext()}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-slate-900/80 hover:bg-slate-900 rounded-full flex items-center justify-center transition-colors touch-action-manipulation z-10"
-              aria-label="Next image"
-              style={{ touchAction: "manipulation" }}
-              type="button"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-6 h-6 text-white"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-            {images.map((image, index) => (
+            {/* Actions footer */}
+            <div className="flex items-center border-t border-slate-100 shrink-0">
               <button
-                key={image.id}
-                onClick={() => goToSlide(index)}
-                className={`relative aspect-video rounded-xl overflow-hidden transition-all duration-300 ${
-                  currentIndex === index
-                    ? "ring-4 ring-blue-500 ring-offset-2 ring-offset-slate-800"
-                    : "opacity-70 hover:opacity-100"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
+                type="button"
+                onClick={copyUrl}
+                className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
               >
-                <img
-                  src={image.base64 || "/placeholder.svg"}
-                  alt={image.name}
-                  className="w-full h-full object-cover"
-                />
+                {copied ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-green-600"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                    <span className="text-green-600">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                    </svg>
+                    Copy URL
+                  </>
+                )}
               </button>
-            ))}
+
+              <div className="w-px h-6 bg-slate-100" />
+
+              <button
+                type="button"
+                onClick={downloadImage}
+                className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+                Download
+              </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Lightbox keyframes */}
+      {lightbox && (
+        <style>{`
+          @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+          @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+          @keyframes scaleIn { from { opacity: 0; transform: scale(0.95) } to { opacity: 1; transform: scale(1) } }
+        `}</style>
       )}
     </div>
   );
