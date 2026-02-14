@@ -44,7 +44,7 @@ function Text({ props }: { props: BlockData }) {
     <div className="w-full p-2">
       <span
         id={props.id}
-        className={`w-full block ${sizeMap[size]} ${fontMap[font]} text-${align}`}
+        className={`w-full block font-bold ${sizeMap[size]} ${fontMap[font]} text-${align}`}
         style={{ color: color }}
       >
         {text}

@@ -44,13 +44,13 @@ const NotificationMenu = ({
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
-        className="h-9 w-9 relative rounded-full hover:bg-muted/80 transition-colors"
+        className="h-9 w-9 relative rounded-lg bg-background border-2 border-border shadow-[2px_2px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-px hover:-translate-y-px active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_var(--border)] transition-all duration-150"
       >
         <BellIcon size={16} />
         {notificationCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white ring-2 ring-background">
+          <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center rounded-sm bg-destructive text-[10px] font-black text-destructive-foreground border border-border shadow-[1px_1px_0px_var(--border)]">
             {notificationCount > 9 ? "9+" : notificationCount}
           </span>
         )}
@@ -141,28 +141,28 @@ const UserButton = ({ address }: { address: string }) => {
         <Button
           variant="outline"
           className="flex items-center gap-2 px-3 py-1.5 h-9
-             bg-emerald-50 dark:bg-emerald-950/40
-             border-emerald-200 dark:border-emerald-800/50
-             rounded-full hover:bg-emerald-100
-             dark:hover:bg-emerald-900/50
-             transition-all duration-200"
+             bg-nb-mint
+             text-black
+             border-2 border-border
+             rounded-lg hover:bg-nb-teal
+             shadow-[2px_2px_0px_var(--border)]
+             hover:shadow-[4px_4px_0px_var(--border)]
+             hover:-translate-x-px hover:-translate-y-px
+             transition-all duration-150"
         >
-          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-          <User className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
-          <span className="text-xs text-emerald-700 dark:text-emerald-400 font-mono hidden sm:inline">
+          <div className="w-2 h-2 bg-nb-teal rounded-sm border border-border animate-pulse" />
+          <User className="w-3.5 h-3.5 text-black" />
+          <span className="text-xs text-black font-mono font-bold hidden sm:inline">
             {formatAddress(address)}
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-80 rounded-xl shadow-xl border-border/50"
-      >
-        <DropdownMenuItem className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-mono rounded-lg">
+      <DropdownMenuContent align="end" className="w-80 rounded-lg">
+        <DropdownMenuItem className="bg-nb-mint text-foreground font-mono rounded-lg border-2 border-border shadow-[2px_2px_0px_var(--border)] mb-1">
           <div className="flex justify-between w-full items-center">
             <div className="flex items-center gap-2">
               <Wifi className="text-emerald-500" />
-              <span className="font-mono">Connected</span>
+              <span className="font-mono text-black">Connected</span>
             </div>
             {wallet === "wander" ? (
               <img
@@ -295,7 +295,7 @@ const UserButton = ({ address }: { address: string }) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => disconnect()}
-          className="w-full bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 rounded-lg cursor-pointer transition-colors"
+          className="w-full bg-destructive text-white hover:bg-destructive/80 rounded-lg cursor-pointer transition-colors font-bold border-2 border-border shadow-[2px_2px_0px_var(--border)]"
         >
           <Unplug className="mr-2 h-4 w-4" />
           Disconnect
@@ -368,7 +368,7 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
       <header
         ref={combinedRef}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl supports-backdrop-filter:bg-background/60 px-4 md:px-6 **:no-underline",
+          "fixed top-0 left-0 right-0 z-50 border-b-2 border-border bg-background px-4 md:px-6 **:no-underline shadow-[0_4px_0px_var(--border)]",
           className,
         )}
         {...props}
@@ -380,10 +380,8 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
               onClick={(e) => e.preventDefault()}
               className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors cursor-pointer group"
             >
-              <div className="text-xl transition-transform duration-200 group-hover:scale-105">
-                {logo}
-              </div>
-              <span className="hidden font-bold text-lg sm:inline-block tracking-tight">
+              <div className="text-xl">{logo}</div>
+              <span className="hidden font-black text-lg sm:inline-block tracking-tight uppercase">
                 metalinks
               </span>
             </button>
@@ -393,9 +391,9 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
           <div className="flex items-center gap-2">
             {/* Theme toggle */}
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted/80 transition-colors"
+              className="h-9 w-9 rounded-lg bg-background border-2 border-border shadow-[2px_2px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-px hover:-translate-y-px active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_var(--border)] transition-all duration-150"
               aria-label="Toggle theme"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
@@ -414,7 +412,7 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
               <Button
                 onClick={onPublish}
                 disabled={isPublishing}
-                className="hidden sm:flex items-center gap-2 rounded-full bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-300 h-9 px-5 text-sm font-medium"
+                className="hidden sm:flex items-center gap-2 rounded-lg bg-primary text-primary-foreground border-2 border-border h-9 px-5 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0px_var(--border)] hover:shadow-[6px_6px_0px_var(--border)] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_var(--border)] transition-all duration-150"
               >
                 {isPublishing ? (
                   <>
@@ -434,7 +432,10 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
             {address && walletType ? (
               <UserButton address={address} />
             ) : (
-              <Button size="sm" className="rounded-full h-9 px-4 font-medium">
+              <Button
+                size="sm"
+                className="rounded-lg h-9 px-4 font-black uppercase tracking-wide"
+              >
                 Connect
               </Button>
             )}

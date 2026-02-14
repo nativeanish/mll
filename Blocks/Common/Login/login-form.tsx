@@ -52,16 +52,15 @@ const LoginForm = () => {
 
   if (status === "connecting") {
     return (
-      <div className="flex flex-col items-center justify-center space-y-5 py-14 animate-fadeIn">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" />
-          <div className="relative rounded-full bg-primary/5 p-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+      <div className="flex flex-col items-center justify-center space-y-5 py-14">
+        <div className="rounded-lg bg-accent border-2 border-border p-4 shadow-[3px_3px_0px_var(--border)]">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-foreground" />
         </div>
         <div className="text-center space-y-1.5">
-          <p className="text-base font-semibold">Connecting to {type}...</p>
-          <p className="text-xs text-muted-foreground/70">
+          <p className="text-base font-black uppercase tracking-wide">
+            Connecting to {type}...
+          </p>
+          <p className="text-xs text-muted-foreground font-bold">
             Please approve the connection in your wallet
           </p>
         </div>
@@ -71,21 +70,21 @@ const LoginForm = () => {
 
   if (status === "error") {
     return (
-      <div className="flex flex-col items-center justify-center space-y-5 py-14 animate-fadeIn">
-        <div className="rounded-2xl bg-destructive/10 p-4 ring-1 ring-destructive/20">
+      <div className="flex flex-col items-center justify-center space-y-5 py-14">
+        <div className="rounded-lg bg-destructive/20 border-2 border-border p-4 shadow-[3px_3px_0px_var(--border)]">
           <XCircle className="h-8 w-8 text-destructive" />
         </div>
         <div className="text-center space-y-1.5">
-          <p className="text-base font-semibold text-destructive">
+          <p className="text-base font-black text-destructive uppercase tracking-wide">
             Connection Failed
           </p>
-          <p className="text-xs text-muted-foreground/70 max-w-xs">
+          <p className="text-xs text-muted-foreground font-bold max-w-xs">
             {error || "Failed to connect to wallet"}
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-muted/50 px-4 py-1.5">
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-          <p className="text-xs text-muted-foreground font-medium">
+        <div className="flex items-center gap-2 rounded-md bg-accent border-2 border-border px-4 py-1.5 shadow-[2px_2px_0px_var(--border)]">
+          <div className="h-2 w-2 rounded-sm bg-nb-orange border border-border animate-pulse" />
+          <p className="text-xs text-foreground font-black uppercase">
             Retrying in {countdown > 0 ? countdown : 0}s
           </p>
         </div>
@@ -95,17 +94,17 @@ const LoginForm = () => {
 
   if (status === "connected" && address) {
     return (
-      <div className="flex flex-col items-center justify-center space-y-5 animate-fadeIn">
-        <div className="rounded-2xl bg-emerald-500/10 p-4 ring-1 ring-emerald-500/20">
-          <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+      <div className="flex flex-col items-center justify-center space-y-5">
+        <div className="rounded-lg bg-nb-mint border-2 border-border p-4 shadow-[3px_3px_0px_var(--border)]">
+          <CheckCircle2 className="h-8 w-8 text-foreground" />
         </div>
-        <p className="text-base font-semibold text-emerald-600 dark:text-emerald-400">
+        <p className="text-base font-black text-foreground uppercase tracking-wide">
           Wallet Connected
         </p>
 
-        <div className="w-full rounded-xl bg-muted/30 ring-1 ring-border/50 overflow-hidden">
+        <div className="w-full rounded-lg bg-card border-2 border-border overflow-hidden shadow-[3px_3px_0px_var(--border)]">
           {/* Wallet type row */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-border/30">
+          <div className="flex items-center gap-3 px-4 py-3 border-b-2 border-border bg-muted">
             <div className="shrink-0">
               {type === "arweave" &&
                 (theme === "dark" ? (
@@ -144,17 +143,17 @@ const LoginForm = () => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">
                 Wallet
               </p>
-              <p className="text-sm font-medium capitalize">{type}</p>
+              <p className="text-sm font-bold capitalize">{type}</p>
             </div>
-            <div className="shrink-0 h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="shrink-0 h-2 w-2 rounded-sm bg-nb-teal border border-border animate-pulse" />
           </div>
 
           {/* Address row */}
           <div className="px-4 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold mb-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black mb-1">
               Address
             </p>
             <div className="flex items-center gap-2">
@@ -174,8 +173,8 @@ const LoginForm = () => {
         </div>
 
         <Button
-          variant="outline"
-          className="w-full h-10 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 transition-all font-medium text-sm"
+          variant="destructive"
+          className="w-full h-10 rounded-lg font-black text-sm uppercase tracking-wide"
           onClick={() => disconnectWallet()}
         >
           Disconnect Wallet
@@ -189,7 +188,7 @@ const LoginForm = () => {
       {/* Arweave Wallets Section */}
       <div className="space-y-2.5">
         <div className="flex items-center gap-2.5 px-1">
-          <div className="flex h-6 w-6 items-center justify-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded-sm border-2 border-border bg-accent shadow-[1px_1px_0px_var(--border)]">
             {theme === "dark" ? (
               <img
                 src="https://arweave.net/r6TvdrKbdBtWUaCs_m1sT9ce1JWxE4lhJlOOixb_INw"
@@ -204,7 +203,7 @@ const LoginForm = () => {
               />
             )}
           </div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+          <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
             Arweave Wallets
           </h3>
         </div>
@@ -212,11 +211,11 @@ const LoginForm = () => {
         <div className="space-y-1.5">
           <Button
             variant="outline"
-            className="h-12 w-full justify-between rounded-xl border-border/50 bg-transparent hover:bg-muted/50 text-sm font-medium transition-all group"
+            className="h-12 w-full justify-between rounded-lg border-2 border-border bg-background hover:bg-accent text-sm font-bold shadow-[3px_3px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-[0.5px] hover:-translate-y-[0.5px] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_var(--border)] transition-all group"
             onClick={() => connectWander()}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50 ring-1 ring-border/30 group-hover:ring-border/50 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent border-2 border-border shadow-[2px_2px_0px_var(--border)]">
                 <img
                   src="https://arweave.net/qbL1viCRNm6RfKHQXztVdKmf5Q0WKmOLmNdTht7G9PE"
                   className="h-5 w-5"
@@ -225,16 +224,16 @@ const LoginForm = () => {
               </div>
               <span>Wander</span>
             </div>
-            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
+            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
 
           <Button
             variant="outline"
-            className="h-12 w-full justify-between rounded-xl border-border/50 bg-transparent hover:bg-muted/50 text-sm font-medium transition-all group"
+            className="h-12 w-full justify-between rounded-lg border-2 border-border bg-background hover:bg-accent text-sm font-bold shadow-[3px_3px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-[0.5px] hover:-translate-y-[0.5px] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_var(--border)] transition-all group"
             onClick={() => connectBeacon()}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50 ring-1 ring-border/30 group-hover:ring-border/50 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent border-2 border-border shadow-[2px_2px_0px_var(--border)]">
                 <img
                   src="https://arweave.net/E-oGpzqQF0N_vw-t3hokpefxj_Ka_fBee_hZ2cK6vIo"
                   className="h-5 w-5"
@@ -243,16 +242,16 @@ const LoginForm = () => {
               </div>
               <span>Beacon</span>
             </div>
-            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
+            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
 
           <Button
             variant="outline"
-            className="h-12 w-full justify-between rounded-xl border-border/50 bg-transparent hover:bg-muted/50 text-sm font-medium transition-all group"
+            className="h-12 w-full justify-between rounded-lg border-2 border-border bg-background hover:bg-accent text-sm font-bold shadow-[3px_3px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-[0.5px] hover:-translate-y-[0.5px] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_var(--border)] transition-all group"
             onClick={() => connectArweave()}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50 ring-1 ring-border/30 group-hover:ring-border/50 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent border-2 border-border shadow-[2px_2px_0px_var(--border)]">
                 {theme === "dark" ? (
                   <img
                     src="https://arweave.net/r6TvdrKbdBtWUaCs_m1sT9ce1JWxE4lhJlOOixb_INw"
@@ -269,7 +268,7 @@ const LoginForm = () => {
               </div>
               <span>Arweave.app</span>
             </div>
-            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
+            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
         </div>
       </div>
@@ -277,10 +276,10 @@ const LoginForm = () => {
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border/40" />
+          <span className="w-full border-t-2 border-border" />
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="bg-card px-3 text-muted-foreground/40 font-medium">
+          <span className="bg-card px-3 text-muted-foreground font-black uppercase">
             or
           </span>
         </div>
@@ -289,14 +288,14 @@ const LoginForm = () => {
       {/* Ethereum Wallets Section */}
       <div className="space-y-2.5">
         <div className="flex items-center gap-2.5 px-1">
-          <div className="flex h-6 w-6 items-center justify-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded-sm border-2 border-border bg-accent shadow-[1px_1px_0px_var(--border)]">
             <img
               src="https://arweave.net/tfIJEwmbqiBBoyjwOTvZvrDbAuyAVI7TTjtd4PQkg34"
               className="h-4 w-4"
               alt="Ethereum"
             />
           </div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+          <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
             Ethereum Wallets
           </h3>
         </div>
@@ -304,11 +303,11 @@ const LoginForm = () => {
         <div className="space-y-1.5">
           <Button
             variant="outline"
-            className="h-12 w-full justify-between rounded-xl border-border/50 bg-transparent hover:bg-muted/50 text-sm font-medium transition-all group"
+            className="h-12 w-full justify-between rounded-lg border-2 border-border bg-background hover:bg-accent text-sm font-bold shadow-[3px_3px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-[0.5px] hover:-translate-y-[0.5px] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_var(--border)] transition-all group"
             onClick={() => connectMetaMask()}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50 ring-1 ring-border/30 group-hover:ring-border/50 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent border-2 border-border shadow-[2px_2px_0px_var(--border)]">
                 <img
                   src="https://arweave.net/AygXinftYYvlUOEyJ_RQsOxpnpzJ9HD6xxsML6prLdo"
                   className="h-5 w-5"
@@ -317,7 +316,7 @@ const LoginForm = () => {
               </div>
               <span>MetaMask</span>
             </div>
-            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
+            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
         </div>
       </div>

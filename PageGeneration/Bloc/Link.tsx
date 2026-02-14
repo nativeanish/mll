@@ -69,7 +69,7 @@ function Link({ block }: Props) {
     >
       <a href={finalUrl} target="_blank" rel="noopener" referrerPolicy="origin">
         <button
-          className="w-10 h-10 flex items-center justify-center relative overflow-hidden rounded-full bg-white shadow-md shadow-gray-200 transition-all duration-300"
+          className="w-10 h-10 flex items-center justify-center relative overflow-hidden rounded-lg bg-white border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
           aria-label={tooltipLabel}
           title={tooltipLabel}
           data-uuid={uuid}
@@ -78,7 +78,7 @@ function Link({ block }: Props) {
           {getIconFor(alt)}
         </button>
       </a>
-      <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full rounded-md px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-200 group-hover:opacity-100 bg-black text-white max-w-64 whitespace-normal warp-break-words text-center">
+      <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full rounded-lg border-2 border-black px-2 py-1 text-[10px] font-bold uppercase opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-black text-white max-w-64 whitespace-normal warp-break-words text-center">
         <div className="font-medium">{tooltipLabel}</div>
         {desc && <div className="opacity-80 mt-0.5">{desc}</div>}
       </div>

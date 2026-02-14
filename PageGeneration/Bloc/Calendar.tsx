@@ -341,8 +341,6 @@ function isValidEmail(email: string): boolean {
 const FONT_STACK =
   '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-const ACCENT_GRADIENT = "linear-gradient(135deg, #5e5ce6 0%, #bf5af2 100%)";
-
 function parseIntervalMinutes(
   intervalStr: string,
   customIntervalStr: string,
@@ -383,14 +381,16 @@ function useIsMobile(breakpoint = 640) {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px 10px 38px",
-  background: "#2c2c2e",
-  border: "1px solid #3a3a3c",
-  borderRadius: 10,
-  color: "#fff",
+  background: "#fff",
+  border: "3px solid #000",
+  borderRadius: 8,
+  color: "#000",
   fontSize: 14,
+  fontWeight: 500,
   outline: "none",
-  transition: "border-color 150ms",
+  transition: "all 150ms",
   boxSizing: "border-box",
+  boxShadow: "2px 2px 0px #000",
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -614,27 +614,25 @@ function Calendar({ props }: { props: BlockData }) {
           justifyContent: "space-between",
           gap: 12,
           padding: "14px 20px",
-          background: "#1c1c1e",
-          border: "1px solid #2c2c2e",
-          borderRadius: 14,
-          color: "#fff",
+          background: "#fff",
+          border: "3px solid #000",
+          borderRadius: 8,
+          color: "#000",
           fontSize: 15,
-          fontWeight: 600,
+          fontWeight: 800,
           cursor: "pointer",
-          transition: "all 200ms ease",
+          transition: "all 150ms ease",
           fontFamily: FONT_STACK,
+          boxShadow: "4px 4px 0px #000",
+          textTransform: "uppercase",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = "#2c2c2e";
-          e.currentTarget.style.borderColor = "#5e5ce6";
-          e.currentTarget.style.transform = "translateY(-1px)";
-          e.currentTarget.style.boxShadow = "0 4px 20px rgba(94,92,230,0.25)";
+          e.currentTarget.style.transform = "translate(2px, 2px)";
+          e.currentTarget.style.boxShadow = "2px 2px 0px #000";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = "#1c1c1e";
-          e.currentTarget.style.borderColor = "#2c2c2e";
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = "none";
+          e.currentTarget.style.transform = "translate(0, 0)";
+          e.currentTarget.style.boxShadow = "4px 4px 0px #000";
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -642,19 +640,20 @@ function Calendar({ props }: { props: BlockData }) {
             style={{
               width: 34,
               height: 34,
-              borderRadius: 9,
-              background: ACCENT_GRADIENT,
+              borderRadius: 8,
+              background: "#FFE66D",
+              border: "2px solid #000",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
             }}
           >
-            <CalendarIcon width={17} height={17} style={{ color: "#fff" }} />
+            <CalendarIcon width={17} height={17} style={{ color: "#000" }} />
           </span>
           <span>{displayTitle}</span>
         </span>
-        <ArrowRightIcon style={{ color: "#636366", flexShrink: 0 }} />
+        <ArrowRightIcon style={{ color: "#000", flexShrink: 0 }} />
       </button>
     </div>
   );
@@ -667,22 +666,23 @@ function Calendar({ props }: { props: BlockData }) {
     <div
       style={{
         padding: isMobile ? "20px 20px 16px" : "28px 24px",
-        borderBottom: isMobile ? "1px solid #2c2c2e" : "none",
-        borderRight: isMobile ? "none" : "1px solid #2c2c2e",
+        borderBottom: isMobile ? "3px solid #000" : "none",
+        borderRight: isMobile ? "none" : "3px solid #000",
         flex: isMobile ? "none" : "0 0 240px",
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
         gap: 16,
-        background: "#161618",
+        background: "#FFE66D",
       }}
     >
       <div
         style={{
           width: 40,
           height: 40,
-          borderRadius: 11,
-          background: ACCENT_GRADIENT,
+          borderRadius: 8,
+          background: "#000",
+          border: "2px solid #000",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -694,11 +694,12 @@ function Calendar({ props }: { props: BlockData }) {
       <div>
         <h2
           style={{
-            color: "#fff",
+            color: "#000",
             fontSize: 17,
-            fontWeight: 700,
+            fontWeight: 900,
             margin: 0,
             lineHeight: 1.3,
+            textTransform: "uppercase",
           }}
         >
           {displayTitle}
@@ -706,10 +707,12 @@ function Calendar({ props }: { props: BlockData }) {
         {description && (
           <p
             style={{
-              color: "#8e8e93",
+              color: "#000",
+              opacity: 0.7,
               fontSize: 13,
               marginTop: 6,
               lineHeight: 1.5,
+              fontWeight: 500,
             }}
           >
             {description}
@@ -724,10 +727,11 @@ function Calendar({ props }: { props: BlockData }) {
             alignItems: "center",
             gap: 8,
             fontSize: 13,
-            color: "#a1a1a6",
+            color: "#000",
+            fontWeight: 700,
           }}
         >
-          <ClockIcon width={14} height={14} style={{ color: "#636366" }} />
+          <ClockIcon width={14} height={14} style={{ color: "#000" }} />
           {interval} min
         </span>
         <span
@@ -736,10 +740,11 @@ function Calendar({ props }: { props: BlockData }) {
             alignItems: "center",
             gap: 8,
             fontSize: 13,
-            color: "#a1a1a6",
+            color: "#000",
+            fontWeight: 700,
           }}
         >
-          <GlobeIcon width={14} height={14} style={{ color: "#636366" }} />
+          <GlobeIcon width={14} height={14} style={{ color: "#000" }} />
           {localTimezone}
         </span>
       </div>
@@ -750,16 +755,17 @@ function Calendar({ props }: { props: BlockData }) {
           style={{
             marginTop: "auto",
             padding: "12px 14px",
-            background: "rgba(94,92,230,0.1)",
-            border: "1px solid rgba(94,92,230,0.2)",
-            borderRadius: 10,
+            background: "#fff",
+            border: "3px solid #000",
+            borderRadius: 8,
+            boxShadow: "2px 2px 0px #000",
           }}
         >
           <div
             style={{
               fontSize: 11,
-              fontWeight: 600,
-              color: "#8e8ce6",
+              fontWeight: 900,
+              color: "#000",
               textTransform: "uppercase",
               letterSpacing: "0.06em",
               marginBottom: 6,
@@ -770,8 +776,9 @@ function Calendar({ props }: { props: BlockData }) {
           <div
             style={{
               fontSize: 13,
-              color: "#e5e5ea",
+              color: "#000",
               lineHeight: 1.6,
+              fontWeight: 500,
             }}
           >
             {formatDateShort(parseDateKey(selectedDate))}
@@ -800,8 +807,8 @@ function Calendar({ props }: { props: BlockData }) {
         style={{
           flex: isMobile ? "none" : selectedDate ? "0 0 58%" : "1",
           padding: isMobile ? "16px 20px" : "24px",
-          borderBottom: isMobile && selectedDate ? "1px solid #2c2c2e" : "none",
-          borderRight: !isMobile && selectedDate ? "1px solid #2c2c2e" : "none",
+          borderBottom: isMobile && selectedDate ? "3px solid #000" : "none",
+          borderRight: !isMobile && selectedDate ? "3px solid #000" : "none",
           transition: "all 0.25s ease",
         }}
       >
@@ -822,30 +829,31 @@ function Calendar({ props }: { props: BlockData }) {
               width: 30,
               height: 30,
               borderRadius: 8,
-              background: canGoPrev ? "#2c2c2e" : "transparent",
-              border: "none",
-              color: canGoPrev ? "#fff" : "#3a3a3c",
+              background: canGoPrev ? "#fff" : "transparent",
+              border: canGoPrev ? "2px solid #000" : "2px solid #ccc",
+              color: canGoPrev ? "#000" : "#ccc",
               cursor: canGoPrev ? "pointer" : "default",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "background 150ms",
+              transition: "all 150ms",
             }}
             onMouseEnter={(e) => {
-              if (canGoPrev) e.currentTarget.style.background = "#3a3a3c";
+              if (canGoPrev) e.currentTarget.style.background = "#FFE66D";
             }}
             onMouseLeave={(e) => {
-              if (canGoPrev) e.currentTarget.style.background = "#2c2c2e";
+              if (canGoPrev) e.currentTarget.style.background = "#fff";
             }}
           >
             <ChevronLeft width={16} height={16} />
           </button>
           <span
             style={{
-              color: "#fff",
+              color: "#000",
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 900,
               letterSpacing: "0.01em",
+              textTransform: "uppercase",
             }}
           >
             {MONTH_NAMES[viewMonth]} {viewYear}
@@ -858,20 +866,20 @@ function Calendar({ props }: { props: BlockData }) {
               width: 30,
               height: 30,
               borderRadius: 8,
-              background: canGoNext ? "#2c2c2e" : "transparent",
-              border: "none",
-              color: canGoNext ? "#fff" : "#3a3a3c",
+              background: canGoNext ? "#fff" : "transparent",
+              border: canGoNext ? "2px solid #000" : "2px solid #ccc",
+              color: canGoNext ? "#000" : "#ccc",
               cursor: canGoNext ? "pointer" : "default",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "background 150ms",
+              transition: "all 150ms",
             }}
             onMouseEnter={(e) => {
-              if (canGoNext) e.currentTarget.style.background = "#3a3a3c";
+              if (canGoNext) e.currentTarget.style.background = "#FFE66D";
             }}
             onMouseLeave={(e) => {
-              if (canGoNext) e.currentTarget.style.background = "#2c2c2e";
+              if (canGoNext) e.currentTarget.style.background = "#fff";
             }}
           >
             <ChevronRight width={16} height={16} />
@@ -892,8 +900,8 @@ function Calendar({ props }: { props: BlockData }) {
               style={{
                 textAlign: "center",
                 fontSize: 11,
-                fontWeight: 500,
-                color: "#636366",
+                fontWeight: 900,
+                color: "#000",
                 padding: "0 0 6px",
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
@@ -937,23 +945,37 @@ function Calendar({ props }: { props: BlockData }) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  borderRadius: 10,
-                  border: isToday && !isSelected ? "1px solid #5e5ce6" : "none",
-                  background: isSelected ? "#5e5ce6" : "transparent",
-                  color: isSelected ? "#fff" : isAvailable ? "#fff" : "#3a3a3c",
+                  borderRadius: 8,
+                  border: isSelected
+                    ? "2px solid #000"
+                    : isToday
+                      ? "2px solid #000"
+                      : isAvailable
+                        ? "2px solid #000"
+                        : "2px solid transparent",
+                  background: isSelected
+                    ? "#000"
+                    : isToday
+                      ? "#FFE66D"
+                      : "transparent",
+                  color: isSelected ? "#fff" : "#000",
                   fontSize: 13,
-                  fontWeight: isSelected || isToday ? 600 : 400,
+                  fontWeight:
+                    isSelected || isToday ? 900 : isAvailable ? 700 : 400,
                   cursor: isAvailable ? "pointer" : "default",
                   transition: "all 150ms ease",
                   position: "relative",
+                  boxShadow: isSelected ? "2px 2px 0px #000" : "none",
                 }}
                 onMouseEnter={(e) => {
                   if (isAvailable && !isSelected)
-                    e.currentTarget.style.background = "#2c2c2e";
+                    e.currentTarget.style.background = "#FFE66D";
                 }}
                 onMouseLeave={(e) => {
                   if (isAvailable && !isSelected)
-                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.background = isToday
+                      ? "#FFE66D"
+                      : "transparent";
                 }}
               >
                 {cell.day}
@@ -967,7 +989,7 @@ function Calendar({ props }: { props: BlockData }) {
                       width: 4,
                       height: 4,
                       borderRadius: "50%",
-                      background: "#5e5ce6",
+                      background: "#000",
                     }}
                   />
                 )}
@@ -992,19 +1014,22 @@ function Calendar({ props }: { props: BlockData }) {
           <div style={{ marginBottom: 12 }}>
             <h3
               style={{
-                color: "#fff",
+                color: "#000",
                 fontSize: 14,
-                fontWeight: 600,
+                fontWeight: 900,
                 margin: 0,
+                textTransform: "uppercase",
               }}
             >
               {formatDateLong(parseDateKey(selectedDate))}
             </h3>
             <p
               style={{
-                color: "#636366",
+                color: "#000",
+                opacity: 0.7,
                 fontSize: 12,
                 marginTop: 3,
+                fontWeight: 500,
               }}
             >
               {availableSlots.length} slot
@@ -1027,8 +1052,10 @@ function Calendar({ props }: { props: BlockData }) {
                 style={{
                   textAlign: "center",
                   padding: "32px 0",
-                  color: "#636366",
+                  color: "#000",
+                  opacity: 0.5,
                   fontSize: 13,
+                  fontWeight: 700,
                 }}
               >
                 No available slots
@@ -1049,30 +1076,25 @@ function Calendar({ props }: { props: BlockData }) {
                       width: "100%",
                       padding: "10px 14px",
                       borderRadius: 8,
-                      border: isActive
-                        ? "1.5px solid #5e5ce6"
-                        : "1px solid #3a3a3c",
-                      background: isActive
-                        ? "rgba(94,92,230,0.15)"
-                        : "transparent",
-                      color: isActive ? "#a5a3ff" : "#e5e5ea",
+                      border: isActive ? "3px solid #000" : "2px solid #000",
+                      background: isActive ? "#FFE66D" : "#fff",
+                      color: "#000",
                       fontSize: 13,
-                      fontWeight: isActive ? 600 : 400,
+                      fontWeight: isActive ? 900 : 600,
                       cursor: "pointer",
                       transition: "all 150ms ease",
                       textAlign: "center",
                       flexShrink: 0,
+                      boxShadow: isActive ? "2px 2px 0px #000" : "none",
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
-                        e.currentTarget.style.borderColor = "#5e5ce6";
-                        e.currentTarget.style.color = "#a5a3ff";
+                        e.currentTarget.style.background = "#FFE66D";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive) {
-                        e.currentTarget.style.borderColor = "#3a3a3c";
-                        e.currentTarget.style.color = "#e5e5ea";
+                        e.currentTarget.style.background = "#fff";
                       }
                     }}
                   >
@@ -1085,7 +1107,7 @@ function Calendar({ props }: { props: BlockData }) {
                           width: 7,
                           height: 7,
                           borderRadius: "50%",
-                          background: "#5e5ce6",
+                          background: "#000",
                           flexShrink: 0,
                         }}
                       />
@@ -1105,26 +1127,28 @@ function Calendar({ props }: { props: BlockData }) {
                 marginTop: 14,
                 width: "100%",
                 padding: "11px 0",
-                borderRadius: 10,
-                border: "none",
-                background: ACCENT_GRADIENT,
+                borderRadius: 8,
+                border: "3px solid #000",
+                background: "#000",
                 color: "#fff",
                 fontSize: 14,
-                fontWeight: 600,
+                fontWeight: 900,
                 cursor: "pointer",
-                transition: "opacity 150ms, transform 150ms",
+                transition: "all 150ms",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 6,
+                textTransform: "uppercase",
+                boxShadow: "4px 4px 0px #000",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "0.9";
-                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.transform = "translate(2px, 2px)";
+                e.currentTarget.style.boxShadow = "2px 2px 0px #000";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "1";
-                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.transform = "translate(0, 0)";
+                e.currentTarget.style.boxShadow = "4px 4px 0px #000";
               }}
             >
               Next
@@ -1160,13 +1184,16 @@ function Calendar({ props }: { props: BlockData }) {
             alignItems: "center",
             gap: 4,
             background: "none",
-            border: "none",
-            color: "#8e8e93",
+            border: "2px solid #000",
+            borderRadius: 8,
+            color: "#000",
             fontSize: 12,
+            fontWeight: 900,
             cursor: "pointer",
-            padding: 0,
+            padding: "4px 10px",
             marginBottom: 16,
             alignSelf: "flex-start",
+            textTransform: "uppercase",
           }}
         >
           <ChevronLeft width={14} height={14} /> Back
@@ -1174,15 +1201,24 @@ function Calendar({ props }: { props: BlockData }) {
 
         <h3
           style={{
-            color: "#fff",
+            color: "#000",
             fontSize: 17,
-            fontWeight: 700,
+            fontWeight: 900,
             margin: "0 0 4px",
+            textTransform: "uppercase",
           }}
         >
           Enter your details
         </h3>
-        <p style={{ color: "#636366", fontSize: 13, margin: "0 0 20px" }}>
+        <p
+          style={{
+            color: "#000",
+            opacity: 0.7,
+            fontSize: 13,
+            fontWeight: 500,
+            margin: "0 0 20px",
+          }}
+        >
           {formatDateLong(dateObj)} &middot; {formatTime12(selectedSlot)} –{" "}
           {formatTime12(addMinutes(selectedSlot, interval))}
         </p>
@@ -1193,12 +1229,13 @@ function Calendar({ props }: { props: BlockData }) {
             style={{
               display: "block",
               fontSize: 12,
-              fontWeight: 500,
-              color: "#a1a1a6",
+              fontWeight: 900,
+              color: "#000",
               marginBottom: 6,
+              textTransform: "uppercase",
             }}
           >
-            Name <span style={{ color: "#ff453a" }}>*</span>
+            Name <span style={{ color: "#000" }}>*</span>
           </label>
           <div style={{ position: "relative" }}>
             <UserIcon
@@ -1209,7 +1246,7 @@ function Calendar({ props }: { props: BlockData }) {
                 left: 12,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#636366",
+                color: "#000",
               }}
             />
             <input
@@ -1223,22 +1260,31 @@ function Calendar({ props }: { props: BlockData }) {
               }}
               style={{
                 ...inputStyle,
-                borderColor: formErrors.name ? "#ff453a" : "#3a3a3c",
+                borderColor: formErrors.name ? "#FF6B6B" : "#000",
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = formErrors.name
-                  ? "#ff453a"
-                  : "#5e5ce6";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.transform = "translate(2px, 2px)";
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = formErrors.name
-                  ? "#ff453a"
-                  : "#3a3a3c";
+                e.currentTarget.style.boxShadow = "2px 2px 0px #000";
+                e.currentTarget.style.transform = "translate(0, 0)";
               }}
             />
           </div>
           {formErrors.name && (
-            <span style={{ fontSize: 11, color: "#ff453a", marginTop: 4 }}>
+            <span
+              style={{
+                fontSize: 11,
+                color: "#000",
+                fontWeight: 700,
+                background: "#FF6B6B",
+                padding: "2px 6px",
+                borderRadius: 4,
+                marginTop: 4,
+                display: "inline-block",
+              }}
+            >
               {formErrors.name}
             </span>
           )}
@@ -1250,12 +1296,13 @@ function Calendar({ props }: { props: BlockData }) {
             style={{
               display: "block",
               fontSize: 12,
-              fontWeight: 500,
-              color: "#a1a1a6",
+              fontWeight: 900,
+              color: "#000",
               marginBottom: 6,
+              textTransform: "uppercase",
             }}
           >
-            Email <span style={{ color: "#ff453a" }}>*</span>
+            Email <span style={{ color: "#000" }}>*</span>
           </label>
           <div style={{ position: "relative" }}>
             <MailIcon
@@ -1266,7 +1313,7 @@ function Calendar({ props }: { props: BlockData }) {
                 left: 12,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#636366",
+                color: "#000",
               }}
             />
             <input
@@ -1280,22 +1327,31 @@ function Calendar({ props }: { props: BlockData }) {
               }}
               style={{
                 ...inputStyle,
-                borderColor: formErrors.email ? "#ff453a" : "#3a3a3c",
+                borderColor: formErrors.email ? "#FF6B6B" : "#000",
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = formErrors.email
-                  ? "#ff453a"
-                  : "#5e5ce6";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.transform = "translate(2px, 2px)";
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = formErrors.email
-                  ? "#ff453a"
-                  : "#3a3a3c";
+                e.currentTarget.style.boxShadow = "2px 2px 0px #000";
+                e.currentTarget.style.transform = "translate(0, 0)";
               }}
             />
           </div>
           {formErrors.email && (
-            <span style={{ fontSize: 11, color: "#ff453a", marginTop: 4 }}>
+            <span
+              style={{
+                fontSize: 11,
+                color: "#000",
+                fontWeight: 700,
+                background: "#FF6B6B",
+                padding: "2px 6px",
+                borderRadius: 4,
+                marginTop: 4,
+                display: "inline-block",
+              }}
+            >
               {formErrors.email}
             </span>
           )}
@@ -1314,9 +1370,9 @@ function Calendar({ props }: { props: BlockData }) {
               marginBottom: 6,
             }}
           >
-            <NoteIcon width={13} height={13} style={{ color: "#636366" }} />
+            <NoteIcon width={13} height={13} style={{ color: "#000" }} />
             Additional details{" "}
-            <span style={{ color: "#636366", fontWeight: 400 }}>
+            <span style={{ color: "#000", opacity: 0.5, fontWeight: 400 }}>
               (optional)
             </span>
           </label>
@@ -1326,10 +1382,12 @@ function Calendar({ props }: { props: BlockData }) {
             onChange={(e) => setGuestNotes(e.target.value)}
             style={textareaStyle}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#5e5ce6";
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "translate(2px, 2px)";
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = "#3a3a3c";
+              e.currentTarget.style.boxShadow = "2px 2px 0px #000";
+              e.currentTarget.style.transform = "translate(0, 0)";
             }}
           />
         </div>
@@ -1341,23 +1399,26 @@ function Calendar({ props }: { props: BlockData }) {
           style={{
             width: "100%",
             padding: "12px 0",
-            borderRadius: 10,
-            border: "none",
-            background: ACCENT_GRADIENT,
-            color: "#fff",
+            borderRadius: 8,
+            border: "3px solid #000",
+            background: "#FFE66D",
+            color: "#000",
             fontSize: 14,
-            fontWeight: 600,
+            fontWeight: 800,
+            letterSpacing: "0.5px",
+            textTransform: "uppercase" as const,
             cursor: "pointer",
-            transition: "opacity 150ms, transform 150ms",
+            transition: "transform 150ms, box-shadow 150ms",
+            boxShadow: "4px 4px 0px #000",
             marginTop: "auto",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = "0.9";
-            e.currentTarget.style.transform = "translateY(-1px)";
+            e.currentTarget.style.transform = "translate(2px, 2px)";
+            e.currentTarget.style.boxShadow = "2px 2px 0px #000";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = "1";
-            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.transform = "translate(0, 0)";
+            e.currentTarget.style.boxShadow = "4px 4px 0px #000";
           }}
         >
           Schedule Meeting
@@ -1387,32 +1448,37 @@ function Calendar({ props }: { props: BlockData }) {
           style={{
             width: 72,
             height: 72,
-            borderRadius: "50%",
-            background: "rgba(48,209,88,0.12)",
+            borderRadius: 8,
+            background: "#4ECDC4",
+            border: "3px solid #000",
+            boxShadow: "4px 4px 0px #000",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 20,
           }}
         >
-          <CheckCircleIcon
-            width={40}
-            height={40}
-            style={{ color: "#30d158" }}
-          />
+          <CheckCircleIcon width={40} height={40} style={{ color: "#000" }} />
         </div>
 
         <h3
           style={{
-            color: "#fff",
+            color: "#000",
             fontSize: 20,
-            fontWeight: 700,
+            fontWeight: 900,
             margin: "0 0 6px",
           }}
         >
           You're booked!
         </h3>
-        <p style={{ color: "#8e8e93", fontSize: 14, margin: "0 0 28px" }}>
+        <p
+          style={{
+            color: "#000",
+            fontSize: 14,
+            margin: "0 0 28px",
+            opacity: 0.6,
+          }}
+        >
           A calendar invite has been sent to your email.
         </p>
 
@@ -1421,8 +1487,10 @@ function Calendar({ props }: { props: BlockData }) {
           style={{
             width: "100%",
             maxWidth: 340,
-            background: "#2c2c2e",
-            borderRadius: 12,
+            background: "#FFE66D",
+            borderRadius: 8,
+            border: "3px solid #000",
+            boxShadow: "4px 4px 0px #000",
             padding: "18px 20px",
             textAlign: "left",
             marginBottom: 24,
@@ -1431,8 +1499,8 @@ function Calendar({ props }: { props: BlockData }) {
           <div
             style={{
               fontSize: 15,
-              fontWeight: 600,
-              color: "#fff",
+              fontWeight: 800,
+              color: "#000",
               marginBottom: 14,
             }}
           >
@@ -1451,13 +1519,13 @@ function Calendar({ props }: { props: BlockData }) {
                 alignItems: "center",
                 gap: 10,
                 fontSize: 13,
-                color: "#e5e5ea",
+                color: "#000",
               }}
             >
               <CalendarIcon
                 width={14}
                 height={14}
-                style={{ color: "#636366", flexShrink: 0 }}
+                style={{ color: "#000", flexShrink: 0 }}
               />
               {formatDateLong(dateObj)}
             </div>
@@ -1473,7 +1541,7 @@ function Calendar({ props }: { props: BlockData }) {
               <ClockIcon
                 width={14}
                 height={14}
-                style={{ color: "#636366", flexShrink: 0 }}
+                style={{ color: "#000", flexShrink: 0 }}
               />
               {formatTime12(selectedSlot)} –{" "}
               {formatTime12(addMinutes(selectedSlot, interval))}
@@ -1484,13 +1552,13 @@ function Calendar({ props }: { props: BlockData }) {
                 alignItems: "center",
                 gap: 10,
                 fontSize: 13,
-                color: "#8e8e93",
+                color: "#000",
               }}
             >
               <GlobeIcon
                 width={14}
                 height={14}
-                style={{ color: "#636366", flexShrink: 0 }}
+                style={{ color: "#000", flexShrink: 0 }}
               />
               {localTimezone}
             </div>
@@ -1500,13 +1568,13 @@ function Calendar({ props }: { props: BlockData }) {
                 alignItems: "center",
                 gap: 10,
                 fontSize: 13,
-                color: "#e5e5ea",
+                color: "#000",
               }}
             >
               <UserIcon
                 width={14}
                 height={14}
-                style={{ color: "#636366", flexShrink: 0 }}
+                style={{ color: "#000", flexShrink: 0 }}
               />
               {guestName}
             </div>
@@ -1516,13 +1584,13 @@ function Calendar({ props }: { props: BlockData }) {
                 alignItems: "center",
                 gap: 10,
                 fontSize: 13,
-                color: "#e5e5ea",
+                color: "#000",
               }}
             >
               <MailIcon
                 width={14}
                 height={14}
-                style={{ color: "#636366", flexShrink: 0 }}
+                style={{ color: "#000", flexShrink: 0 }}
               />
               {guestEmail}
             </div>
@@ -1536,20 +1604,25 @@ function Calendar({ props }: { props: BlockData }) {
             style={{
               flex: 1,
               padding: "11px 0",
-              borderRadius: 10,
-              border: "1px solid #3a3a3c",
-              background: "#2c2c2e",
-              color: "#fff",
+              borderRadius: 8,
+              border: "2px solid #000",
+              background: "#fff",
+              color: "#000",
               fontSize: 13,
-              fontWeight: 500,
+              fontWeight: 800,
               cursor: "pointer",
-              transition: "background 150ms",
+              transition: "transform 150ms, box-shadow 150ms",
+              boxShadow: "3px 3px 0px #000",
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.5px",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#3a3a3c";
+              e.currentTarget.style.transform = "translate(2px, 2px)";
+              e.currentTarget.style.boxShadow = "1px 1px 0px #000";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#2c2c2e";
+              e.currentTarget.style.transform = "translate(0, 0)";
+              e.currentTarget.style.boxShadow = "3px 3px 0px #000";
             }}
           >
             Close
@@ -1562,20 +1635,25 @@ function Calendar({ props }: { props: BlockData }) {
             style={{
               flex: 1,
               padding: "11px 0",
-              borderRadius: 10,
-              border: "none",
-              background: ACCENT_GRADIENT,
+              borderRadius: 8,
+              border: "2px solid #000",
+              background: "#000",
               color: "#fff",
               fontSize: 13,
-              fontWeight: 600,
+              fontWeight: 800,
               cursor: "pointer",
-              transition: "opacity 150ms",
+              transition: "transform 150ms, box-shadow 150ms",
+              boxShadow: "3px 3px 0px #000",
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.5px",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.9";
+              e.currentTarget.style.transform = "translate(2px, 2px)";
+              e.currentTarget.style.boxShadow = "1px 1px 0px #000";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.transform = "translate(0, 0)";
+              e.currentTarget.style.boxShadow = "3px 3px 0px #000";
             }}
           >
             Book another
@@ -1596,9 +1674,7 @@ function Calendar({ props }: { props: BlockData }) {
           position: "fixed",
           inset: 0,
           zIndex: 9998,
-          background: "rgba(0,0,0,0.65)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
+          background: "rgba(0,0,0,0.5)",
           animation: "calFadeIn 0.2s ease",
         }}
         onClick={closeDialog}
@@ -1626,13 +1702,14 @@ function Calendar({ props }: { props: BlockData }) {
                 transform: "translate(-50%, -50%)",
                 width: "min(92vw, 780px)",
                 maxHeight: "min(90vh, 600px)",
-                borderRadius: 16,
+                borderRadius: 8,
               }),
-          background: "#1c1c1e",
+          background: "#fff",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+          border: "3px solid #000",
+          boxShadow: "8px 8px 0px #000",
         }}
       >
         {/* Dialog close button */}
@@ -1647,23 +1724,24 @@ function Calendar({ props }: { props: BlockData }) {
             zIndex: 10,
             width: 32,
             height: 32,
-            borderRadius: 8,
-            background: "#2c2c2e",
-            border: "none",
-            color: "#8e8e93",
+            borderRadius: 6,
+            background: "#fff",
+            border: "2px solid #000",
+            color: "#000",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            transition: "background 150ms, color 150ms",
+            transition: "transform 150ms, box-shadow 150ms",
+            boxShadow: "2px 2px 0px #000",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#3a3a3c";
-            e.currentTarget.style.color = "#fff";
+            e.currentTarget.style.transform = "translate(2px, 2px)";
+            e.currentTarget.style.boxShadow = "0 0 0 #000";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "#2c2c2e";
-            e.currentTarget.style.color = "#8e8e93";
+            e.currentTarget.style.transform = "translate(0, 0)";
+            e.currentTarget.style.boxShadow = "2px 2px 0px #000";
           }}
         >
           <CloseIcon width={16} height={16} />
@@ -1687,12 +1765,12 @@ function Calendar({ props }: { props: BlockData }) {
                 borderRadius: 3,
                 background:
                   step === s
-                    ? "#5e5ce6"
+                    ? "#000"
                     : (["calendar", "form", "confirmed"] as Step[]).indexOf(
                           step,
                         ) > i
-                      ? "#5e5ce6"
-                      : "#3a3a3c",
+                      ? "#000"
+                      : "#ddd",
                 transition: "all 0.25s ease",
                 opacity:
                   (["calendar", "form", "confirmed"] as Step[]).indexOf(step) >
@@ -1747,15 +1825,15 @@ function Calendar({ props }: { props: BlockData }) {
           background: transparent;
         }
         .cal-dialog-body::-webkit-scrollbar-thumb {
-          background: #3a3a3c;
+          background: #000;
           border-radius: 3px;
         }
         .cal-dialog-body::-webkit-scrollbar-thumb:hover {
-          background: #636366;
+          background: #333;
         }
         .cal-dialog-body {
           scrollbar-width: thin;
-          scrollbar-color: #3a3a3c transparent;
+          scrollbar-color: #000 transparent;
         }
         @media (max-width: 640px) {
           .cal-dialog-body {

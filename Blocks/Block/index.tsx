@@ -11,14 +11,14 @@ function Block() {
   if (blocks.length === 0) {
     return (
       <div className="mt-6 w-full max-w-xl">
-        <div className="rounded-2xl border border-dashed border-border/50 bg-muted/10 py-16 px-6 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
-            <Layers className="h-5 w-5 text-muted-foreground/60" />
+        <div className="rounded-lg border-2 border-dashed border-border bg-muted py-16 px-6 text-center shadow-[4px_4px_0px_var(--border)]">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-accent border-2 border-border shadow-[2px_2px_0px_var(--border)]">
+            <Layers className="h-6 w-6 text-accent-foreground" />
           </div>
-          <p className="text-sm text-muted-foreground/70 max-w-xs mx-auto">
+          <p className="text-sm font-bold text-foreground max-w-xs mx-auto">
             No blocks added yet. Click{" "}
-            <span className="font-medium text-foreground/80">"Add Block"</span>{" "}
-            above to start building your page.
+            <span className="font-black text-primary">"Add Block"</span> below
+            to start building your page.
           </p>
         </div>
       </div>

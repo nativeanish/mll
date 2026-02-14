@@ -67,26 +67,30 @@ function Newsletter({ props }: { props: BlockData }) {
   const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   return (
-    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000]">
       {isSubscribed ? (
         <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
-            <MailCheckIcon className="h-6 w-6 text-green-600" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#4ECDC4] border-[3px] border-black">
+            <MailCheckIcon className="h-6 w-6 text-black" />
           </div>
-          <h2 className="text-base font-bold text-slate-800">{successTitle}</h2>
-          <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
+          <h2 className="text-base font-bold text-black uppercase">
+            {successTitle}
+          </h2>
+          <p className="text-sm text-black max-w-xs leading-relaxed">
             {successDescription}
           </p>
         </div>
       ) : (
         <div className="px-5 py-6">
           <div className="flex items-center gap-2.5 mb-1.5">
-            <MailIcon className="h-5 w-5 text-slate-400 shrink-0" />
-            <h2 className="text-[0.95rem] font-bold text-slate-800">{title}</h2>
+            <MailIcon className="h-5 w-5 text-black shrink-0" />
+            <h2 className="text-[0.95rem] font-bold text-black uppercase">
+              {title}
+            </h2>
           </div>
 
           {description && (
-            <p className="text-sm text-slate-500 leading-relaxed mb-4 ml-[1.875rem]">
+            <p className="text-sm text-black leading-relaxed mb-4 ml-7.5">
               {description}
             </p>
           )}
@@ -116,12 +120,12 @@ function Newsletter({ props }: { props: BlockData }) {
                 if (error) setError("");
               }}
               placeholder={emailPlaceholder}
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 transition-colors"
+              className="w-full rounded-lg border-[3px] border-black bg-white px-3.5 py-2.5 text-sm text-black placeholder:text-gray-500 outline-none shadow-[2px_2px_0px_#000] focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5 transition-all"
             />
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-gray-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 active:scale-[0.98] cursor-pointer"
+              className="w-full rounded-lg border-[3px] border-black bg-[#FF6B6B] px-4 py-2.5 text-sm font-bold text-white uppercase shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all cursor-pointer"
             >
               {buttonText}
             </button>

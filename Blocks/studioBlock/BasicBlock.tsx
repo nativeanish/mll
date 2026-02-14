@@ -84,31 +84,28 @@ export default function BasicCard() {
   const disabled = isFetching;
 
   return (
-    <div className="relative w-full max-w-xl rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+    <div className="relative w-full max-w-xl rounded-lg border-2 border-border bg-card shadow-[4px_4px_0px_var(--border)] overflow-hidden">
       {/* Cover Image Section */}
       <div className="relative">
-        {/* Cover pill badge */}
         <div className="absolute left-3 top-3 z-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur-md px-3 py-1 text-[11px] font-medium text-white/90 ring-1 ring-white/10">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-accent border-2 border-border px-3 py-1 text-[11px] font-black text-accent-foreground uppercase tracking-wide shadow-[2px_2px_0px_var(--border)]">
             <Upload className="h-3 w-3" />
-            Cover Image
+            Cover
           </span>
         </div>
 
-        {/* Cover preview */}
-        <div className="relative aspect-3/1 w-full overflow-hidden bg-linear-to-br from-muted via-muted to-muted/50 group/cover">
+        <div className="relative aspect-3/1 w-full overflow-hidden bg-muted group/cover border-b-2 border-border">
           <img
             src={coverUrl || "/cover-image-placeholder.png"}
             alt="Cover"
-            className="h-full w-full object-cover transition-all duration-500 group-hover/cover:scale-105 group-hover/cover:brightness-90"
+            className="h-full w-full object-cover transition-all duration-300 group-hover/cover:scale-105"
           />
-          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent" />
-          <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/0 opacity-0 transition-all duration-300 group-hover/cover:bg-black/40 group-hover/cover:opacity-100">
-            <div className="flex flex-col items-center gap-2 text-white transform translate-y-2 group-hover/cover:translate-y-0 transition-transform duration-300">
-              <div className="rounded-full bg-white/20 backdrop-blur-sm p-3">
+          <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover/cover:bg-black/40 group-hover/cover:opacity-100">
+            <div className="flex flex-col items-center gap-2 text-white">
+              <div className="rounded-lg bg-white/20 p-3 border-2 border-white/40">
                 <Upload className="h-5 w-5" />
               </div>
-              <span className="text-sm font-medium">Change Cover</span>
+              <span className="text-sm font-black uppercase">Change Cover</span>
             </div>
             <input
               type="file"
@@ -120,7 +117,7 @@ export default function BasicCard() {
           </label>
           {coverUrl ? (
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
               aria-label="Remove cover image"
               onClick={() => {
@@ -128,7 +125,7 @@ export default function BasicCard() {
                   URL.revokeObjectURL(coverUrl);
                 setData({ coverUrl: null });
               }}
-              className="absolute right-2 top-2 h-7 w-7 rounded-full bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 border-0 opacity-0 group-hover/cover:opacity-100 transition-opacity"
+              className="absolute right-2 top-2 h-7 w-7 rounded-md bg-destructive text-white border-2 border-border hover:bg-destructive/80 opacity-0 group-hover/cover:opacity-100 transition-opacity shadow-none"
               disabled={disabled}
             >
               <X className="h-3.5 w-3.5" />
@@ -140,7 +137,7 @@ export default function BasicCard() {
       {/* Avatar Section */}
       <div className="-mt-12 flex flex-col items-center gap-1 relative z-10 px-6">
         <div className="relative group/avatar">
-          <Avatar className="h-20 w-20 sm:h-24 sm:w-24 overflow-hidden bg-muted shadow-xl ring-4 ring-card transition-transform duration-300 group-hover/avatar:scale-105">
+          <Avatar className="h-20 w-20 sm:h-24 sm:w-24 overflow-hidden bg-muted border-4 border-border shadow-[3px_3px_0px_var(--border)] ring-4 ring-card">
             <AvatarImage
               src={
                 avatarUrl ||
@@ -150,14 +147,14 @@ export default function BasicCard() {
               className="h-full w-full object-cover"
             />
             <AvatarFallback
-              className="text-lg font-semibold text-muted-foreground"
+              className="text-lg font-black text-foreground"
               aria-hidden
             >
               ME
             </AvatarFallback>
           </Avatar>
 
-          <label className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/0 opacity-0 transition-all duration-300 group-hover/avatar:bg-black/50 group-hover/avatar:opacity-100">
+          <label className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/0 opacity-0 transition-all duration-200 group-hover/avatar:bg-black/50 group-hover/avatar:opacity-100">
             <Camera className="h-6 w-6 text-white" />
             <input
               type="file"
@@ -170,7 +167,7 @@ export default function BasicCard() {
 
           {avatarUrl ? (
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
               aria-label="Remove profile image"
               onClick={() => {
@@ -178,14 +175,14 @@ export default function BasicCard() {
                   URL.revokeObjectURL(avatarUrl);
                 setData({ avatarUrl: null });
               }}
-              className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-destructive/90 text-white hover:bg-destructive border-2 border-card opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+              className="absolute -top-1 -right-1 h-6 w-6 rounded-md bg-destructive text-white hover:bg-destructive/80 border-2 border-border opacity-0 group-hover/avatar:opacity-100 transition-opacity shadow-none"
               disabled={disabled}
             >
               <X className="h-3 w-3" />
             </Button>
           ) : null}
         </div>
-        <span className="text-[11px] font-medium text-muted-foreground/70 mt-1">
+        <span className="text-[11px] font-bold text-muted-foreground mt-1 uppercase tracking-wider">
           Profile Photo
         </span>
       </div>
@@ -195,7 +192,7 @@ export default function BasicCard() {
         <div className="space-y-1.5">
           <Label
             htmlFor="name"
-            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            className="text-xs font-black uppercase tracking-widest text-foreground"
           >
             Display Name
           </Label>
@@ -204,7 +201,7 @@ export default function BasicCard() {
             placeholder="Enter your name"
             value={name}
             onChange={(e) => setData({ name: e.target.value })}
-            className="bg-muted/30 border-border/50 rounded-xl h-10 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+            className="rounded-lg h-10 text-sm"
             disabled={disabled}
           />
         </div>
@@ -212,7 +209,7 @@ export default function BasicCard() {
         <div className="space-y-1.5">
           <Label
             htmlFor="bio"
-            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            className="text-xs font-black uppercase tracking-widest text-foreground"
           >
             Bio
           </Label>
@@ -221,7 +218,7 @@ export default function BasicCard() {
             placeholder="Tell people about yourself..."
             value={description}
             onChange={(e) => setData({ description: e.target.value })}
-            className="min-h-24 bg-muted/30 border-border/50 rounded-xl text-sm resize-none focus:ring-2 focus:ring-primary/20 transition-all"
+            className="min-h-24 rounded-lg text-sm resize-none"
             disabled={disabled}
           />
         </div>
@@ -229,10 +226,10 @@ export default function BasicCard() {
         <div className="pt-2">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-dashed border-border/50" />
+              <span className="w-full border-t-2 border-dashed border-border" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-card px-3 text-muted-foreground/50 font-medium">
+              <span className="bg-card px-3 text-muted-foreground font-black uppercase tracking-widest">
                 or import
               </span>
             </div>
@@ -242,7 +239,7 @@ export default function BasicCard() {
         <Button
           size="lg"
           onClick={handleFetch}
-          className="w-full rounded-xl bg-linear-to-r from-red-600 to-rose-500 text-white hover:from-red-700 hover:to-rose-600 shadow-sm hover:shadow-md hover:shadow-red-500/10 transition-all duration-300 h-11 font-medium"
+          className="w-full rounded-lg bg-destructive text-white border-2 border-border h-11 font-black uppercase tracking-wide shadow-[4px_4px_0px_var(--border)] hover:shadow-[6px_6px_0px_var(--border)] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_var(--border)] transition-all"
           disabled={disabled}
         >
           {isFetching ? (

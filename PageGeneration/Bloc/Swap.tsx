@@ -267,7 +267,7 @@ function Swap({ props }: { props: BlockData }) {
     }
     return (
       <div
-        className="flex items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/40"
+        className="flex items-center justify-center rounded-full bg-[#A855F7]"
         style={{ height: size, width: size }}
       >
         <span className="text-sm font-semibold text-primary">
@@ -287,24 +287,24 @@ function Swap({ props }: { props: BlockData }) {
     const value = inputs[field];
 
     return (
-      <div className="rounded-2xl border border-slate-200/80 bg-slate-100/80 p-4 shadow-sm backdrop-blur-sm">
+      <div className="rounded-lg border-[3px] border-black bg-white p-4 shadow-[3px_3px_0px_#000]">
         <div className="flex items-center gap-3">
           {renderLogo(logo, symbol, 44)}
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-slate-900 truncate">
+            <div className="text-sm font-bold text-black truncate">
               {symbol || "-"}
             </div>
-            <div className="text-xs text-slate-600 truncate">
+            <div className="text-xs text-black/70 truncate">
               {fullName || "Unnamed token"}
             </div>
           </div>
-          <span className="ml-auto rounded-full bg-slate-900/5 px-3 py-1 text-[11px] font-semibold text-slate-700">
+          <span className="ml-auto rounded-lg bg-[#FFE66D] border-2 border-black px-3 py-1 text-[11px] font-bold text-black">
             ${price > 0 ? formatAmount(price, 4) : "—"}
           </span>
         </div>
 
         <div className="mt-3 space-y-1">
-          <label className="text-[10px] uppercase tracking-wide text-slate-500">
+          <label className="text-[10px] uppercase tracking-wide text-black font-bold">
             Amount
           </label>
           <input
@@ -312,7 +312,7 @@ function Swap({ props }: { props: BlockData }) {
             onChange={(event) => handleInputChange(field, event.target.value)}
             placeholder="0.0"
             inputMode="decimal"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="w-full rounded-lg border-[3px] border-black bg-white px-3 py-2 text-sm font-semibold text-black shadow-[2px_2px_0px_#000] focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5 focus:outline-none"
           />
         </div>
       </div>
@@ -322,14 +322,14 @@ function Swap({ props }: { props: BlockData }) {
   if (!poolProcess) {
     return (
       <div
-        className="w-full rounded-2xl border border-dashed border-slate-200 bg-white/70 p-6 text-center text-slate-600 shadow-sm"
+        className="w-full rounded-lg border-[3px] border-dashed border-black bg-[#FFE66D] p-6 text-center text-black"
         data-uuid={props.id}
       >
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-white border-[3px] border-black">
           <ArrowLeftRight className="h-5 w-5" />
         </div>
-        <div className="text-sm font-semibold">No pool selected</div>
-        <div className="text-xs text-slate-500 mt-1">
+        <div className="text-sm font-bold">No pool selected</div>
+        <div className="text-xs text-black/70 mt-1">
           Choose a Permaswap pool in the editor to render this swap block.
         </div>
       </div>
@@ -338,28 +338,28 @@ function Swap({ props }: { props: BlockData }) {
 
   return (
     <div
-      className="w-full max-w-xl mx-auto rounded-3xl border border-white/70 bg-gradient-to-br from-white/85 via-sky-50/80 to-slate-100/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.16)] backdrop-blur"
+      className="w-full max-w-xl mx-auto rounded-lg border-[3px] border-black bg-white p-6 shadow-[6px_6px_0px_#000]"
       data-uuid={props.id}
       data-description={poolName || undefined}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-black/70">
             Permaswap
           </p>
-          <h3 className="text-2xl font-semibold text-slate-900 leading-tight drop-shadow-sm">
+          <h3 className="text-2xl font-bold text-black leading-tight uppercase">
             {poolName || "Selected pool"}
           </h3>
-          <p className="font-mono text-[11px] text-slate-500 break-all">
+          <p className="font-mono text-[11px] text-black/50 break-all">
             {poolProcess}
           </p>
         </div>
         <button
           type="button"
           onClick={() => fetchPools({ manual: true })}
-          className="flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600 shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition hover:border-slate-300 hover:shadow-[0_10px_26px_rgba(15,23,42,0.12)]"
+          className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#FFE66D] px-3.5 py-1.5 text-[11px] font-bold text-black shadow-[2px_2px_0px_#000] transition-transform hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_#000]"
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900/5 text-slate-700">
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-black/10 text-black">
             <RefreshCw
               className={`h-3.5 w-3.5 ${loading || manualRefreshing ? "animate-spin" : ""}`}
             />
@@ -371,29 +371,29 @@ function Swap({ props }: { props: BlockData }) {
       </div>
 
       {error && (
-        <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="mt-4 flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#FF6B6B] px-3 py-2 text-sm text-black font-bold">
           <AlertTriangle className="h-4 w-4" />
           <span>{error}</span>
         </div>
       )}
 
       {!loading && !error && !selectedPool && (
-        <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="mt-4 rounded-lg border-[3px] border-black bg-[#FFE66D] px-4 py-3 text-sm text-black font-bold">
           Pool not found in latest listing. It may have been removed or renamed.
         </div>
       )}
 
       {loading ? (
         <div className="mt-5 space-y-3">
-          <div className="h-28 animate-pulse rounded-2xl bg-white/80" />
-          <div className="h-10 animate-pulse rounded-xl bg-white/80" />
+          <div className="h-28 animate-pulse rounded-lg bg-gray-200 border-[3px] border-black" />
+          <div className="h-10 animate-pulse rounded-lg bg-gray-200 border-[3px] border-black" />
         </div>
       ) : selectedPool ? (
         <div className="mt-5 space-y-5">
           <div className="grid gap-3">
             {renderTokenCard("x")}
-            <div className="flex items-center justify-center text-slate-500">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-[0_10px_22px_rgba(15,23,42,0.1)] border border-white/60">
+            <div className="flex items-center justify-center text-black">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FFE66D] border-[3px] border-black shadow-[3px_3px_0px_#000]">
                 <ArrowLeftRight className="h-4.5 w-4.5" />
               </div>
             </div>
@@ -401,21 +401,21 @@ function Swap({ props }: { props: BlockData }) {
           </div>
 
           {calculationError ? (
-            <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#FF6B6B] px-3 py-2 text-sm text-black font-bold">
               <AlertTriangle className="h-4 w-4" />
               <span>{calculationError}</span>
             </div>
           ) : pricesAvailable ? (
-            <div className="rounded-2xl border border-white/70 bg-white/90 px-4 py-3 text-xs text-slate-600 shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
-              <p className="font-semibold text-slate-800">
+            <div className="rounded-lg border-[3px] border-black bg-white px-4 py-3 text-xs text-black/70">
+              <p className="font-bold text-black">
                 1 {selectedPool.symbolX} ≈ {formatAmount(priceX / priceY, 6)}{" "}
                 {selectedPool.symbolY}
               </p>
-              <p className="font-semibold text-slate-800">
+              <p className="font-bold text-black">
                 1 {selectedPool.symbolY} ≈ {formatAmount(priceY / priceX, 6)}{" "}
                 {selectedPool.symbolX}
               </p>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-black/50">
                 Prices refresh every minute.
               </p>
             </div>
@@ -424,7 +424,7 @@ function Swap({ props }: { props: BlockData }) {
           <button
             type="button"
             onClick={handleSwap}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 px-5 py-3.5 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(15,23,42,0.22)] transition hover:translate-y-[-1px] hover:shadow-[0_22px_36px_rgba(15,23,42,0.26)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-[3px] border-black bg-black px-5 py-3.5 text-sm font-bold text-white uppercase shadow-[4px_4px_0px_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none focus:outline-none"
           >
             <ExternalLink className="h-4 w-4" />
             <span>Trade</span>

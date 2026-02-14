@@ -1,6 +1,6 @@
 import type { BlockData } from "@/store/useBlockStore";
 import { getStringField } from "../utils/getStringFields";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // ─── Custom SVG Icons ────────────────────────────────────────────
 
@@ -537,220 +537,657 @@ async function fetchFarcasterCast(
 
 // ─── Sub-Components ──────────────────────────────────────────────
 
-/* -------- Twitter Embed (uses Twitter widget.js) -------- */
-function TwitterEmbed({ url, tweetId }: { url: string; tweetId: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
+/* -------- oEmbed helpers for Twitter (fallback) -------- */
 
-  useEffect(() => {
-    // Load Twitter widget.js if not already loaded
-    function loadWidgetScript(): Promise<void> {
-      if (
-        (
-          window as unknown as {
-            twttr?: { widgets?: { createTweet: unknown } };
-          }
-        ).twttr?.widgets
-      ) {
-        return Promise.resolve();
-      }
-      return new Promise((resolve) => {
-        const id = "twitter-wjs";
-        if (document.getElementById(id)) {
-          // Script tag exists, wait for it to load
-          const check = setInterval(() => {
-            if (
-              (window as unknown as { twttr?: { widgets?: unknown } }).twttr
-                ?.widgets
-            ) {
-              clearInterval(check);
-              resolve();
-            }
-          }, 100);
-          setTimeout(() => {
-            clearInterval(check);
-            resolve();
-          }, 5000);
-          return;
-        }
-        const script = document.createElement("script");
-        script.id = id;
-        script.src = "https://platform.twitter.com/widgets.js";
-        script.async = true;
-        script.onload = () => {
-          const check = setInterval(() => {
-            if (
-              (window as unknown as { twttr?: { widgets?: unknown } }).twttr
-                ?.widgets
-            ) {
-              clearInterval(check);
-              resolve();
-            }
-          }, 100);
-          setTimeout(() => {
-            clearInterval(check);
-            resolve();
-          }, 5000);
-        };
-        script.onerror = () => resolve();
-        document.body.appendChild(script);
-      });
+async function fetchTweetOEmbed(tweetUrl: string): Promise<{
+  author_name?: string;
+  author_url?: string;
+  html?: string;
+} | null> {
+  try {
+    const endpoint = `https://publish.twitter.com/oembed?url=${encodeURIComponent(tweetUrl)}&omit_script=true&hide_media=false&hide_thread=true&dnt=true`;
+    const res = await fetch(endpoint);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+function extractTextFromOEmbed(html: string): string {
+  const match = html.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+  if (!match) return "";
+  return match[1]
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, "$1")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+}
+
+function extractDateFromOEmbed(html: string): string | undefined {
+  const match = html.match(/(\w+ \d{1,2}, \d{4})<\/a>\s*<\/blockquote>/i);
+  return match?.[1];
+}
+
+function extractUsernameFromUrl(url: string): string | null {
+  try {
+    const match = new URL(url).pathname.match(/\/([^/]+)\/status\//);
+    return match?.[1] ?? null;
+  } catch {
+    const match = url.match(/\/([^/]+)\/status\//);
+    return match?.[1] ?? null;
+  }
+}
+
+/* -------- FxTwitter API (rich data, CORS-friendly) -------- */
+
+interface RichTweetData {
+  text: string;
+  authorName: string;
+  handle: string;
+  avatar: string | null;
+  isVerified: boolean;
+  timestamp: string | null;
+  likes: number;
+  replies: number;
+  retweets: number;
+  images: string[];
+  videoThumb: string | null;
+  videoUrl: string | null;
+  linkCard: {
+    title: string;
+    description: string;
+    image: string | null;
+    url: string;
+  } | null;
+  article: {
+    title: string;
+    previewText: string;
+    coverImage: string | null;
+    blocks: { type: string; text: string }[];
+  } | null;
+}
+
+async function fetchTweetFxTwitter(
+  tweetId: string,
+): Promise<RichTweetData | null> {
+  try {
+    const res = await fetch(`https://api.fxtwitter.com/status/${tweetId}`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!json || json.code !== 200 || !json.tweet) return null;
+
+    const tweet = json.tweet;
+    const author = tweet.author ?? {};
+
+    // Extract media
+    const allMedia: {
+      type: string;
+      url: string;
+      thumbnail_url?: string;
+      width?: number;
+      height?: number;
+    }[] = tweet.media?.all ?? [];
+
+    // Extract images (photos)
+    const images = allMedia.filter((m) => m.type === "photo").map((m) => m.url);
+
+    // Extract video
+    let videoThumb: string | null = null;
+    let videoUrl: string | null = null;
+    const videoMedia = allMedia.find(
+      (m) => m.type === "video" || m.type === "animated_gif",
+    );
+    if (videoMedia) {
+      videoThumb = videoMedia.thumbnail_url ?? null;
+      videoUrl = videoMedia.url ?? null;
     }
 
-    let cancelled = false;
+    // Extract external link card (if present)
+    let linkCard: RichTweetData["linkCard"] = null;
+    const ext = tweet.media?.external;
+    if (ext && ext.title) {
+      linkCard = {
+        title: ext.title,
+        description: ext.description ?? "",
+        image: ext.thumbnail_url ?? null,
+        url: ext.url ?? "",
+      };
+    }
 
-    (async () => {
-      await loadWidgetScript();
-      if (cancelled || !containerRef.current) return;
-
-      const twttr = (
-        window as unknown as {
-          twttr?: {
-            widgets?: {
-              createTweet: (
-                id: string,
-                el: HTMLElement,
-                opts: Record<string, unknown>,
-              ) => Promise<HTMLElement | undefined>;
-            };
+    // Extract article (if present)
+    let article: RichTweetData["article"] = null;
+    const rawArticle = tweet.article as
+      | {
+          title?: string;
+          preview_text?: string;
+          cover_media?: {
+            media_info?: { original_img_url?: string };
+          };
+          content?: {
+            blocks?: { type?: string; text?: string }[];
           };
         }
-      ).twttr;
-      if (!twttr?.widgets?.createTweet) {
-        if (!cancelled) setError(true);
+      | undefined;
+
+    if (rawArticle?.title || rawArticle?.preview_text) {
+      const blockItems = (rawArticle.content?.blocks ?? [])
+        .map((b) => ({
+          type: b.type ?? "unstyled",
+          text: (b.text ?? "").trim(),
+        }))
+        .filter((b) => b.text.length > 0)
+        .slice(0, 6);
+
+      article = {
+        title: rawArticle.title ?? "Article",
+        previewText: rawArticle.preview_text ?? "",
+        coverImage:
+          rawArticle.cover_media?.media_info?.original_img_url ?? null,
+        blocks: blockItems,
+      };
+    }
+
+    // Format date
+    let timestamp: string | null = null;
+    if (tweet.created_at) {
+      try {
+        timestamp = new Date(tweet.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
+    return {
+      text: tweet.text ?? tweet.raw_text?.text ?? "",
+      authorName: author.name ?? "",
+      handle: author.screen_name ? `@${author.screen_name}` : "",
+      avatar: author.avatar_url ?? null,
+      isVerified: author.verified ?? false,
+      timestamp,
+      likes: tweet.likes ?? 0,
+      replies: tweet.replies ?? 0,
+      retweets: tweet.retweets ?? 0,
+      images,
+      videoThumb,
+      videoUrl,
+      linkCard,
+      article,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/* -------- SVG micro-icons for Twitter card -------- */
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5-6H21m0 0v7.5m0-7.5l-9 9"
+      />
+    </svg>
+  );
+}
+
+function VerifiedBadge({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 22 22" fill="none">
+      <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+      <path
+        d="M9.5 14.25L6.25 11l-.916.917L9.5 16.083l8.333-8.333-.916-.917L9.5 14.25z"
+        fill="#fff"
+      />
+    </svg>
+  );
+}
+
+function TweetHeartIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.56-1.13-1.666-1.84-2.908-1.91z" />
+    </svg>
+  );
+}
+
+function TweetReplyIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.25-.893 4.33-2.486 5.86l-4.677 4.49a.697.697 0 01-1.182-.208l-.965-2.5H8.378a2.5 2.5 0 01-2.5-2.5V10H1.75z" />
+    </svg>
+  );
+}
+
+function TweetRetweetIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z" />
+    </svg>
+  );
+}
+
+function PlayIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
+
+function formatCompact(n: number): string {
+  if (n >= 1_000_000)
+    return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  return String(n);
+}
+
+/* -------- Twitter Custom Card (syndication + oEmbed fallback) -------- */
+function TwitterEmbed({ url, tweetId }: { url: string; tweetId: string }) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
+    "loading",
+  );
+  const [rich, setRich] = useState<RichTweetData | null>(null);
+  // oEmbed fallback state
+  const [fbAuthorName, setFbAuthorName] = useState<string | null>(null);
+  const [fbText, setFbText] = useState<string | null>(null);
+  const [fbTimestamp, setFbTimestamp] = useState<string | undefined>(undefined);
+  const [avatarError, setAvatarError] = useState(false);
+
+  const username = extractUsernameFromUrl(url);
+  const xUrl = url.replace(
+    /^https?:\/\/(www\.)?(twitter\.com|x\.com)/,
+    "https://x.com",
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!tweetId) {
+      setStatus("error");
+      return;
+    }
+
+    (async () => {
+      // Try fxtwitter API first (CORS-friendly, rich data)
+      const synData = await fetchTweetFxTwitter(tweetId);
+      if (cancelled) return;
+      if (synData) {
+        setRich(synData);
+        setStatus("loaded");
         return;
       }
 
+      // Fallback to oEmbed
       try {
-        // Clear previous content
-        containerRef.current.innerHTML = "";
-        const el = await twttr.widgets.createTweet(
-          tweetId,
-          containerRef.current,
-          {
-            conversation: "none",
-            align: "center",
-            dnt: true,
-            width: "100%",
-          },
-        );
-        if (!cancelled) {
-          setLoaded(true);
-          if (!el) setError(true);
-          // Force full-width on Twitter widget elements (they use inline max-width: 550px)
-          if (containerRef.current) {
-            const widgets = containerRef.current.querySelectorAll(
-              "twitter-widget, twitterwidget, .twitter-tweet, .twitter-tweet-rendered",
-            );
-            widgets.forEach((w) => {
-              (w as HTMLElement).style.maxWidth = "100%";
-              (w as HTMLElement).style.width = "100%";
-            });
-            // Also handle iframes inside the widget
-            const iframes = containerRef.current.querySelectorAll("iframe");
-            iframes.forEach((iframe) => {
-              iframe.style.maxWidth = "100%";
-              iframe.style.width = "100%";
-            });
+        const oembed = await fetchTweetOEmbed(url);
+        if (cancelled) return;
+        if (oembed) {
+          if (oembed.author_name) setFbAuthorName(oembed.author_name);
+          if (oembed.html) {
+            setFbText(extractTextFromOEmbed(oembed.html));
+            setFbTimestamp(extractDateFromOEmbed(oembed.html));
           }
         }
+        setStatus("loaded");
       } catch {
-        if (!cancelled) setError(true);
+        if (!cancelled) setStatus("loaded");
       }
     })();
-
     return () => {
       cancelled = true;
     };
-  }, [tweetId]);
+  }, [tweetId, url]);
 
-  // Force full width on any Twitter widget elements that appear asynchronously
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const forceFullWidth = () => {
-      if (!containerRef.current) return;
-      const els = containerRef.current.querySelectorAll(
-        "twitter-widget, twitterwidget, .twitter-tweet, .twitter-tweet-rendered, iframe",
-      );
-      els.forEach((el) => {
-        (el as HTMLElement).style.maxWidth = "100%";
-        (el as HTMLElement).style.width = "100%";
-      });
-    };
-    const observer = new MutationObserver(forceFullWidth);
-    observer.observe(containerRef.current, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-    });
-    const interval = setInterval(forceFullWidth, 200);
-    const timeout = setTimeout(() => clearInterval(interval), 5000);
-    return () => {
-      observer.disconnect();
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, [loaded]);
+  // Determine display values (rich > oEmbed fallback)
+  const displayName = rich?.authorName || fbAuthorName || username || "User";
+  const handle = rich?.handle || (username ? `@${username}` : "");
+  const displayText = rich?.text || fbText;
+  const displayTimestamp = rich?.timestamp || fbTimestamp;
+  const avatarUrl =
+    rich?.avatar ||
+    (username && !avatarError ? `https://unavatar.io/x/${username}` : null);
+  const isVerified = rich?.isVerified ?? false;
+  const images = rich?.images ?? [];
+  const videoThumb = rich?.videoThumb ?? null;
+  const videoUrl = rich?.videoUrl ?? null;
+  const linkCard = rich?.linkCard ?? null;
+  const article = rich?.article ?? null;
+  const likes = rich?.likes ?? 0;
+  const replies = rich?.replies ?? 0;
+  const retweets = rich?.retweets ?? 0;
+  const hasEngagement = likes > 0 || replies > 0 || retweets > 0;
 
-  if (error) {
+  /* Loading skeleton */
+  if (status === "loading") {
     return (
-      <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="px-5 py-8 flex flex-col items-center text-center">
-          <div className="flex items-center justify-center w-14 h-14 rounded-full mb-4 bg-gray-100">
-            <TwitterIcon className="w-7 h-7" style={{ color: "#000" }} />
+      <div className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] p-5 animate-pulse">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gray-200 border-2 border-black" />
+            <div>
+              <div className="h-4 w-28 bg-gray-200 rounded mb-1.5" />
+              <div className="h-3 w-20 bg-gray-100 rounded" />
+            </div>
           </div>
-          <p className="text-gray-900 font-semibold text-sm mb-1">
-            Unable to load tweet
-          </p>
-          <p className="text-gray-500 text-xs mb-4">
-            The tweet may have been deleted or is unavailable
-          </p>
-          <button
-            onClick={() => openUrl(url)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-black hover:bg-gray-800 transition-colors"
-          >
-            View on X
-          </button>
+          <div className="w-7 h-7 rounded bg-gray-100" />
+        </div>
+        <div className="space-y-2 mb-4">
+          <div className="h-4 w-full bg-gray-200 rounded" />
+          <div className="h-4 w-5/6 bg-gray-200 rounded" />
+          <div className="h-4 w-2/3 bg-gray-100 rounded" />
+        </div>
+        <div className="h-40 w-full bg-gray-200 rounded-lg border-2 border-black/10 mb-4" />
+        <div className="flex items-center gap-6">
+          <div className="h-3 w-12 bg-gray-100 rounded" />
+          <div className="h-3 w-12 bg-gray-100 rounded" />
+          <div className="h-3 w-12 bg-gray-100 rounded" />
         </div>
       </div>
     );
   }
 
+  /* Error / no tweet ID */
+  if (status === "error" || !tweetId) {
+    return (
+      <a
+        href={xUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-full rounded-lg border-[3px] border-black bg-[#FF6B6B] shadow-[4px_4px_0px_#000] p-5 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all no-underline"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center">
+              <TwitterIcon className="w-5 h-5" style={{ color: "#fff" }} />
+            </div>
+            <div>
+              <p className="text-black font-black text-sm uppercase m-0">
+                Could not load tweet
+              </p>
+              <p className="text-black/60 text-xs font-medium m-0 mt-0.5">
+                Tap to view on X
+              </p>
+            </div>
+          </div>
+          <ExternalLinkIcon className="w-5 h-5 text-black/60 shrink-0" />
+        </div>
+      </a>
+    );
+  }
+
+  /* Loaded card */
   return (
-    <div className="w-full">
-      <style>{`
-        twitter-widget, twitterwidget, .twitter-tweet, .twitter-tweet-rendered {
-          max-width: 100% !important;
-          width: 100% !important;
-        }
-      `}</style>
-      {!loaded && (
-        <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="p-4 animate-pulse">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-11 h-11 rounded-full bg-gray-200" />
-              <div className="flex-1">
-                <div className="h-4 w-28 bg-gray-200 rounded mb-1.5" />
-                <div className="h-3 w-36 bg-gray-100 rounded" />
+    <div
+      className="block w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden cursor-pointer hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all group"
+      onClick={() => openUrl(xUrl)}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") openUrl(xUrl);
+      }}
+    >
+      {/* Header: Avatar + Name + Verified + X logo */}
+      <div className="px-5 pt-5 pb-0 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Avatar */}
+          {avatarUrl && !avatarError ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="w-12 h-12 rounded-full border-[3px] border-black object-cover shrink-0"
+              loading="lazy"
+              onError={() => setAvatarError(true)}
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full border-[3px] border-black bg-black flex items-center justify-center shrink-0">
+              <span className="text-white font-black text-lg">
+                {displayName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="text-black font-bold text-sm truncate m-0 max-w-40">
+                {displayName}
+              </p>
+              {isVerified && <VerifiedBadge className="w-4 h-4 shrink-0" />}
+            </div>
+            {handle && (
+              <p className="text-black/50 text-xs font-medium m-0 truncate">
+                {handle}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shrink-0 group-hover:bg-[#FFE66D] transition-colors">
+          <TwitterIcon
+            className="w-4 h-4 text-white group-hover:text-black transition-colors"
+            style={{}}
+          />
+        </div>
+      </div>
+
+      {/* Tweet text */}
+      <div className="px-5 pt-3 pb-3">
+        {displayText ? (
+          <p className="text-black/80 text-sm leading-relaxed font-medium m-0 whitespace-pre-line overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:6]">
+            {displayText}
+          </p>
+        ) : (
+          <p className="text-black/50 text-sm font-medium italic m-0">
+            View this post on X →
+          </p>
+        )}
+      </div>
+
+      {/* Media: Images */}
+      {images.length > 0 && (
+        <div
+          className={`mx-5 mb-3 rounded-lg border-[3px] border-black overflow-hidden ${
+            images.length === 1 ? "" : "grid grid-cols-2 gap-0"
+          }`}
+        >
+          {images.slice(0, 4).map((img, i) => (
+            <div
+              key={i}
+              className={`relative overflow-hidden ${
+                images.length === 1
+                  ? "aspect-video"
+                  : images.length === 3 && i === 0
+                    ? "row-span-2 aspect-square"
+                    : "aspect-square"
+              } ${images.length > 1 && i > 0 ? "border-l-2 border-black" : ""} ${
+                images.length > 2 && i >= 2 ? "border-t-2 border-black" : ""
+              } ${images.length === 3 && i === 2 ? "border-t-2 border-black" : ""}`}
+            >
+              <img
+                src={img}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              {images.length > 4 && i === 3 && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <span className="text-white font-black text-xl">
+                    +{images.length - 4}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Media: Video */}
+      {videoThumb && images.length === 0 && (
+        <div
+          className="mx-5 mb-3 rounded-lg border-[3px] border-black overflow-hidden relative aspect-video bg-black"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          {videoUrl ? (
+            <video
+              src={videoUrl}
+              controls
+              playsInline
+              preload="metadata"
+              poster={videoThumb}
+              className="w-full h-full object-cover bg-black"
+            />
+          ) : (
+            <>
+              <img
+                src={videoThumb}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-white/90 border-[3px] border-black shadow-[3px_3px_0px_#000] flex items-center justify-center">
+                  <PlayIcon className="w-7 h-7 text-black ml-0.5" />
+                </div>
               </div>
-              <TwitterIcon
-                className="w-5 h-5"
-                style={{ color: "#000", opacity: 0.4 }}
+            </>
+          )}
+          <span className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded uppercase pointer-events-none">
+            Video
+          </span>
+        </div>
+      )}
+
+      {/* Link card preview */}
+      {linkCard && images.length === 0 && !videoThumb && !article && (
+        <div className="mx-5 mb-3 rounded-lg border-[3px] border-black overflow-hidden bg-[#FFF8E7]">
+          {linkCard.image && (
+            <div className="aspect-2/1 overflow-hidden border-b-[3px] border-black">
+              <img
+                src={linkCard.image}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
-            <div className="space-y-2 mb-4">
-              <div className="h-4 w-full bg-gray-200 rounded" />
-              <div className="h-4 w-5/6 bg-gray-200 rounded" />
-              <div className="h-4 w-2/3 bg-gray-100 rounded" />
-            </div>
+          )}
+          <div className="px-3 py-2.5">
+            <p className="text-black font-bold text-xs truncate m-0">
+              {linkCard.title}
+            </p>
+            {linkCard.description && (
+              <p className="text-black/50 text-[11px] font-medium m-0 mt-0.5 line-clamp-2">
+                {linkCard.description}
+              </p>
+            )}
+            {linkCard.url && (
+              <p className="text-black/40 text-[10px] font-bold m-0 mt-1 truncate uppercase">
+                {(() => {
+                  try {
+                    return new URL(linkCard.url).hostname.replace("www.", "");
+                  } catch {
+                    return linkCard.url;
+                  }
+                })()}
+              </p>
+            )}
           </div>
         </div>
       )}
-      <div
-        ref={containerRef}
-        className="w-full max-w-[550px] mx-auto [&>div]:m-0! [&_.twitter-tweet]:m-0! [&_.twitter-tweet]:max-w-full! [&_.twitter-tweet]:w-full! *:max-w-full! [&_iframe]:w-full!"
-      />
+
+      {/* Article preview */}
+      {article && images.length === 0 && !videoThumb && (
+        <div className="mx-5 mb-3 rounded-lg border-[3px] border-black overflow-hidden bg-[#FFF8E7]">
+          {article.coverImage && (
+            <div className="aspect-2/1 overflow-hidden border-b-[3px] border-black">
+              <img
+                src={article.coverImage}
+                alt={article.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+          <div className="px-3 py-3">
+            <p className="text-black font-black text-sm leading-snug m-0">
+              {article.title}
+            </p>
+            {article.previewText && (
+              <p className="text-black/70 text-xs font-medium m-0 mt-1.5 line-clamp-3">
+                {article.previewText}
+              </p>
+            )}
+
+            {article.blocks.length > 0 && (
+              <div className="mt-2.5 space-y-1.5 border-t-2 border-black/15 pt-2.5">
+                {article.blocks.map((block, idx) => (
+                  <p
+                    key={`${block.type}-${idx}`}
+                    className={`m-0 text-black/80 font-medium ${
+                      block.type === "header-two"
+                        ? "text-xs font-black uppercase"
+                        : block.type === "ordered-list-item"
+                          ? "text-[11px] before:content-['•_']"
+                          : "text-[11px]"
+                    } line-clamp-2`}
+                  >
+                    {block.text}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Engagement row */}
+      {hasEngagement && (
+        <div className="px-5 pb-3 flex items-center gap-5">
+          {replies > 0 && (
+            <span className="inline-flex items-center gap-1 text-black/40 text-xs font-bold">
+              <TweetReplyIcon className="w-3.5 h-3.5" />
+              {formatCompact(replies)}
+            </span>
+          )}
+          {retweets > 0 && (
+            <span className="inline-flex items-center gap-1 text-black/40 text-xs font-bold">
+              <TweetRetweetIcon className="w-3.5 h-3.5" />
+              {formatCompact(retweets)}
+            </span>
+          )}
+          {likes > 0 && (
+            <span className="inline-flex items-center gap-1 text-[#FF6B6B] text-xs font-bold">
+              <TweetHeartIcon className="w-3.5 h-3.5" />
+              {formatCompact(likes)}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="px-5 py-3 border-t-[3px] border-black bg-[#FFF8E7] flex items-center justify-between">
+        <span className="text-black/50 text-xs font-bold">
+          {displayTimestamp ?? "Post on X"}
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-black/60 group-hover:text-black transition-colors">
+          View on X
+          <ExternalLinkIcon className="w-3.5 h-3.5" />
+        </span>
+      </div>
     </div>
   );
 }
@@ -791,23 +1228,23 @@ function RedditEmbed({ url }: { url: string }) {
 
   if (!embedUrl || error) {
     return (
-      <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden">
         <div className="px-5 py-8 flex flex-col items-center text-center">
           <div
-            className="flex items-center justify-center w-14 h-14 rounded-full mb-4"
-            style={{ backgroundColor: "#FFF4F0" }}
+            className="flex items-center justify-center w-14 h-14 rounded-lg mb-4 border-2 border-black"
+            style={{ backgroundColor: "#FFE66D" }}
           >
             <RedditIcon className="w-7 h-7" style={{ color: "#FF4500" }} />
           </div>
-          <p className="text-gray-900 font-semibold text-sm mb-1">
+          <p className="text-black font-bold text-sm mb-1">
             Unable to load Reddit post
           </p>
-          <p className="text-gray-500 text-xs mb-4">
+          <p className="text-black/60 text-xs mb-4">
             The post may have been deleted or is unavailable
           </p>
           <button
             onClick={() => openUrl(url)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold text-white border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all uppercase"
             style={{ backgroundColor: "#FF4500" }}
           >
             View on Reddit
@@ -818,7 +1255,7 @@ function RedditEmbed({ url }: { url: string }) {
   }
 
   return (
-    <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden">
       <iframe
         src={embedUrl}
         sandbox="allow-scripts allow-same-origin allow-popups"
@@ -838,11 +1275,11 @@ function LoadingSkeleton({ platform }: { platform: Platform }) {
   const Icon = config.icon;
 
   return (
-    <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden">
       <div className="p-4 animate-pulse">
         {/* Header skeleton */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-11 h-11 rounded-full bg-gray-200" />
+          <div className="w-11 h-11 rounded-lg bg-gray-200 border-2 border-black" />
           <div className="flex-1">
             <div className="h-4 w-28 bg-gray-200 rounded mb-1.5" />
             <div className="h-3 w-36 bg-gray-100 rounded" />
@@ -861,7 +1298,7 @@ function LoadingSkeleton({ platform }: { platform: Platform }) {
         </div>
 
         {/* Image skeleton */}
-        <div className="w-full h-44 bg-gray-100 rounded-xl mb-3" />
+        <div className="w-full h-44 bg-gray-100 rounded-lg mb-3 border-2 border-black" />
 
         {/* Footer skeleton */}
         <div className="flex gap-6">
@@ -890,27 +1327,27 @@ function ErrorCard({
   const Icon = config.icon;
 
   return (
-    <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden">
       <div className="px-5 py-8 flex flex-col items-center text-center">
         {/* Icon badge */}
         <div
-          className="flex items-center justify-center w-14 h-14 rounded-full mb-4"
+          className="flex items-center justify-center w-14 h-14 rounded-lg mb-4 border-2 border-black"
           style={{ backgroundColor: config.bgColor }}
         >
           <Icon className="w-7 h-7" style={{ color: config.color }} />
         </div>
 
-        <p className="text-gray-900 font-semibold text-sm mb-1">
+        <p className="text-black font-bold text-sm mb-1">
           Unable to load {config.name} post
         </p>
-        <p className="text-gray-500 text-xs max-w-xs mb-5 leading-relaxed">
+        <p className="text-black/60 text-xs max-w-xs mb-5 leading-relaxed">
           {message}
         </p>
 
         <div className="flex items-center gap-3">
           <button
             onClick={onRetry}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border-2 border-black text-black bg-white shadow-[3px_3px_0px_#000] hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all uppercase"
           >
             <svg
               className="w-3.5 h-3.5"
@@ -929,7 +1366,7 @@ function ErrorCard({
           </button>
           <button
             onClick={() => openUrl(url)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors hover:opacity-90"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold text-white border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all uppercase"
             style={{ backgroundColor: config.color }}
           >
             <svg
@@ -994,7 +1431,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
 
   return (
     <div
-      className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all duration-200"
+      className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden cursor-pointer hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0px_#000] transition-all duration-200"
       onClick={() => openUrl(data.url)}
       role="link"
       tabIndex={0}
@@ -1010,12 +1447,12 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
               <img
                 src={data.avatar}
                 alt={data.author}
-                className="w-11 h-11 rounded-full object-cover shrink-0 ring-1 ring-gray-100"
+                className="w-11 h-11 rounded-lg object-cover shrink-0 border-2 border-black"
                 loading="lazy"
               />
             ) : (
               <div
-                className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0 border-2 border-black"
                 style={{ backgroundColor: config.bgColor }}
               >
                 <Icon className="w-5 h-5" style={{ color: config.color }} />
@@ -1024,16 +1461,16 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
 
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-gray-900 font-semibold text-sm truncate max-w-[180px]">
+                <span className="text-black font-bold text-sm truncate max-w-[180px]">
                   {data.author}
                 </span>
                 {timeAgo && (
-                  <span className="text-gray-400 text-xs shrink-0">
+                  <span className="text-black/50 text-xs shrink-0 font-bold">
                     · {timeAgo}
                   </span>
                 )}
               </div>
-              <div className="text-gray-500 text-xs truncate">
+              <div className="text-black/60 text-xs truncate font-medium">
                 {data.subreddit ?? data.handle}
               </div>
             </div>
@@ -1041,7 +1478,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
 
           {/* Platform badge */}
           <span
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold shrink-0 border-2 border-black uppercase"
             style={{
               backgroundColor: config.bgColor,
               color: config.color,
@@ -1056,7 +1493,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
       {/* ── Channel badge (Farcaster) ── */}
       {data.channel && (
         <div className="px-4 pt-2">
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[11px] font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#FFE66D] text-black text-[11px] font-bold border-2 border-black">
             {data.channelImg && (
               <img
                 src={data.channelImg}
@@ -1073,7 +1510,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
       {/* ── Title (Reddit) ── */}
       {data.title && (
         <div className="px-4 pt-3">
-          <h3 className="text-gray-900 font-bold text-base leading-snug overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+          <h3 className="text-black font-black text-base leading-snug overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
             {data.title}
           </h3>
         </div>
@@ -1082,7 +1519,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
       {/* ── Content ── */}
       {data.content && (
         <div className="px-4 pt-2">
-          <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:6]">
+          <p className="text-black/80 text-sm leading-relaxed whitespace-pre-line overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:6] font-medium">
             {truncateText(data.content, 600)}
           </p>
         </div>
@@ -1094,7 +1531,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
           {data.videos.map((src, i) => (
             <div
               key={`vid-${i}`}
-              className="rounded-xl overflow-hidden border border-gray-100 mb-2 last:mb-0"
+              className="rounded-lg overflow-hidden border-2 border-black mb-2 last:mb-0"
               onClick={(e) => e.stopPropagation()}
             >
               <video
@@ -1116,7 +1553,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
       {data.images.length > 0 && (
         <div className="px-4 pt-3">
           {data.images.length === 1 ? (
-            <div className="rounded-xl overflow-hidden border border-gray-100">
+            <div className="rounded-lg overflow-hidden border-2 border-black">
               <img
                 src={data.images[0]}
                 alt="Post media"
@@ -1128,7 +1565,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-0.5 rounded-xl overflow-hidden border border-gray-100">
+            <div className="grid grid-cols-2 gap-0.5 rounded-lg overflow-hidden border-2 border-black">
               {data.images.slice(0, 4).map((src, i) => (
                 <img
                   key={i}
@@ -1154,14 +1591,14 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
             {data.externalLinks.map((link, i) => (
               <div
                 key={`link-${i}`}
-                className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors mb-2 last:mb-0"
+                className="flex items-center gap-3 p-3 rounded-lg border-2 border-black bg-[#FFF8E7] hover:bg-[#FFE66D] transition-all mb-2 last:mb-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   openUrl(link.url);
                 }}
               >
                 <svg
-                  className="w-4 h-4 text-gray-400 shrink-0"
+                  className="w-4 h-4 text-black shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1175,11 +1612,13 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
                 </svg>
                 <div className="min-w-0">
                   {link.title && (
-                    <p className="text-gray-900 text-sm font-medium truncate">
+                    <p className="text-black text-sm font-bold truncate">
                       {link.title}
                     </p>
                   )}
-                  <p className="text-gray-500 text-xs truncate">{link.url}</p>
+                  <p className="text-black/50 text-xs truncate font-medium">
+                    {link.url}
+                  </p>
                 </div>
               </div>
             ))}
@@ -1188,7 +1627,7 @@ function PostCard({ data, platform }: { data: PostInfo; platform: Platform }) {
 
       {/* ── Engagement Footer ── */}
       <div className="px-4 py-3 mt-1">
-        <div className="flex items-center gap-5 text-gray-500 text-xs">
+        <div className="flex items-center gap-5 text-black/60 text-xs font-bold">
           {platform === "reddit" ? (
             <>
               <span className="inline-flex items-center gap-1 hover:text-orange-500 transition-colors">

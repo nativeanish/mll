@@ -90,18 +90,18 @@ async function copyToClipboard(text: string) {
 
 function extColor(ext: string): string {
   const e = ext.toLowerCase();
-  if (["pdf"].includes(e)) return "bg-red-100 text-red-700";
-  if (["doc", "docx"].includes(e)) return "bg-blue-100 text-blue-700";
-  if (["xls", "xlsx", "csv"].includes(e)) return "bg-green-100 text-green-700";
+  if (["pdf"].includes(e)) return "bg-[#FF6B6B] text-black";
+  if (["doc", "docx"].includes(e)) return "bg-[#6366F1] text-white";
+  if (["xls", "xlsx", "csv"].includes(e)) return "bg-[#4ECDC4] text-black";
   if (["png", "jpg", "jpeg", "gif", "svg", "webp"].includes(e))
-    return "bg-purple-100 text-purple-700";
+    return "bg-[#A855F7] text-white";
   if (["zip", "rar", "7z", "tar", "gz"].includes(e))
-    return "bg-amber-100 text-amber-700";
+    return "bg-[#FFE66D] text-black";
   if (["mp4", "mov", "avi", "mkv", "webm"].includes(e))
-    return "bg-pink-100 text-pink-700";
+    return "bg-[#FF6B6B] text-black";
   if (["mp3", "wav", "ogg", "flac"].includes(e))
-    return "bg-cyan-100 text-cyan-700";
-  return "bg-slate-100 text-slate-600";
+    return "bg-[#4ECDC4] text-black";
+  return "bg-gray-200 text-black";
 }
 
 /* ------------------------------------------------------------------ */
@@ -118,32 +118,29 @@ function FileCard({ file }: { file: LocalFileMeta }) {
   const showOriginalName = label !== file.name;
 
   return (
-    <div className="group w-full rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-slate-300">
+    <div className="group w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000]">
       <div className="flex items-center gap-3.5 p-4">
         {/* extension badge */}
         <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-[0.65rem] font-bold uppercase tracking-wider ${extColor(ext)}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-2 border-black text-[0.65rem] font-black uppercase tracking-wider ${extColor(ext)}`}
         >
           {ext || "FILE"}
         </div>
 
         {/* file info */}
         <div className="min-w-0 flex-1">
-          <p
-            className="truncate text-sm font-semibold text-slate-800"
-            title={label}
-          >
+          <p className="truncate text-sm font-bold text-black" title={label}>
             {label}
           </p>
           {showOriginalName && (
             <p
-              className="truncate text-xs text-slate-400 mt-0.5"
+              className="truncate text-xs text-black/50 mt-0.5"
               title={file.name}
             >
               {file.name}
             </p>
           )}
-          <p className="text-[0.7rem] text-slate-400 mt-0.5">
+          <p className="text-[0.7rem] text-black/50 mt-0.5">
             {formatBytes(file.size)}
             {file.type ? ` · ${file.type}` : ""}
           </p>
@@ -151,7 +148,7 @@ function FileCard({ file }: { file: LocalFileMeta }) {
       </div>
 
       {/* actions */}
-      <div className="flex items-center border-t border-slate-100">
+      <div className="flex items-center border-t-[3px] border-black">
         <button
           type="button"
           onClick={async () => {
@@ -160,7 +157,7 @@ function FileCard({ file }: { file: LocalFileMeta }) {
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           }}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors rounded-bl-xl cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold uppercase text-black hover:bg-[#FFE66D] transition-colors rounded-bl-lg cursor-pointer"
           aria-label="Copy file URL"
         >
           <svg
@@ -189,12 +186,12 @@ function FileCard({ file }: { file: LocalFileMeta }) {
           {copied ? "Copied!" : "Copy link"}
         </button>
 
-        <div className="w-px h-5 bg-slate-100" />
+        <div className="w-[3px] h-5 bg-black" />
 
         <button
           type="button"
           onClick={() => downloadViaAnchor(file.url, file.name)}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors rounded-br-xl cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold uppercase text-black hover:bg-[#FFE66D] transition-colors rounded-br-lg cursor-pointer"
           aria-label="Download file"
         >
           <svg
@@ -237,7 +234,7 @@ function File({ props }: { props: BlockData }) {
       data-description={description || undefined}
     >
       {!files.length ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+        <div className="flex flex-col items-center justify-center rounded-lg border-[3px] border-dashed border-black bg-[#FFE66D] px-5 py-10 text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -248,13 +245,13 @@ function File({ props }: { props: BlockData }) {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-slate-300 mb-3"
+            className="text-black mb-3"
           >
             <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
             <path d="M14 2v4a2 2 0 0 0 2 2h4" />
           </svg>
-          <p className="text-sm font-medium text-slate-500">No files yet</p>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm font-bold text-black">No files yet</p>
+          <p className="text-xs text-black/70 mt-1">
             Files shared here will appear when available.
           </p>
         </div>

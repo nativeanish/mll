@@ -154,24 +154,24 @@ export default function PageGeneration({ basicData, block }: Props) {
   return (
     <>
       <style>{`
-        * { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f8fafc; }
-        *::-webkit-scrollbar { width: 6px; height: 6px; }
-        *::-webkit-scrollbar-track { background: #f8fafc; }
-        *::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        *::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        * { scrollbar-width: thin; scrollbar-color: #222 #FFE66D; }
+        *::-webkit-scrollbar { width: 8px; height: 8px; }
+        *::-webkit-scrollbar-track { background: #FFE66D; }
+        *::-webkit-scrollbar-thumb { background: #222; border-radius: 0; }
+        *::-webkit-scrollbar-thumb:hover { background: #000; }
       `}</style>
 
-      <div className="bg-white min-h-screen flex flex-col">
+      <div className="bg-[#FFF8E7] min-h-screen flex flex-col">
         {/* ── Navbar ──────────────────────────────────────── */}
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <header className="sticky top-0 z-50 bg-[#FFE66D] border-b-[3px] border-black">
           <div className="max-w-2xl mx-auto flex items-center justify-between px-4 h-14">
             <a href="#" className="flex items-center gap-2 select-none">
               <Logo />
-              <span className="text-gray-900 font-semibold text-sm tracking-tight">
+              <span className="text-black font-black text-sm uppercase tracking-widest">
                 metalinks
               </span>
             </a>
-            <button className="md:hidden text-gray-400 hover:text-gray-900 transition p-1">
+            <button className="md:hidden text-black hover:bg-black hover:text-[#FFE66D] border-2 border-black p-1 transition-colors">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -181,7 +181,7 @@ export default function PageGeneration({ basicData, block }: Props) {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                   d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
@@ -193,7 +193,7 @@ export default function PageGeneration({ basicData, block }: Props) {
         <div className="flex-1 w-full max-w-2xl mx-auto">
           {/* Cover Image */}
           {coverUrl && (
-            <div className="w-full overflow-hidden">
+            <div className="w-full border-b-[3px] border-black overflow-hidden">
               <img
                 src={coverUrl}
                 alt="Cover"
@@ -212,20 +212,20 @@ export default function PageGeneration({ basicData, block }: Props) {
               <img
                 src={avatarUrl}
                 alt="Profile avatar"
-                className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white shadow-lg object-cover"
+                className="w-24 h-24 md:w-28 md:h-28 rounded-lg border-[3px] border-black shadow-[4px_4px_0px_#000] object-cover bg-white"
               />
             </div>
           )}
 
           {/* Name & Bio */}
-          <div className="text-center mt-4">
+          <div className="text-center mt-5">
             {name && (
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-black uppercase tracking-wide">
                 {name}
               </h1>
             )}
             {description && (
-              <p className="mt-1.5 text-gray-500 text-sm md:text-base leading-relaxed max-w-md mx-auto">
+              <p className="mt-2 text-black/70 text-sm md:text-base font-medium leading-relaxed max-w-md mx-auto">
                 {description}
               </p>
             )}
@@ -233,7 +233,7 @@ export default function PageGeneration({ basicData, block }: Props) {
 
           {/* Social Icons */}
           {socialLinks.length > 0 && (
-            <div className="flex justify-center flex-wrap gap-3 mt-4">
+            <div className="flex justify-center flex-wrap gap-3 mt-5">
               {socialLinks.map((link) => (
                 <Link key={link.id} block={link} />
               ))}
@@ -241,24 +241,17 @@ export default function PageGeneration({ basicData, block }: Props) {
           )}
 
           {/* ── Content Blocks (stacked, one per row) ──── */}
-          <div className="flex flex-col mt-6 pb-10">
+          <div className="flex flex-col mt-6 pb-10 gap-4 px-4">
             {contentBlocks.map((b) => (
-              <div
-                key={b.id}
-                className="w-full border-t border-gray-200 py-4 px-4"
-              >
+              <div key={b.id} className="w-full">
                 {renderBlock(b)}
               </div>
             ))}
-            {/* Bottom border for the last item */}
-            {contentBlocks.length > 0 && (
-              <div className="border-t border-gray-200" />
-            )}
           </div>
         </div>
 
         {/* ── Footer ─────────────────────────────────────── */}
-        <footer className="border-t border-gray-100 bg-white">
+        <footer className="border-t-[3px] border-black bg-[#FFE66D]">
           <div className="max-w-2xl mx-auto px-4 py-6 flex justify-center">
             <a
               href="#"
@@ -269,7 +262,7 @@ export default function PageGeneration({ basicData, block }: Props) {
                   "_blank",
                 );
               }}
-              className="inline-flex items-center justify-center rounded-full bg-gray-900 text-white px-5 py-2 text-xs font-medium hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center justify-center rounded-lg bg-black text-white px-5 py-2.5 text-xs font-black uppercase tracking-wider border-[3px] border-black shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
               aria-label="Powered by ar.io"
             >
               <div className="mr-1.5">
@@ -290,7 +283,7 @@ export default function PageGeneration({ basicData, block }: Props) {
                   ></path>
                 </svg>
               </div>
-              Powered by <span className="ml-1 font-semibold">ar.io</span>
+              Powered by <span className="ml-1 font-black">ar.io</span>
             </a>
           </div>
         </footer>

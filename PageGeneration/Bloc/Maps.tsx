@@ -240,7 +240,7 @@ function Maps({ props }: { props: BlockData }) {
 
   return (
     <div
-      className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden group"
+      className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden group"
       data-uuid={props.id}
     >
       {/* Map */}
@@ -250,9 +250,9 @@ function Maps({ props }: { props: BlockData }) {
       >
         <div ref={mapRef} className="w-full aspect-2/1" style={{ zIndex: 0 }} />
         {/* Gradient overlay at bottom of map */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-black/30 to-transparent pointer-events-none" />
+
         {/* Floating coordinates badge */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm shadow-sm text-[0.7rem] font-medium text-gray-700">
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FFE66D] border-2 border-black shadow-[2px_2px_0px_#000] text-[0.7rem] font-bold text-black">
           <MapPinIcon className="w-3.5 h-3.5 text-red-500" />
           {coordText}
         </div>
@@ -262,7 +262,7 @@ function Maps({ props }: { props: BlockData }) {
       <div className="px-4 py-3">
         {/* Title */}
         {title && (
-          <h3 className="text-sm font-semibold text-gray-900 leading-snug">
+          <h3 className="text-sm font-bold uppercase text-black leading-snug">
             {title}
           </h3>
         )}
@@ -270,7 +270,7 @@ function Maps({ props }: { props: BlockData }) {
         {/* Description */}
         {description && (
           <p
-            className={`text-xs text-gray-500 leading-relaxed ${title ? "mt-1" : ""}`}
+            className={`text-xs text-black/70 leading-relaxed ${title ? "mt-1" : ""}`}
           >
             {description}
           </p>
@@ -278,14 +278,14 @@ function Maps({ props }: { props: BlockData }) {
 
         {/* If no title and no description, show a default label */}
         {!title && !description && (
-          <p className="text-xs text-gray-400">Map location</p>
+          <p className="text-xs font-bold uppercase text-black">Map location</p>
         )}
 
         {/* Action button */}
         <button
           type="button"
           onClick={() => window.open(mapsUrl, "_blank", "noopener")}
-          className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 active:bg-gray-950 transition-colors cursor-pointer"
+          className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border-[3px] border-black bg-black text-white text-xs font-bold uppercase shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none cursor-pointer"
         >
           <NavigationIcon className="w-3.5 h-3.5" />
           Open in Google Maps

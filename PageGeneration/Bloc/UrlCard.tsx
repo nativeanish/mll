@@ -45,7 +45,7 @@ function UrlCard({ props }: UrlCardProps) {
     >
       {displayType === "button" ? (
         <div
-          className="p-3 bg-gray-900 border cursor-pointer border-white w-full text-white text-md flex flex-row rounded-lg"
+          className="p-3 border-[3px] border-black bg-black cursor-pointer w-full text-white text-md flex flex-row rounded-lg font-bold uppercase tracking-wide shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
           onClick={() => {
             if (url) {
               const a = document.createElement("a");
@@ -66,7 +66,7 @@ function UrlCard({ props }: UrlCardProps) {
       ) : (
         <div>
           <div
-            className="w-full cursor-pointer aspect-video border border-gray-300 rounded-lg overflow-hidden flex relative"
+            className="w-full cursor-pointer aspect-video border-[3px] border-black rounded-lg shadow-[4px_4px_0px_#000] overflow-hidden flex relative"
             onClick={() => {
               if (url) {
                 const a = document.createElement("a");
@@ -81,10 +81,10 @@ function UrlCard({ props }: UrlCardProps) {
             <img
               src={imageUrl || ""}
               alt={description || "Image"}
-              className="w-full h-full object-cover brightness-50 hover:brightness-100 transition-all"
+              className="w-full h-full object-cover transition-all"
             />
             {imageText && (
-              <div className="absolute w-full bottom-0 bg-black bg-opacity-60 px-3 py-1 rounded text-gray-100 text-md pointer-events-none flex space-x-2 brightness-100 hover:brightness-50 transition-all">
+              <div className="absolute w-full bottom-0 bg-black border-t-[3px] border-black px-3 py-1 text-white text-md pointer-events-none flex space-x-2 font-bold uppercase tracking-wide">
                 <Browser />
                 <span className="truncate">{imageText}</span>
               </div>

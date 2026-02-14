@@ -104,7 +104,7 @@ function ImageCar({ props }: { props: BlockData }) {
       data-description={description || undefined}
     >
       {/* Main image */}
-      <div className="relative w-full rounded-xl overflow-hidden bg-slate-100">
+      <div className="relative w-full rounded-lg overflow-hidden border-[3px] border-black bg-white shadow-[4px_4px_0px_#000]">
         <div
           className="aspect-video w-full cursor-pointer"
           onClick={openLightbox}
@@ -119,7 +119,7 @@ function ImageCar({ props }: { props: BlockData }) {
 
         {/* Image title overlay */}
         {images[currentIndex].title && (
-          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-4 pb-3 pt-8 pointer-events-none">
+          <div className="absolute bottom-0 inset-x-0 bg-black/70 px-4 pb-3 pt-3 pointer-events-none">
             <p className="text-sm font-medium text-white truncate">
               {images[currentIndex].title}
             </p>
@@ -132,7 +132,7 @@ function ImageCar({ props }: { props: BlockData }) {
             <button
               onClick={goToPrevious}
               type="button"
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-[#FFE66D] border-2 border-black shadow-[2px_2px_0px_#000] flex items-center justify-center text-black hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_#000] cursor-pointer"
               aria-label="Previous image"
             >
               <svg
@@ -152,7 +152,7 @@ function ImageCar({ props }: { props: BlockData }) {
             <button
               onClick={goToNext}
               type="button"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-[#FFE66D] border-2 border-black shadow-[2px_2px_0px_#000] flex items-center justify-center text-black hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_#000] cursor-pointer"
               aria-label="Next image"
             >
               <svg
@@ -171,7 +171,7 @@ function ImageCar({ props }: { props: BlockData }) {
             </button>
 
             {/* Counter pill */}
-            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/50 text-[0.7rem] font-medium text-white tabular-nums">
+            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black border-2 border-black text-[0.7rem] font-bold text-white tabular-nums">
               {currentIndex + 1} / {images.length}
             </div>
           </>
@@ -188,8 +188,8 @@ function ImageCar({ props }: { props: BlockData }) {
               type="button"
               className={`relative shrink-0 w-16 h-11 rounded-lg overflow-hidden transition-all cursor-pointer ${
                 currentIndex === index
-                  ? "ring-2 ring-slate-800 ring-offset-1 opacity-100"
-                  : "opacity-50 hover:opacity-80"
+                  ? "border-[3px] border-black shadow-[2px_2px_0px_#000] opacity-100"
+                  : "border-2 border-black/30 opacity-60 hover:opacity-90"
               }`}
               aria-label={`Go to image ${index + 1}`}
             >
@@ -206,33 +206,33 @@ function ImageCar({ props }: { props: BlockData }) {
       {/* ---- Lightbox Modal ---- */}
       {lightbox && (
         <div
-          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]"
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/90 animate-[fadeIn_0.15s_ease-out]"
           onClick={(e) => {
             if (e.target === e.currentTarget) closeLightbox();
           }}
         >
           <div
-            className="relative w-full max-h-[95dvh] sm:max-w-3xl sm:max-h-[90dvh] bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-[slideUp_0.2s_ease-out] sm:animate-[scaleIn_0.15s_ease-out]"
+            className="relative w-full max-h-[95dvh] sm:max-w-3xl sm:max-h-[90dvh] bg-white rounded-lg border-[3px] border-black overflow-hidden shadow-[6px_6px_0px_#000] flex flex-col animate-[slideUp_0.2s_ease-out] sm:animate-[scaleIn_0.15s_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Mobile drag bar */}
-            <div className="block sm:hidden w-9 h-1 mx-auto mt-2 rounded-full bg-slate-300 shrink-0" />
+            <div className="block sm:hidden w-9 h-1 mx-auto mt-2 rounded-lg bg-black shrink-0" />
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b-[3px] border-black shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 {images.length > 1 && (
-                  <span className="text-xs font-medium text-slate-400 tabular-nums shrink-0">
+                  <span className="text-xs font-bold text-black tabular-nums shrink-0">
                     {currentIndex + 1} / {images.length}
                   </span>
                 )}
                 {images[currentIndex].title && (
-                  <p className="text-sm font-semibold text-slate-700 truncate">
+                  <p className="text-sm font-bold text-black truncate">
                     {images[currentIndex].title}
                   </p>
                 )}
                 {!images[currentIndex].title && images[currentIndex].name && (
-                  <p className="text-sm text-slate-500 truncate">
+                  <p className="text-sm text-black/70 truncate">
                     {images[currentIndex].name}
                   </p>
                 )}
@@ -240,7 +240,7 @@ function ImageCar({ props }: { props: BlockData }) {
               <button
                 type="button"
                 onClick={closeLightbox}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-black border-2 border-black hover:bg-[#FF6B6B] hover:text-white transition-colors cursor-pointer shrink-0"
                 aria-label="Close"
               >
                 <svg
@@ -261,7 +261,7 @@ function ImageCar({ props }: { props: BlockData }) {
             </div>
 
             {/* Image */}
-            <div className="relative flex-1 min-h-0 bg-slate-50 flex items-center justify-center overflow-hidden">
+            <div className="relative flex-1 min-h-0 bg-gray-100 flex items-center justify-center overflow-hidden">
               <img
                 src={images[currentIndex].base64 || "/placeholder.svg"}
                 alt={images[currentIndex].name}
@@ -275,7 +275,7 @@ function ImageCar({ props }: { props: BlockData }) {
                   <button
                     onClick={goToPrevious}
                     type="button"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-[#FFE66D] border-2 border-black shadow-[2px_2px_0px_#000] flex items-center justify-center text-black hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_#000] cursor-pointer"
                     aria-label="Previous image"
                   >
                     <svg
@@ -295,7 +295,7 @@ function ImageCar({ props }: { props: BlockData }) {
                   <button
                     onClick={goToNext}
                     type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center text-slate-700 hover:bg-white transition-colors cursor-pointer"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-[#FFE66D] border-2 border-black shadow-[2px_2px_0px_#000] flex items-center justify-center text-black hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_#000] cursor-pointer"
                     aria-label="Next image"
                   >
                     <svg
@@ -317,11 +317,11 @@ function ImageCar({ props }: { props: BlockData }) {
             </div>
 
             {/* Actions footer */}
-            <div className="flex items-center border-t border-slate-100 shrink-0">
+            <div className="flex items-center border-t-[3px] border-black shrink-0">
               <button
                 type="button"
                 onClick={copyUrl}
-                className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold uppercase text-black hover:bg-[#FFE66D] transition-colors cursor-pointer"
               >
                 {copied ? (
                   <>
@@ -362,12 +362,12 @@ function ImageCar({ props }: { props: BlockData }) {
                 )}
               </button>
 
-              <div className="w-px h-6 bg-slate-100" />
+              <div className="w-[3px] h-6 bg-black" />
 
               <button
                 type="button"
                 onClick={downloadImage}
-                className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold uppercase text-black hover:bg-[#FFE66D] transition-colors cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

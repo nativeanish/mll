@@ -329,7 +329,7 @@ function Community({ blockData }: { blockData: BlockData }) {
       {url.length > 0 && title.length > 0 && (
         <button
           type="button"
-          className="group w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-slate-300 active:scale-[0.98] cursor-pointer"
+          className="group w-full flex items-center gap-3 px-4 py-3.5 rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all cursor-pointer"
           data-uuid={blockData.id}
           data-description={description || undefined}
           onClick={() => {
@@ -343,10 +343,10 @@ function Community({ blockData }: { blockData: BlockData }) {
             {comtype === "Discord-Community" && <DiscordSvg size={28} />}
             {comtype === "Reddit-Community" && <RedditSvg size={28} />}
           </div>
-          <span className="flex-1 text-left font-semibold text-[0.95rem] text-slate-800 truncate">
+          <span className="flex-1 text-left font-bold text-[0.95rem] text-black uppercase truncate">
             {title}
           </span>
-          <div className="flex-shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5">
+          <div className="flex-shrink-0 text-black transition-transform group-hover:translate-x-0.5">
             <LinkIcon size={18} />
           </div>
         </button>

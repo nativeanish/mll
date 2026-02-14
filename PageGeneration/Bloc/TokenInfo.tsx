@@ -136,23 +136,23 @@ const getStatusVisuals = (status: TokenStatus | undefined) => {
   > = {
     certified: {
       label: "Certified",
-      badge: "bg-blue-50 text-blue-700 border border-blue-200",
-      icon: <IconCheckCircle className="h-4 w-4 text-blue-600" />,
+      badge: "bg-[#6366F1] text-white border-2 border-black",
+      icon: <IconCheckCircle className="h-4 w-4 text-white" />,
     },
     normal: {
       label: "Normal",
-      badge: "bg-green-50 text-green-700 border border-green-200",
-      icon: <div className="h-2.5 w-2.5 rounded-full bg-green-500" />,
+      badge: "bg-[#4ECDC4] text-black border-2 border-black",
+      icon: <div className="h-2.5 w-2.5 rounded-lg bg-black" />,
     },
     unavailable: {
       label: "Unavailable",
-      badge: "bg-gray-50 text-gray-700 border border-gray-200",
-      icon: <IconHelpCircle className="h-4 w-4 text-gray-500" />,
+      badge: "bg-gray-200 text-black border-2 border-black",
+      icon: <IconHelpCircle className="h-4 w-4 text-black" />,
     },
     evil: {
       label: "Warning",
-      badge: "bg-red-50 text-red-700 border border-red-200",
-      icon: <IconAlertTriangle className="h-4 w-4 text-red-600" />,
+      badge: "bg-[#FF6B6B] text-black border-2 border-black",
+      icon: <IconAlertTriangle className="h-4 w-4 text-black" />,
     },
   };
 
@@ -177,12 +177,12 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
 
   if (!token) {
     return (
-      <div className="w-full p-6 rounded-2xl bg-white border border-slate-200 text-center text-slate-700 shadow-sm">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+      <div className="w-full p-6 rounded-lg bg-[#FFE66D] border-[3px] border-black text-center text-black shadow-[4px_4px_0px_#000]">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-white border-[3px] border-black">
           <IconBarChart className="h-6 w-6" />
         </div>
-        <div className="text-sm font-semibold">No token selected</div>
-        <div className="text-xs text-slate-500 mt-1">
+        <div className="text-sm font-bold">No token selected</div>
+        <div className="text-xs text-black/70 mt-1">
           Choose a token in the editor to show its market snapshot.
         </div>
       </div>
@@ -195,18 +195,18 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
 
   return (
     <div className="w-full space-y-3" data-uuid={block.id}>
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-lg border-[3px] border-black bg-white p-4 shadow-[4px_4px_0px_#000]">
         <div className="flex items-start gap-3">
           <div className="relative">
             {token.logo ? (
               <img
                 src={`https://arweave.net/${token.logo}`}
                 alt={token.symbol || "Token"}
-                className="h-12 w-12 rounded-full object-cover border-2 border-white shadow"
+                className="h-12 w-12 rounded-lg object-cover border-[3px] border-black shadow-[2px_2px_0px_#000]"
               />
             ) : (
-              <div className="h-12 w-12 rounded-full bg-linear-to-br from-blue-500/20 to-indigo-500/40 flex items-center justify-center border-2 border-white shadow">
-                <span className="text-lg font-bold text-slate-900">
+              <div className="h-12 w-12 rounded-lg bg-[#A855F7] flex items-center justify-center border-[3px] border-black shadow-[2px_2px_0px_#000]">
+                <span className="text-lg font-bold text-white">
                   {(token.symbol || "?").charAt(0)}
                 </span>
               </div>
@@ -216,17 +216,17 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div className="flex-1 min-w-0">
-                <div className="text-base font-semibold text-slate-900 truncate">
+                <div className="text-base font-bold text-black truncate">
                   {token.symbol || "Unknown"}
                 </div>
                 {token.fullName && (
-                  <div className="text-xs text-slate-600 truncate">
+                  <div className="text-xs text-black/70 truncate">
                     {token.fullName}
                   </div>
                 )}
               </div>
               <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-full ${statusVisuals.badge}`}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold rounded-lg ${statusVisuals.badge}`}
               >
                 {statusVisuals.icon}
                 <span>{statusVisuals.label}</span>
@@ -235,10 +235,10 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
 
             {price !== null && price > 0 && (
               <div className="mt-2">
-                <div className="text-xl font-bold text-blue-600">
+                <div className="text-xl font-black text-black">
                   ${price.toFixed(6)}
                 </div>
-                <div className="text-[11px] text-slate-500">Current price</div>
+                <div className="text-[11px] text-black/70">Current price</div>
               </div>
             )}
           </div>
@@ -247,22 +247,22 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
         {(displayOptions.decimals ||
           displayOptions.totalSupply ||
           displayOptions.tokenStatus) && (
-          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-800">
-              <IconBarChart className="h-4 w-4 text-blue-600" />
+          <div className="mt-3 rounded-lg border-[3px] border-black bg-white p-3">
+            <div className="flex items-center gap-2 mb-2 text-sm font-bold text-black">
+              <IconBarChart className="h-4 w-4 text-black" />
               Basic Stats
             </div>
             <div className="flex flex-nowrap overflow-x-auto gap-2 text-center pb-1">
               {displayOptions.decimals && (
-                <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-2.5 py-2 min-w-[150px]">
-                  <div className="p-2 rounded-lg bg-blue-100">
-                    <IconActivity className="h-5 w-5 text-blue-700" />
+                <div className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#6366F1] px-2.5 py-2 min-w-[150px] shadow-[2px_2px_0px_#000]">
+                  <div className="p-2 rounded-lg bg-black/20 border-2 border-black">
+                    <IconActivity className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0 text-left">
-                    <div className="text-[10px] text-blue-700 leading-tight">
+                    <div className="text-[10px] text-white leading-tight">
                       Decimals
                     </div>
-                    <div className="text-base font-bold text-blue-800 leading-tight">
+                    <div className="text-base font-bold text-white leading-tight">
                       {decimals}
                     </div>
                   </div>
@@ -270,15 +270,15 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
               )}
 
               {displayOptions.totalSupply && (
-                <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 px-2.5 py-2 min-w-[150px]">
-                  <div className="p-2 rounded-lg bg-emerald-100">
-                    <IconBarChart className="h-5 w-5 text-emerald-700" />
+                <div className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#4ECDC4] px-2.5 py-2 min-w-[150px] shadow-[2px_2px_0px_#000]">
+                  <div className="p-2 rounded-lg bg-black/20 border-2 border-black">
+                    <IconBarChart className="h-5 w-5 text-black" />
                   </div>
                   <div className="min-w-0 text-left">
-                    <div className="text-[10px] text-emerald-700 leading-tight">
+                    <div className="text-[10px] text-black leading-tight">
                       Total Supply
                     </div>
-                    <div className="text-base font-bold text-emerald-800 leading-tight">
+                    <div className="text-base font-bold text-black leading-tight">
                       {formatSupply(token.totalSupply, decimals)}
                     </div>
                   </div>
@@ -286,18 +286,18 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
               )}
 
               {displayOptions.tokenStatus && (
-                <div className="flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50/70 px-2.5 py-2 min-w-[170px]">
-                  <div className="p-2 rounded-lg bg-purple-100">
-                    <IconCheckCircle className="h-5 w-5 text-purple-700" />
+                <div className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#A855F7] px-2.5 py-2 min-w-[170px] shadow-[2px_2px_0px_#000]">
+                  <div className="p-2 rounded-lg bg-black/20 border-2 border-black">
+                    <IconCheckCircle className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0 text-left">
-                    <div className="text-[10px] text-purple-700 leading-tight">
+                    <div className="text-[10px] text-white leading-tight">
                       Status
                     </div>
-                    <div className="text-base font-bold text-purple-800 leading-tight">
+                    <div className="text-base font-bold text-white leading-tight">
                       {token.tokenAccessible ? "Available" : "Unavailable"}
                     </div>
-                    <div className="text-[10px] text-purple-700 leading-tight">
+                    <div className="text-[10px] text-white leading-tight">
                       {token.tokenAccessible
                         ? "Trading active"
                         : "Trading paused"}
@@ -310,55 +310,55 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
         )}
 
         {displayOptions.aggregatedStats && (
-          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-            <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-800">
-              <IconTrendingUp className="h-4 w-4 text-blue-600" />
+          <div className="mt-3 rounded-lg border-[3px] border-black bg-white p-3">
+            <div className="flex items-center gap-2 mb-2 text-sm font-bold text-black">
+              <IconTrendingUp className="h-4 w-4 text-black" />
               Aggregated pool statistics
             </div>
 
             {!aggregatedStats ? (
-              <div className="text-xs text-slate-500 text-center">
+              <div className="text-xs text-black/70 text-center">
                 No pool data captured yet.
               </div>
             ) : (
               <div className="flex flex-nowrap overflow-x-auto gap-2 text-center pb-1">
-                <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-2.5 py-2 min-w-[150px]">
-                  <div className="p-2 rounded-lg bg-blue-100">
-                    <IconActivity className="h-5 w-5 text-blue-700" />
+                <div className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#6366F1] px-2.5 py-2 min-w-[150px] shadow-[2px_2px_0px_#000]">
+                  <div className="p-2 rounded-lg bg-black/20 border-2 border-black">
+                    <IconActivity className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0 text-left">
-                    <div className="text-[10px] text-blue-700 leading-tight">
+                    <div className="text-[10px] text-white leading-tight">
                       24h Trade Count
                     </div>
-                    <div className="text-base font-bold text-blue-800 leading-tight">
+                    <div className="text-base font-bold text-white leading-tight">
                       {formatNumber(aggregatedStats.totalTrades24H ?? 0, 0)}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/70 px-2.5 py-2 min-w-[150px]">
-                  <div className="p-2 rounded-lg bg-emerald-100">
-                    <IconBarChart className="h-5 w-5 text-emerald-700" />
+                <div className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#4ECDC4] px-2.5 py-2 min-w-[150px] shadow-[2px_2px_0px_#000]">
+                  <div className="p-2 rounded-lg bg-black/20 border-2 border-black">
+                    <IconBarChart className="h-5 w-5 text-black" />
                   </div>
                   <div className="min-w-0 text-left">
-                    <div className="text-[10px] text-emerald-700 leading-tight">
+                    <div className="text-[10px] text-black leading-tight">
                       24h Volume
                     </div>
-                    <div className="text-base font-bold text-emerald-800 leading-tight">
+                    <div className="text-base font-bold text-black leading-tight">
                       ${formatNumber(aggregatedStats.totalVolume24H ?? 0)}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50/70 px-2.5 py-2 min-w-[150px]">
-                  <div className="p-2 rounded-lg bg-purple-100">
-                    <IconTrendingUp className="h-5 w-5 text-purple-700" />
+                <div className="flex items-center gap-2 rounded-lg border-[3px] border-black bg-[#A855F7] px-2.5 py-2 min-w-[150px] shadow-[2px_2px_0px_#000]">
+                  <div className="p-2 rounded-lg bg-black/20 border-2 border-black">
+                    <IconTrendingUp className="h-5 w-5 text-white" />
                   </div>
                   <div className="min-w-0 text-left">
-                    <div className="text-[10px] text-purple-700 leading-tight">
+                    <div className="text-[10px] text-white leading-tight">
                       7d Volume
                     </div>
-                    <div className="text-base font-bold text-purple-800 leading-tight">
+                    <div className="text-base font-bold text-white leading-tight">
                       ${formatNumber(aggregatedStats.totalVolume7D ?? 0)}
                     </div>
                   </div>
@@ -367,7 +367,7 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
             )}
 
             {aggregatedStats?.poolCount !== undefined && (
-              <div className="mt-2 text-xs text-slate-600">
+              <div className="mt-2 text-xs text-black/70">
                 Active in {aggregatedStats.poolCount} pools
               </div>
             )}
@@ -377,7 +377,7 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
         <div className="mt-4">
           <button
             type="button"
-            className="w-full h-11 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-sm transition hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 rounded-lg border-[3px] border-black bg-black text-white text-sm font-bold uppercase shadow-[4px_4px_0px_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={token.tokenAccessible === false}
             onClick={() => {
               const target = token.process || token.symbol;
@@ -392,7 +392,7 @@ function TokenInfo({ pros, props }: TokenInfoProps) {
           </button>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-black/70">
           {displayOptions.lastUpdated && lastUpdated && (
             <span className="inline-flex items-center gap-1">
               <IconClock className="h-3.5 w-3.5" />

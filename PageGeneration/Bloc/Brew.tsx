@@ -322,7 +322,7 @@ function Brew({ props }: { props: BlockData }) {
       <button
         type="button"
         onClick={handleOpen}
-        className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl border-none bg-gray-700 text-white text-sm font-semibold cursor-pointer shadow-sm transition-all hover:bg-gray-800 active:scale-[0.97]"
+        className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg border-[3px] border-black bg-[#FF6B6B] text-black text-sm font-bold uppercase cursor-pointer shadow-[4px_4px_0px_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none"
       >
         <CoffeeIcon className="h-[1.1rem] w-[1.1rem]" />
         {title}
@@ -331,30 +331,30 @@ function Brew({ props }: { props: BlockData }) {
       {/* ---- Modal ---- */}
       {open && (
         <div
-          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm animate-[brew-fade-in_0.2s_ease-out]"
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/80 animate-[brew-fade-in_0.2s_ease-out]"
           onClick={(e) => {
             if (e.target === e.currentTarget) handleClose();
           }}
         >
           <div
-            className="relative w-full max-h-[92dvh] sm:max-w-[440px] sm:max-h-[85dvh] overflow-y-auto overscroll-contain bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl brew-slide-up sm:brew-scale-in"
+            className="relative w-full max-h-[92dvh] sm:max-w-[440px] sm:max-h-[85dvh] overflow-y-auto overscroll-contain bg-white rounded-lg border-[3px] border-black shadow-[6px_6px_0px_#000] brew-slide-up sm:brew-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* drag indicator (mobile only) */}
-            <div className="block sm:hidden w-9 h-1 mx-auto mt-2 rounded-full bg-slate-300" />
+            <div className="block sm:hidden w-9 h-1 mx-auto mt-2 rounded-lg bg-black" />
 
             {/* header */}
             <div className="flex items-center justify-between px-5 pt-4 pb-2">
               <div className="flex items-center gap-2">
-                <CoffeeIcon className="h-5 w-5 text-amber-800" />
-                <span className="font-bold text-[1.05rem] text-slate-800">
+                <CoffeeIcon className="h-5 w-5 text-black" />
+                <span className="font-bold text-[1.05rem] text-black">
                   {title}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex p-1 rounded-lg text-slate-400 hover:text-slate-600 bg-transparent border-none cursor-pointer"
+                className="flex p-1 rounded-lg text-black hover:bg-gray-100 bg-transparent border-2 border-black cursor-pointer"
               >
                 <XIcon className="h-5 w-5" />
               </button>
@@ -364,18 +364,18 @@ function Brew({ props }: { props: BlockData }) {
               {/* ======= STEP: CONNECTING ======= */}
               {step === "connecting" && (
                 <div className="flex flex-col items-center justify-center py-12 px-4 gap-4">
-                  <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
-                    <WalletIcon className="h-6 w-6 text-slate-600 animate-spin" />
+                  <div className="w-14 h-14 rounded-lg bg-[#FFE66D] border-[3px] border-black flex items-center justify-center">
+                    <WalletIcon className="h-6 w-6 text-black animate-spin" />
                   </div>
-                  <p className="font-semibold text-slate-700 text-[0.95rem]">
+                  <p className="font-bold text-black text-[0.95rem]">
                     Connecting wallet...
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-black/70">
                     Verifying your balance
                   </p>
                   {/* progress bar */}
-                  <div className="w-[70%] h-1 rounded-full bg-slate-200 overflow-hidden mt-2">
-                    <div className="h-full rounded-full bg-slate-500 brew-progress" />
+                  <div className="w-[70%] h-1 rounded-lg bg-gray-200 border-2 border-black overflow-hidden mt-2">
+                    <div className="h-full rounded-lg bg-black brew-progress" />
                   </div>
                 </div>
               )}
@@ -385,11 +385,11 @@ function Brew({ props }: { props: BlockData }) {
                 <div className="flex flex-col gap-4">
                   {/* balance badge */}
                   {walletBalance && (
-                    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[0.82rem]">
-                      <span className="flex items-center gap-1.5 text-slate-500">
+                    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-[#FFE66D] border-[3px] border-black text-[0.82rem]">
+                      <span className="flex items-center gap-1.5 text-black/70">
                         <WalletIcon className="h-3.5 w-3.5" /> Balance
                       </span>
-                      <span className="font-bold text-slate-700">
+                      <span className="font-bold text-black">
                         {walletBalance} {chain.symbol}
                       </span>
                     </div>
@@ -397,15 +397,15 @@ function Brew({ props }: { props: BlockData }) {
 
                   {/* description */}
                   {description && (
-                    <p className="text-sm text-slate-500 leading-relaxed">
+                    <p className="text-sm text-black/70 leading-relaxed">
                       {description}
                     </p>
                   )}
 
                   {/* payment address */}
-                  <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-100 text-xs">
-                    <span className="text-slate-400">To:</span>
-                    <span className="font-mono text-slate-600">
+                  <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-100 border-2 border-black text-xs">
+                    <span className="text-black/70">To:</span>
+                    <span className="font-mono text-black">
                       {formatAddress(paymentAddress)}
                     </span>
                   </div>
@@ -413,8 +413,8 @@ function Brew({ props }: { props: BlockData }) {
                   {/* tip amounts */}
                   {parsedTipAmounts.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-1.5 mb-2 text-[0.82rem] font-semibold text-slate-600">
-                        <CoinsIcon className="h-4 w-4 text-amber-800" />
+                      <div className="flex items-center gap-1.5 mb-2 text-[0.82rem] font-bold text-black uppercase">
+                        <CoinsIcon className="h-4 w-4 text-black" />
                         Select an amount
                       </div>
                       <div className="grid grid-cols-3 gap-2">
@@ -428,10 +428,10 @@ function Brew({ props }: { props: BlockData }) {
                                 setSelectedAmt(amt);
                                 setInputErr("");
                               }}
-                              className={`py-2.5 rounded-xl font-semibold text-sm cursor-pointer transition-all ${
+                              className={`py-2.5 rounded-lg font-bold text-sm cursor-pointer transition-all ${
                                 active
-                                  ? "border-2 border-gray-700 bg-slate-50 text-slate-900"
-                                  : "border border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                                  ? "border-[3px] border-black bg-[#FFE66D] text-black shadow-[2px_2px_0px_#000]"
+                                  : "border-[3px] border-black bg-white text-black hover:bg-gray-100"
                               }`}
                             >
                               {amt} {chain.symbol}
@@ -445,7 +445,7 @@ function Brew({ props }: { props: BlockData }) {
                   {/* custom amount */}
                   {allowCustom && (
                     <div>
-                      <label className="block text-[0.82rem] font-semibold text-slate-600 mb-1.5">
+                      <label className="block text-[0.82rem] font-bold text-black uppercase mb-1.5">
                         Custom amount
                       </label>
                       <div className="flex gap-2">
@@ -459,12 +459,12 @@ function Brew({ props }: { props: BlockData }) {
                             setInputErr("");
                           }}
                           placeholder={`e.g. 3.5 ${chain.symbol}`}
-                          className="flex-1 px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                          className="flex-1 px-3 py-2.5 rounded-lg border-[3px] border-black text-sm text-black outline-none shadow-[2px_2px_0px_#000] focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5"
                         />
                         <button
                           type="button"
                           onClick={applyCustom}
-                          className="px-4 py-2.5 rounded-lg border border-slate-300 bg-slate-50 font-semibold text-[0.82rem] text-gray-700 cursor-pointer hover:bg-slate-100 transition-colors"
+                          className="px-4 py-2.5 rounded-lg border-[3px] border-black bg-[#FFE66D] font-bold text-[0.82rem] text-black uppercase cursor-pointer hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_#000] transition-transform"
                         >
                           Set
                         </button>
@@ -480,10 +480,10 @@ function Brew({ props }: { props: BlockData }) {
                     type="button"
                     disabled={!selectedAmt}
                     onClick={handleSubmitTip}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl border-none font-semibold text-sm transition-colors mt-1 ${
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg border-[3px] font-bold text-sm transition-all mt-1 ${
                       selectedAmt
-                        ? "bg-gray-700 text-white cursor-pointer hover:bg-gray-800"
-                        : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                        ? "bg-black text-white border-black uppercase shadow-[4px_4px_0px_#FF6B6B] cursor-pointer hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#FF6B6B]"
+                        : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                     }`}
                   >
                     <CoffeeIcon className="h-4 w-4" />
@@ -497,17 +497,17 @@ function Brew({ props }: { props: BlockData }) {
               {/* ======= STEP: PROCESSING ======= */}
               {step === "processing" && (
                 <div className="flex flex-col items-center justify-center py-12 px-4 gap-4">
-                  <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
-                    <LoaderIcon className="h-6 w-6 text-slate-600 animate-spin" />
+                  <div className="w-14 h-14 rounded-lg bg-[#FFE66D] border-[3px] border-black flex items-center justify-center">
+                    <LoaderIcon className="h-6 w-6 text-black animate-spin" />
                   </div>
-                  <p className="font-semibold text-slate-700 text-[0.95rem]">
+                  <p className="font-bold text-black text-[0.95rem]">
                     Processing your tip...
                   </p>
-                  <p className="text-xs text-slate-400 text-center">
+                  <p className="text-xs text-black/70 text-center">
                     Sending {selectedAmt} {chain.symbol}
                   </p>
-                  <div className="w-[70%] h-1 rounded-full bg-slate-200 overflow-hidden mt-2">
-                    <div className="h-full rounded-full bg-slate-500 brew-progress-slow" />
+                  <div className="w-[70%] h-1 rounded-lg bg-gray-200 border-2 border-black overflow-hidden mt-2">
+                    <div className="h-full rounded-lg bg-black brew-progress-slow" />
                   </div>
                 </div>
               )}
@@ -515,24 +515,22 @@ function Brew({ props }: { props: BlockData }) {
               {/* ======= STEP: SUCCESS ======= */}
               {step === "success" && (
                 <div className="flex flex-col items-center justify-center pt-10 pb-8 px-4 gap-3">
-                  <div className="brew-check-pop w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
-                    <CheckCircleIcon className="h-7 w-7 text-green-600" />
+                  <div className="brew-check-pop w-14 h-14 rounded-lg bg-[#4ECDC4] border-[3px] border-black flex items-center justify-center">
+                    <CheckCircleIcon className="h-7 w-7 text-black" />
                   </div>
-                  <p className="font-bold text-slate-800 text-base">
-                    Tip Sent!
-                  </p>
-                  <p className="text-sm text-slate-500 text-center">
+                  <p className="font-bold text-black text-base">Tip Sent!</p>
+                  <p className="text-sm text-black/70 text-center">
                     You tipped {selectedAmt} {chain.symbol}
                   </p>
                   {thankMessage && (
-                    <p className="text-[0.82rem] text-slate-600 text-center px-3.5 py-2.5 bg-slate-50 rounded-lg border border-slate-200 mt-1 leading-relaxed">
+                    <p className="text-[0.82rem] text-black text-center px-3.5 py-2.5 bg-[#FFE66D] rounded-lg border-[3px] border-black mt-1 leading-relaxed">
                       &ldquo;{thankMessage}&rdquo;
                     </p>
                   )}
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="mt-3 px-8 py-2.5 rounded-xl border-none bg-gray-700 text-white font-semibold text-sm cursor-pointer hover:bg-gray-800 transition-colors"
+                    className="mt-3 px-8 py-2.5 rounded-lg border-[3px] border-black bg-black text-white font-bold text-sm uppercase cursor-pointer shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] transition-transform"
                   >
                     Done
                   </button>

@@ -34,19 +34,19 @@ const Login = () => {
       <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="w-full sm:max-w-md">
           {/* Card */}
-          <Card className="border-border/40 bg-card/80 backdrop-blur-xl shadow-xl shadow-black/5 dark:shadow-black/20 rounded-2xl overflow-hidden">
-            {/* Accent top bar */}
-            <div className="h-1 w-full bg-linear-to-r from-violet-500 via-indigo-500 to-purple-500" />
+          <Card className="border-2 border-border bg-card shadow-[6px_6px_0px_var(--border)] rounded-lg overflow-hidden">
+            {/* Accent top bar - neo-brutal style */}
+            <div className="h-2 w-full bg-primary border-b-2 border-border" />
 
             <CardHeader className="space-y-4 px-6 pt-8 pb-2 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5 ring-1 ring-primary/10">
-                <Shield className="h-7 w-7 text-primary" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-accent border-2 border-border shadow-[3px_3px_0px_var(--border)]">
+                <Shield className="h-7 w-7 text-accent-foreground" />
               </div>
               <div className="space-y-2">
-                <CardTitle className="text-2xl font-bold tracking-tight">
+                <CardTitle className="text-2xl font-black tracking-tight uppercase">
                   Connect Your Wallet
                 </CardTitle>
-                <CardDescription className="text-sm leading-relaxed text-muted-foreground/80 max-w-sm mx-auto">
+                <CardDescription className="text-sm leading-relaxed text-muted-foreground font-medium max-w-sm mx-auto">
                   Choose your preferred wallet to securely connect and access
                   the platform.
                 </CardDescription>
@@ -59,12 +59,12 @@ const Login = () => {
               address &&
               address.length > 0 ? null : (
                 <div className="pt-2">
-                  <p className="text-muted-foreground/60 text-center text-xs leading-relaxed">
+                  <p className="text-foreground text-center text-xs leading-relaxed font-bold">
                     Don't have a wallet?{" "}
                     <a
                       href="https://ar.io/wallet"
                       target="_blank"
-                      className="text-foreground/80 font-medium underline-offset-4 hover:underline transition-colors hover:text-foreground"
+                      className="text-primary font-black underline underline-offset-4 hover:text-primary/80 transition-colors"
                     >
                       Get one here
                     </a>
@@ -75,7 +75,7 @@ const Login = () => {
           </Card>
 
           {/* Footer text */}
-          <p className="mt-6 text-center text-[11px] text-muted-foreground/40">
+          <p className="mt-6 text-center text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
             Secured by Arweave &middot; Your keys, your data
           </p>
         </div>

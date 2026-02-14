@@ -57,19 +57,13 @@ function Phone({ props }: { props: BlockData }) {
           isClickable ? "" : "pointer-events-none opacity-70"
         }`}
       >
-        <div className="relative w-full overflow-hidden rounded-md border border-white/10 bg-blue-800 text-white p-2 shadow-2xl backdrop-blur-sm ring-1 ring-black/20 transition-transform duration-300 transform-gpu group-hover:-translate-y-0.5 group-hover:shadow-[0_15px_45px_-15px_rgba(59,130,246,0.7)] group-focus-visible:ring-2 group-focus-visible:ring-blue-300/50">
-          <div
-            className="absolute inset-1 rounded-[18px] bg-white/5 opacity-30 transition duration-500 group-hover:opacity-50 group-focus-visible:opacity-60"
-            aria-hidden
-          />
+        <div className="relative w-full overflow-hidden rounded-lg border-[3px] border-black bg-[#6366F1] text-white p-2 font-bold shadow-[4px_4px_0px_#000] transition-all">
+          <div className="hidden" aria-hidden />
 
           <div className="relative flex flex-col gap-3">
             <div className="flex items-center gap-4">
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">
-                <div
-                  className="absolute inset-0 rounded-2xl bg-white/10 opacity-40 blur-md transition duration-500 group-hover:opacity-70"
-                  aria-hidden
-                />
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-black/20 border-2 border-black">
+                <div className="hidden" aria-hidden />
                 <Svg className="relative" />
               </div>
 
@@ -79,21 +73,21 @@ function Phone({ props }: { props: BlockData }) {
                     <img
                       src={`https://arweave.net/${flags}`}
                       alt="flag"
-                      className="h-7 w-10 rounded-md object-cover ring-1 ring-white/20 shrink-0"
+                      className="h-7 w-10 rounded-md object-cover border-2 border-black shrink-0"
                     />
                   ) : (
-                    <div className="h-7 w-10 rounded-md bg-white/10 flex items-center justify-center text-xs font-semibold text-white/90 ring-1 ring-white/10 shrink-0">
+                    <div className="h-7 w-10 rounded-md bg-black/20 flex items-center justify-center text-xs font-bold text-white border-2 border-black shrink-0">
                       {countryCode || "--"}
                     </div>
                   )}
 
-                  <span className="text-sm font-semibold tracking-wide truncate">
+                  <span className="text-sm font-bold tracking-wide truncate">
                     {displayNumber}
                   </span>
                 </div>
               </div>
 
-              <div className="hidden sm:flex h-full items-center border-l border-white/10 pl-4 text-white/70">
+              <div className="hidden sm:flex h-full items-center border-l-[2px] border-black pl-4 text-white">
                 <Svg className="h-6 w-6" />
               </div>
             </div>

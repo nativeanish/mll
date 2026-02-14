@@ -34,10 +34,10 @@ function Email({ props }: { props: BlockData }) {
         type="button"
         onClick={openMail}
         aria-label={title}
-        className={`group w-full flex items-center justify-between rounded-md px-5 py-3 text-white border border-white/10 bg-[#0f766e]/90 hover:bg-[#0f766e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-200 transition duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_15px_25px_rgba(15,118,110,0.35)]`}
+        className={`group w-full flex items-center justify-between rounded-lg border-[3px] border-black bg-[#4ECDC4] px-5 py-3 text-black font-bold uppercase tracking-wide shadow-[4px_4px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all`}
       >
-        <span className="font-semibold  tracking-wide truncate">{title}</span>
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 backdrop-blur transition duration-300 group-hover:bg-white/40">
+        <span className="font-bold tracking-wide truncate">{title}</span>
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/10 transition-all">
           <Svg />
         </span>
       </button>

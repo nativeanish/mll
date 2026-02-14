@@ -119,7 +119,7 @@ export default function MobileView({
   src,
   frameWidth = 393,
   frameHeight = 393,
-  className = "hidden lg:flex fixed right-0 top-0 h-screen w-[40%] xl:w-[45%] items-center justify-center bg-muted/30 border-l border-border/30",
+  className = "hidden lg:flex fixed right-0 top-0 h-screen w-[40%] xl:w-[45%] items-center justify-center bg-muted/30 border-l-2 border-border",
   sandbox = "allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-modals allow-popups allow-popups-to-escape-sandbox",
   allow = "clipboard-read; clipboard-write; geolocation; microphone; camera; fullscreen",
   onLoad,
@@ -268,15 +268,15 @@ export default function MobileView({
 
   const DeviceShell = (
     <div
-      className="relative bg-gray-950 rounded-[2.5rem] shadow-2xl shadow-black/20 dark:shadow-black/50 border border-gray-700/50 overflow-hidden ring-1 ring-gray-600/20"
+      className="relative bg-foreground rounded-2xl shadow-[6px_6px_0px_var(--border)] border-2 border-border overflow-hidden"
       style={{ width: outerWidth, height: outerHeight }}
     >
       {showDecorations && (
         <>
-          {/* Dynamic Island notch */}
-          <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 mt-2.5 h-[22px] w-28 bg-gray-950 rounded-full z-10 ring-1 ring-gray-800/50" />
-          {/* Home indicator */}
-          <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 h-1 w-28 bg-gray-600/40 rounded-full z-10" />
+          {/* Blocky notch */}
+          {/* <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 mt-2 h-[18px] w-24 bg-background border-2 border-border rounded-md z-10 shadow-[2px_2px_0px_var(--border)]" /> */}
+          {/* Home indicator bar */}
+          <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 h-1.5 w-24 bg-muted-foreground/60 rounded-sm z-10 border border-border" />
         </>
       )}
       <div
@@ -313,7 +313,7 @@ export default function MobileView({
         />
       </div>
       {!src && !html && (
-        <div className="absolute inset-0 flex items-center justify-center text-center text-sm text-gray-500 p-4">
+        <div className="absolute inset-0 flex items-center justify-center text-center text-sm text-muted-foreground font-bold p-4 bg-background">
           Provide html or src to render inside the mobile preview.
         </div>
       )}
@@ -325,7 +325,7 @@ export default function MobileView({
       {/* Desktop view: persist preview on right side */}
       <div className={className}>
         <div className="flex flex-col items-center gap-4">
-          <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">
+          <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
             Live Preview
           </p>
           {DeviceShell}
@@ -338,7 +338,7 @@ export default function MobileView({
           type="button"
           aria-label="Open mobile preview"
           onClick={() => setIsOpen(true)}
-          className={`lg:hidden fixed right-4 bottom-6 z-40 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/20 p-3.5 active:scale-95 transition-transform hover:shadow-2xl hover:shadow-primary/30 ${
+          className={`lg:hidden fixed right-4 bottom-6 z-40 rounded-lg bg-primary text-primary-foreground border-2 border-border shadow-[4px_4px_0px_var(--border)] p-3.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_var(--border)] hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0px_var(--border)] transition-all ${
             mobileButtonClassName ?? ""
           }`}
         >
@@ -349,7 +349,7 @@ export default function MobileView({
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className={`lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 ${
+          className={`lg:hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 ${
             overlayClassName ?? ""
           }`}
           aria-modal="true"
@@ -360,7 +360,7 @@ export default function MobileView({
               type="button"
               aria-label="Close mobile preview"
               onClick={() => setIsOpen(false)}
-              className="rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg p-2.5 text-white hover:bg-white/20 transition-colors"
+              className="rounded-md bg-accent border-2 border-border shadow-[2px_2px_0px_var(--border)] p-2.5 text-foreground hover:bg-primary hover:text-primary-foreground active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_var(--border)] transition-all"
             >
               <X className="h-5 w-5" />
             </button>

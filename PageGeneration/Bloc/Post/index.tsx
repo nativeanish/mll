@@ -176,7 +176,7 @@ function PostCard({ item }: { item: PostPreview }) {
 
   return (
     <div
-      className="w-full rounded-xl border border-gray-200 bg-white overflow-hidden cursor-pointer hover:shadow-sm transition-shadow"
+      className="w-full rounded-lg border-[3px] border-black bg-white shadow-[4px_4px_0px_#000] overflow-hidden cursor-pointer hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all"
       onClick={() => openInNewTab(item.url)}
       role="link"
       tabIndex={0}
@@ -185,7 +185,7 @@ function PostCard({ item }: { item: PostPreview }) {
       }}
     >
       {item.imageUrl ? (
-        <div className="w-full aspect-video bg-gray-100 overflow-hidden">
+        <div className="w-full aspect-video bg-gray-100 overflow-hidden border-b-[3px] border-black">
           <img
             src={item.imageUrl}
             alt={item.title ?? "Post"}
@@ -194,7 +194,7 @@ function PostCard({ item }: { item: PostPreview }) {
           />
         </div>
       ) : (
-        <div className="w-full aspect-video bg-gray-50 flex items-center justify-center">
+        <div className="w-full aspect-video bg-[#FFF8E7] flex items-center justify-center border-b-[3px] border-black">
           <div className="flex items-center gap-3 px-4">
             {faviconUrl ? (
               <img
@@ -207,10 +207,12 @@ function PostCard({ item }: { item: PostPreview }) {
               <div className="w-10 h-10 rounded-lg bg-gray-200" />
             )}
             <div className="min-w-0">
-              <div className="text-gray-900 font-semibold truncate">
+              <div className="text-black font-bold truncate">
                 {item.title ?? host ?? "Link"}
               </div>
-              <div className="text-gray-500 text-xs truncate">{item.url}</div>
+              <div className="text-black/50 text-xs truncate font-medium">
+                {item.url}
+              </div>
             </div>
           </div>
         </div>
@@ -218,7 +220,7 @@ function PostCard({ item }: { item: PostPreview }) {
 
       <div className="p-4">
         <div className="flex items-center gap-2 mb-2">
-          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+          <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-lg bg-[#FFE66D] text-black border-2 border-black uppercase">
             {item.source === "medium" ? (
               <MediumIcon className="w-3.5 h-3.5" aria-hidden="true" />
             ) : (
@@ -234,17 +236,19 @@ function PostCard({ item }: { item: PostPreview }) {
         </div>
 
         {item.title && item.title.length > 0 && (
-          <div className="text-gray-900 font-semibold text-lg overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+          <div className="text-black font-black text-lg overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
             {item.title ?? host ?? "Link"}
           </div>
         )}
         {item.description ? (
-          <p className="text-gray-600 text-sm mt-2 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+          <p className="text-black/70 text-sm mt-2 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] font-medium">
             {item.description}
           </p>
         ) : null}
 
-        <p className="text-gray-400 text-xs mt-3 truncate">{item.url}</p>
+        <p className="text-black/40 text-xs mt-3 truncate font-medium">
+          {item.url}
+        </p>
       </div>
     </div>
   );
@@ -399,7 +403,9 @@ function Post({ props }: { props: BlockData }) {
       )}
 
       {loading && normalized.length > 0 ? (
-        <div className="text-gray-500 text-xs mt-3">Loading previews…</div>
+        <div className="text-black/50 text-xs mt-3 font-bold">
+          Loading previews…
+        </div>
       ) : null}
     </div>
   );

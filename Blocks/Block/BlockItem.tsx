@@ -372,22 +372,22 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
   };
 
   return (
-    <Card className="transition-all duration-300 border-border/50 hover:border-border bg-card/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md group/card overflow-hidden">
+    <Card className="transition-all duration-150 border-2 border-border bg-card rounded-lg shadow-[4px_4px_0px_var(--border)] hover:shadow-[6px_6px_0px_var(--border)] hover:-translate-x-0.5 hover:-translate-y-0.5 group/card overflow-hidden">
       <CardHeader className="pb-2 pt-4 px-4 sm:px-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-primary/5 text-primary ring-1 ring-primary/10 transition-colors group-hover/card:bg-primary/10">
+            <div className="p-2 rounded-lg bg-nb-teal border-2 border-border text-white shadow-[2px_2px_0px_var(--border)]">
               <IconComponent className="h-4 w-4" />
             </div>
             <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-semibold">
+              <CardTitle className="text-sm font-black uppercase tracking-wide">
                 {block.name}
               </CardTitle>
               <span
-                className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
+                className={`inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-md border-2 border-border uppercase tracking-wider ${
                   block.enabled
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-                    : "bg-muted text-muted-foreground"
+                    ? "bg-nb-mint text-foreground shadow-[1px_1px_0px_var(--border)]"
+                    : "bg-muted text-muted-foreground shadow-[1px_1px_0px_var(--border)]"
                 }`}
               >
                 {block.enabled ? "Active" : "Off"}
@@ -404,14 +404,12 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
                   onClick={onToggle}
                 >
                   <div
-                    className={`relative w-7 h-4 rounded-full transition-colors ${
-                      block.enabled
-                        ? "bg-emerald-500"
-                        : "bg-muted-foreground/30"
+                    className={`relative w-8 h-5 rounded-md border-2 border-border transition-colors ${
+                      block.enabled ? "bg-nb-teal" : "bg-muted"
                     }`}
                   >
                     <div
-                      className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+                      className={`absolute top-0.5 h-3 w-3 rounded-sm bg-white border border-border transition-transform ${
                         block.enabled ? "translate-x-3.5" : "translate-x-0.5"
                       }`}
                     />
@@ -428,7 +426,7 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  className="h-7 w-7 rounded-lg text-foreground hover:text-destructive hover:bg-destructive/20 transition-colors"
                   onClick={onDelete}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -453,7 +451,7 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
                 size="sm"
                 onClick={() => setIsEdit(!isEdit)}
                 disabled={error}
-                className="rounded-lg h-8 text-xs font-medium shadow-sm"
+                className="rounded-lg h-8 text-xs font-black uppercase tracking-wide"
               >
                 <Save className="h-3.5 w-3.5 mr-1.5" />
                 Save
@@ -463,7 +461,7 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsEdit(!isEdit)}
-                className="rounded-lg h-8 text-xs font-medium border-border/50 hover:bg-muted/50"
+                className="rounded-lg h-8 text-xs font-black uppercase tracking-wide"
               >
                 <Edit3 className="h-3.5 w-3.5 mr-1.5" />
                 Edit

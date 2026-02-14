@@ -159,14 +159,33 @@ function Studio() {
       <main className="flex-1 pt-14">
         <div className="w-full min-h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row">
           {/* Editor Panel */}
-          <div className="w-full lg:w-[60%] xl:w-[55%] lg:mr-[40%] xl:mr-[45%] overflow-y-auto min-h-screen">
-            <div className="max-w-xl mx-auto px-4 sm:px-6 py-8 space-y-0">
-              {/* Section Label */}
-              <div className="mb-6">
-                <h1 className="text-xl font-bold tracking-tight">
+          <div className="w-full lg:w-[60%] xl:w-[55%] lg:mr-[40%] xl:mr-[45%] overflow-y-auto min-h-screen relative">
+            {/* Background decoration - geometric shapes */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="absolute -top-10 -right-10 h-44 w-44 rotate-12 rounded-lg border-2 border-border bg-accent/20 shadow-[4px_4px_0px_var(--border)]" />
+              <div className="absolute top-[40%] -left-14 h-36 w-36 -rotate-6 rounded-lg border-2 border-border bg-primary/15 shadow-[4px_4px_0px_var(--border)]" />
+              <div className="absolute top-[20%] right-[15%] h-20 w-20 rotate-45 rounded-md border-2 border-border bg-secondary/20 shadow-[3px_3px_0px_var(--border)]" />
+              <div className="absolute top-[65%] right-16 h-14 w-14 rounded-full border-2 border-border bg-nb-pink/15 shadow-[2px_2px_0px_var(--border)]" />
+              <div className="absolute top-32 left-[20%] h-10 w-10 rounded-md border-2 border-border bg-nb-orange/20 shadow-[2px_2px_0px_var(--border)]" />
+              <div className="absolute bottom-[25%] left-8 h-16 w-16 rotate-12 rounded-md border-2 border-border bg-nb-purple/15 shadow-[3px_3px_0px_var(--border)]" />
+              <div className="absolute bottom-[10%] right-[30%] h-12 w-12 -rotate-12 rounded-full border-2 border-border bg-nb-teal/15 shadow-[2px_2px_0px_var(--border)]" />
+              {/* Grid dot pattern */}
+              <div
+                className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+                style={{
+                  backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1.5px, transparent 0)`,
+                  backgroundSize: "40px 40px",
+                }}
+              />
+            </div>
+
+            <div className="max-w-xl mx-auto px-4 sm:px-6 pt-8 pb-28 space-y-0 relative z-10">
+              {/* Section Label - Neo-brutal style, full width */}
+              <div className="mb-6 bg-nb-yellow border-2 border-border rounded-lg px-4 py-3 shadow-[4px_4px_0px_var(--border)] w-full">
+                <h1 className="text-xl font-black tracking-tight uppercase text-black">
                   Page Builder
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-black/70 font-bold mt-1">
                   Customize your profile and add content blocks
                 </p>
               </div>
@@ -175,11 +194,11 @@ function Studio() {
               <Block />
 
               {/* Mobile-only publish button */}
-              <div className="sm:hidden pt-6 pb-8">
+              <div className="sm:hidden pt-6 pb-4">
                 <Button
                   onClick={handlePublish}
                   disabled={isPublishing}
-                  className="w-full rounded-2xl bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 h-12 font-medium"
+                  className="w-full rounded-lg h-12 font-black uppercase tracking-wide"
                 >
                   {isPublishing ? (
                     <>
@@ -197,20 +216,21 @@ function Studio() {
             </div>
           </div>
 
-          {/* Floating Add Block button */}
+          {/* Floating Add Block button - Neo-brutal */}
           <div className="fixed bottom-6 left-0 lg:w-[60%] xl:w-[55%] w-full z-40 pointer-events-none">
             <div className="max-w-xl mx-auto px-4 sm:px-6">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button
                     size="lg"
-                    className="pointer-events-auto w-full rounded-2xl bg-white/10 backdrop-blur-md hover:bg-white/15 text-neutral-400 hover:text-neutral-200 h-14 transition-all duration-300 group shadow-lg shadow-black/10 border-2 border-dashed border-neutral-500/40 hover:border-neutral-400/60"
+                    variant="outline"
+                    className="pointer-events-auto w-full rounded-lg bg-accent text-accent-foreground border-2 border-border border-dashed h-14 font-black uppercase tracking-wide shadow-[4px_4px_0px_var(--border)] hover:shadow-[6px_6px_0px_var(--border)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
                   >
                     <div className="flex items-center gap-2">
-                      <div className="rounded-full bg-neutral-600 p-1.5 group-hover:bg-neutral-500 transition-colors">
-                        <Plus className="h-4 w-4 text-neutral-300 group-hover:text-white" />
+                      <div className="rounded-md bg-primary border-2 border-border p-1.5">
+                        <Plus className="h-4 w-4 text-primary-foreground" />
                       </div>
-                      <span className="font-semibold">Add Block</span>
+                      <span>Add Block</span>
                     </div>
                   </Button>
                 </DialogTrigger>
