@@ -72,7 +72,7 @@ function withViewport(html: string, opts?: { disableLinks?: boolean }): string {
       return html.replace(
         /<html([^>]*)>/i,
         (_m, attrs) =>
-          `<html${attrs}><head>${viewportTag}${disableLinksStyle}${disableLinksScript}</head>`
+          `<html${attrs}><head>${viewportTag}${disableLinksStyle}${disableLinksScript}</head>`,
       );
     }
     // Ensure viewport, then inject disable-links assets right after <head>
@@ -82,7 +82,7 @@ function withViewport(html: string, opts?: { disableLinks?: boolean }): string {
     }
     return out.replace(
       /<head[^>]*>/i,
-      (m) => `${m}${disableLinksStyle}${disableLinksScript}`
+      (m) => `${m}${disableLinksStyle}${disableLinksScript}`,
     );
   }
 
@@ -119,7 +119,7 @@ export default function MobileView({
   src,
   frameWidth = 393,
   frameHeight = 393,
-  className = "hidden lg:flex fixed right-0 top-0 h-screen w-[30%] items-center justify-center",
+  className = "hidden lg:flex fixed right-0 top-0 h-screen w-[40%] xl:w-[45%] items-center justify-center bg-muted/30 border-l border-border/30",
   sandbox = "allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-modals allow-popups allow-popups-to-escape-sandbox",
   allow = "clipboard-read; clipboard-write; geolocation; microphone; camera; fullscreen",
   onLoad,
@@ -211,7 +211,7 @@ export default function MobileView({
       base
         .split(/\s+/)
         .map((t) => t.trim())
-        .filter(Boolean)
+        .filter(Boolean),
     );
     const toRemove = [
       "allow-popups",
@@ -251,7 +251,7 @@ export default function MobileView({
             el = el.parentElement;
           }
         },
-        true
+        true,
       );
     } catch {
       // ignore
@@ -268,13 +268,15 @@ export default function MobileView({
 
   const DeviceShell = (
     <div
-      className="relative bg-white rounded-[2rem] shadow-2xl border-4 border-gray-300 overflow-hidden"
+      className="relative bg-gray-950 rounded-[2.5rem] shadow-2xl shadow-black/20 dark:shadow-black/50 border border-gray-700/50 overflow-hidden ring-1 ring-gray-600/20"
       style={{ width: outerWidth, height: outerHeight }}
     >
       {showDecorations && (
         <>
-          <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 mt-2 h-6 w-36 bg-black/30 rounded-full z-10" />
-          <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 h-1.5 w-24 bg-black/25 rounded-full z-10" />
+          {/* Dynamic Island notch */}
+          <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 mt-2.5 h-[22px] w-28 bg-gray-950 rounded-full z-10 ring-1 ring-gray-800/50" />
+          {/* Home indicator */}
+          <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 h-1 w-28 bg-gray-600/40 rounded-full z-10" />
         </>
       )}
       <div
@@ -321,7 +323,14 @@ export default function MobileView({
   return (
     <>
       {/* Desktop view: persist preview on right side */}
-      <div className={className}>{DeviceShell}</div>
+      <div className={className}>
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">
+            Live Preview
+          </p>
+          {DeviceShell}
+        </div>
+      </div>
 
       {/* Mobile: floating toggle button */}
       {showToggleOnMobile && (
@@ -329,31 +338,31 @@ export default function MobileView({
           type="button"
           aria-label="Open mobile preview"
           onClick={() => setIsOpen(true)}
-          className={`lg:hidden fixed right-3 top-1/2 -translate-y-1/2 z-40 rounded-full bg-white border border-gray-200 shadow-lg p-3 active:scale-95 ${
+          className={`lg:hidden fixed right-4 bottom-6 z-40 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/20 p-3.5 active:scale-95 transition-transform hover:shadow-2xl hover:shadow-primary/30 ${
             mobileButtonClassName ?? ""
           }`}
         >
-          <Smartphone className="h-5 w-5 text-gray-700" />
+          <Smartphone className="h-5 w-5" />
         </button>
       )}
 
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className={`lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 ${
+          className={`lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 ${
             overlayClassName ?? ""
           }`}
           aria-modal="true"
           role="dialog"
         >
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-10">
             <button
               type="button"
               aria-label="Close mobile preview"
               onClick={() => setIsOpen(false)}
-              className="rounded-full bg-white/95 border border-gray-200 shadow p-2"
+              className="rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg p-2.5 text-white hover:bg-white/20 transition-colors"
             >
-              <X className="h-5 w-5 text-gray-700" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 

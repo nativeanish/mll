@@ -9,6 +9,8 @@ import {
   Wallet,
   Moon,
   Sun,
+  Globe,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -19,7 +21,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
-import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/lib/utils";
 import { Token } from "@/utils/ao/token";
 import { useQuery } from "@tanstack/react-query";
@@ -43,43 +44,60 @@ const NotificationMenu = ({
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="h-8 w-8 relative rounded-full"
+        className="h-9 w-9 relative rounded-full hover:bg-muted/80 transition-colors"
       >
         <BellIcon size={16} />
         {notificationCount > 0 && (
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white ring-2 ring-background">
             {notificationCount > 9 ? "9+" : notificationCount}
-          </Badge>
+          </span>
         )}
         <span className="sr-only">Notifications</span>
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-80">
-      <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+    <DropdownMenuContent
+      align="end"
+      className="w-80 rounded-xl shadow-xl border-border/50"
+    >
+      <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Notifications
+      </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => onItemClick?.("notification1")}>
-        <div className="flex flex-col gap-1">
+      <DropdownMenuItem
+        onClick={() => onItemClick?.("notification1")}
+        className="rounded-lg cursor-pointer"
+      >
+        <div className="flex flex-col gap-1 py-1">
           <p className="text-sm font-medium">New message received</p>
           <p className="text-xs text-muted-foreground">2 minutes ago</p>
         </div>
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onItemClick?.("notification2")}>
-        <div className="flex flex-col gap-1">
+      <DropdownMenuItem
+        onClick={() => onItemClick?.("notification2")}
+        className="rounded-lg cursor-pointer"
+      >
+        <div className="flex flex-col gap-1 py-1">
           <p className="text-sm font-medium">System update available</p>
           <p className="text-xs text-muted-foreground">1 hour ago</p>
         </div>
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onItemClick?.("notification3")}>
-        <div className="flex flex-col gap-1">
+      <DropdownMenuItem
+        onClick={() => onItemClick?.("notification3")}
+        className="rounded-lg cursor-pointer"
+      >
+        <div className="flex flex-col gap-1 py-1">
           <p className="text-sm font-medium">Weekly report ready</p>
           <p className="text-xs text-muted-foreground">3 hours ago</p>
         </div>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => onItemClick?.("view-all")}>
-        <Check />
+      <DropdownMenuItem
+        onClick={() => onItemClick?.("view-all")}
+        className="rounded-lg cursor-pointer"
+      >
+        <Check className="mr-2 h-4 w-4" />
         Mark all as read
       </DropdownMenuItem>
     </DropdownMenuContent>
@@ -94,7 +112,7 @@ const formatAddress = (addr: string) => {
 function useBalanceQuery(
   key: string,
   address: string,
-  fetcher: (addr: string) => Promise<string>
+  fetcher: (addr: string) => Promise<string>,
 ) {
   return useQuery<string | null>({
     queryKey: [key, address],
@@ -122,23 +140,28 @@ const UserButton = ({ address }: { address: string }) => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="flex items-center gap-2 px-3 py-1.5 
-             bg-green-100 dark:bg-green-900/30 
-             rounded-sm hover:bg-green-200 
-             dark:hover:bg-green-900/50"
+          className="flex items-center gap-2 px-3 py-1.5 h-9
+             bg-emerald-50 dark:bg-emerald-950/40
+             border-emerald-200 dark:border-emerald-800/50
+             rounded-full hover:bg-emerald-100
+             dark:hover:bg-emerald-900/50
+             transition-all duration-200"
         >
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <User className="w-4 h-4 text-green-700 dark:text-green-400" />
-          <span className="text-xs text-green-600 dark:text-green-500 font-mono">
+          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+          <User className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+          <span className="text-xs text-emerald-700 dark:text-emerald-400 font-mono hidden sm:inline">
             {formatAddress(address)}
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuItem className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-500 font-mono">
+      <DropdownMenuContent
+        align="end"
+        className="w-80 rounded-xl shadow-xl border-border/50"
+      >
+        <DropdownMenuItem className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-mono rounded-lg">
           <div className="flex justify-between w-full items-center">
             <div className="flex items-center gap-2">
-              <Wifi className="text-green-500" />
+              <Wifi className="text-emerald-500" />
               <span className="font-mono">Connected</span>
             </div>
             {wallet === "wander" ? (
@@ -194,7 +217,7 @@ const UserButton = ({ address }: { address: string }) => {
                         Math.pow(
                           10,
                           Token.find((e) => e.symbol === "ARIO")
-                            ?.denomination ?? 1
+                            ?.denomination ?? 1,
                         )
                       : parseFloat(ario.data).toFixed(2)) + " $ARIO"
                   : "Failed to fetch"}
@@ -272,9 +295,9 @@ const UserButton = ({ address }: { address: string }) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => disconnect()}
-          className="w-full bg-[#b51820] text-white hover:bg-[#e3222c]"
+          className="w-full bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 rounded-lg cursor-pointer transition-colors"
         >
-          <Unplug />
+          <Unplug className="mr-2 h-4 w-4" />
           Disconnect
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -306,6 +329,8 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   onMessageClick?: () => void;
   onNotificationItemClick?: (item: string) => void;
   onUserItemClick?: (item: string) => void;
+  onPublish?: () => void;
+  isPublishing?: boolean;
 }
 
 const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
@@ -315,9 +340,11 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
       logo = <Logo />,
       notificationCount = 3,
       onNotificationItemClick,
+      onPublish,
+      isPublishing = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     const containerRef = useRef<HTMLElement>(null);
     const address = useWallet((state) => state.address);
@@ -334,67 +361,87 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
           ref.current = node;
         }
       },
-      [ref]
+      [ref],
     );
 
     return (
       <header
         ref={combinedRef}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 [&_*]:no-underline",
-          className
+          "fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl supports-backdrop-filter:bg-background/60 px-4 md:px-6 **:no-underline",
+          className,
         )}
         {...props}
       >
-        <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4">
-          {/* Left side */}
-          <div className="flex flex-1 items-center gap-2">
-            <div className="flex items-center gap-6">
-              <button
-                onClick={(e) => e.preventDefault()}
-                className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors cursor-pointer"
-              >
-                <div className="text-2xl">{logo}</div>
-                <span className="hidden font-bold text-xl sm:inline-block">
-                  metalinks
-                </span>
-              </button>
-            </div>
+        <div className="container mx-auto flex h-14 max-w-screen-2xl items-center justify-between gap-3">
+          {/* Left side - Logo */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={(e) => e.preventDefault()}
+              className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors cursor-pointer group"
+            >
+              <div className="text-xl transition-transform duration-200 group-hover:scale-105">
+                {logo}
+              </div>
+              <span className="hidden font-bold text-lg sm:inline-block tracking-tight">
+                metalinks
+              </span>
+            </button>
           </div>
-          {/* Right side */}
-          <div className="flex flex-1 items-center justify-end gap-4">
+
+          {/* Right side - Actions */}
+          <div className="flex items-center gap-2">
             {/* Theme toggle */}
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="relative h-8 w-8"
+              className="h-9 w-9 rounded-full hover:bg-muted/80 transition-colors"
               aria-label="Toggle theme"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            <div className="flex items-center gap-2">
-              <NotificationMenu
-                notificationCount={notificationCount}
-                onItemClick={onNotificationItemClick}
-              />
-            </div>
+            <NotificationMenu
+              notificationCount={notificationCount}
+              onItemClick={onNotificationItemClick}
+            />
 
-            {/* Wallet Connection Status */}
+            {/* Publish button */}
+            {address && walletType && (
+              <Button
+                onClick={onPublish}
+                disabled={isPublishing}
+                className="hidden sm:flex items-center gap-2 rounded-full bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-300 h-9 px-5 text-sm font-medium"
+              >
+                {isPublishing ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Publishing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-3.5 w-3.5" />
+                    <span>Publish</span>
+                  </>
+                )}
+              </Button>
+            )}
+
+            {/* Wallet Connection */}
             {address && walletType ? (
-              <div className="flex items-center gap-2">
-                <UserButton address={address} />
-              </div>
+              <UserButton address={address} />
             ) : (
-              <Button size="sm">Connect</Button>
+              <Button size="sm" className="rounded-full h-9 px-4 font-medium">
+                Connect
+              </Button>
             )}
           </div>
         </div>
       </header>
     );
-  }
+  },
 );
 export default NavBar;

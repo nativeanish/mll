@@ -176,7 +176,7 @@ function PostCard({ item }: { item: PostPreview }) {
 
   return (
     <div
-      className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+      className="w-full rounded-xl border border-gray-200 bg-white overflow-hidden cursor-pointer hover:shadow-sm transition-shadow"
       onClick={() => openInNewTab(item.url)}
       role="link"
       tabIndex={0}
@@ -391,7 +391,7 @@ function Post({ props }: { props: BlockData }) {
   return (
     <div className="w-full" data-uuid={props.id} data-desc={description || ""}>
       {normalized.length === 0 ? null : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <div className="flex flex-col gap-4 w-full">
           {items.map((item) => (
             <PostCard key={item.key} item={item} />
           ))}

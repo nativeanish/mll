@@ -372,114 +372,105 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
   };
 
   return (
-    <Card
-      className={
-        "transition-all duration-200 border-border hover:border-primary/50"
-      }
-    >
-      <CardHeader className="pb-3">
+    <Card className="transition-all duration-300 border-border/50 hover:border-border bg-card/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md group/card overflow-hidden">
+      <CardHeader className="pb-2 pt-4 px-4 sm:px-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className={
-                "p-2 rounded-lg transition-colors bg-primary/10 text-primary"
-              }
-            >
-              <IconComponent className="h-5 w-5" />
+            <div className="p-2 rounded-xl bg-primary/5 text-primary ring-1 ring-primary/10 transition-colors group-hover/card:bg-primary/10">
+              <IconComponent className="h-4 w-4" />
             </div>
-            <div>
-              <CardTitle className="text-base">{block.name}</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold">
+                {block.name}
+              </CardTitle>
+              <span
+                className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full transition-colors ${
+                  block.enabled
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {block.enabled ? "Active" : "Off"}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {renderStats()}
-            <Separator orientation="vertical" className="h-6 hidden sm:block" />
-            <div className="flex items-center gap-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={onToggle}
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg"
+                  onClick={onToggle}
+                >
+                  <div
+                    className={`relative w-7 h-4 rounded-full transition-colors ${
+                      block.enabled
+                        ? "bg-emerald-500"
+                        : "bg-muted-foreground/30"
+                    }`}
                   >
                     <div
-                      className={`w-4 h-2 rounded-full transition-colors ${
-                        block.enabled ? "bg-green-500" : "bg-gray-400"
+                      className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+                        block.enabled ? "translate-x-3.5" : "translate-x-0.5"
                       }`}
                     />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent sideOffset={4}>
-                  {block.enabled ? "Disable" : "Enable"} block
-                </TooltipContent>
-              </Tooltip>
+                  </div>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={4}>
+                {block.enabled ? "Disable" : "Enable"} block
+              </TooltipContent>
+            </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={onDelete}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent sideOffset={4}>Delete block</TooltipContent>
-              </Tooltip>
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  onClick={onDelete}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={4}>Delete block</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">{renderBlockContent()}</CardContent>
-      <CardFooter>
-        <div className="flex w-full justify-between pt-2">
+
+      <CardContent className="px-4 sm:px-5 pt-0 pb-2">
+        {renderBlockContent()}
+      </CardContent>
+
+      <CardFooter className="px-4 sm:px-5 pb-3 pt-0">
+        <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-2">
             {isEdit ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEdit(!isEdit)}
-                    disabled={error}
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent sideOffset={4}>
-                  Save changes to block
-                </TooltipContent>
-              </Tooltip>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setIsEdit(!isEdit)}
+                disabled={error}
+                className="rounded-lg h-8 text-xs font-medium shadow-sm"
+              >
+                <Save className="h-3.5 w-3.5 mr-1.5" />
+                Save
+              </Button>
             ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEdit(!isEdit)}
-                  >
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent sideOffset={4}>Edit block</TooltipContent>
-              </Tooltip>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEdit(!isEdit)}
+                className="rounded-lg h-8 text-xs font-medium border-border/50 hover:bg-muted/50"
+              >
+                <Edit3 className="h-3.5 w-3.5 mr-1.5" />
+                Edit
+              </Button>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-xs px-2 py-1 rounded-full ${
-                block.enabled
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
-              }`}
-            >
-              {block.enabled ? "Active" : "Disabled"}
-            </span>
-          </div>
+          <div className="hidden sm:flex items-center">{renderStats()}</div>
         </div>
       </CardFooter>
     </Card>

@@ -96,7 +96,7 @@ function getOdyseePath(raw: string): { path: string; r?: string } | null {
 
 function buildEmbed(
   rawUrl: string,
-  twitchParent: string
+  twitchParent: string,
 ): { provider: VideoProvider; embedUrl: string; title: string } | null {
   const hostname = getHostname(rawUrl);
   if (!hostname) return null;
@@ -116,7 +116,7 @@ function buildEmbed(
     return {
       provider: "twitch",
       embedUrl: `https://player.twitch.tv/?video=${twitchId}&parent=${encodeURIComponent(
-        parent
+        parent,
       )}&autoplay=false`,
       title: "Twitch video",
     };
@@ -165,11 +165,10 @@ function Video({ props }: { props: BlockData }) {
     "description",
   ]);
 
-  const [twitchParent, setTwitchParent] = React.useState("localhost");
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    setTwitchParent(window.location.hostname || "localhost");
-  }, []);
+  const twitchParent =
+    typeof window !== "undefined"
+      ? window.location.hostname || "localhost"
+      : "localhost";
   const normalizedUrl = (typeof url === "string" ? url.trim() : "") || "";
   const displayUrl = React.useMemo(() => {
     const u = safeParseUrl(normalizedUrl);
@@ -180,7 +179,7 @@ function Video({ props }: { props: BlockData }) {
   }, [normalizedUrl]);
   const embed = React.useMemo(
     () => (normalizedUrl ? buildEmbed(normalizedUrl, twitchParent) : null),
-    [normalizedUrl, twitchParent]
+    [normalizedUrl, twitchParent],
   );
 
   return (

@@ -1,72 +1,47 @@
 export function BackgroundDecoration() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Large ring inspired by Paradigm design */}
+      {/* Gradient orbs */}
+      <div className="absolute -top-[30%] -right-[20%] h-[600px] w-[600px] rounded-full bg-violet-500/4 dark:bg-violet-500/6 blur-3xl" />
+      <div className="absolute -bottom-[20%] -left-[15%] h-[500px] w-[500px] rounded-full bg-indigo-500/4 dark:bg-indigo-500/6 blur-3xl" />
+      <div className="absolute top-[20%] left-[50%] h-[300px] w-[300px] rounded-full bg-purple-500/3 dark:bg-purple-500/4 blur-3xl" />
+
+      {/* Subtle ring */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <svg
-          width="800"
-          height="800"
-          viewBox="0 0 800 800"
+          width="700"
+          height="700"
+          viewBox="0 0 700 700"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="opacity-[0.03] dark:opacity-[0.05]"
+          className="opacity-[0.02] dark:opacity-[0.04]"
         >
           <circle
-            cx="400"
-            cy="400"
-            r="300"
+            cx="350"
+            cy="350"
+            r="280"
             stroke="currentColor"
-            strokeWidth="100"
+            strokeWidth="1"
+            className="text-primary"
+          />
+          <circle
+            cx="350"
+            cy="350"
+            r="200"
+            stroke="currentColor"
+            strokeWidth="0.5"
+            strokeDasharray="4 6"
             className="text-primary"
           />
         </svg>
       </div>
 
-      {/* Smaller accent circles */}
-      <div className="absolute right-[10%] top-[15%]">
-        <svg
-          width="120"
-          height="120"
-          viewBox="0 0 120 120"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="opacity-[0.04] dark:opacity-[0.06]"
-        >
-          <circle
-            cx="60"
-            cy="60"
-            r="50"
-            fill="currentColor"
-            className="text-accent"
-          />
-        </svg>
-      </div>
-
-      <div className="absolute bottom-[20%] left-[15%]">
-        <svg
-          width="80"
-          height="80"
-          viewBox="0 0 80 80"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="opacity-[0.04] dark:opacity-[0.06]"
-        >
-          <circle
-            cx="40"
-            cy="40"
-            r="35"
-            fill="currentColor"
-            className="text-primary"
-          />
-        </svg>
-      </div>
-
-      {/* Grid pattern overlay */}
+      {/* Grid dot pattern */}
       <div
-        className="absolute inset-0 opacity-[0.015] dark:opacity-[0.02]"
+        className="absolute inset-0 opacity-[0.012] dark:opacity-[0.025]"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-          backgroundSize: "40px 40px",
+          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 0.5px, transparent 0)`,
+          backgroundSize: "32px 32px",
         }}
       />
     </div>

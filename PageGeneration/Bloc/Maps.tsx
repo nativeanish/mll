@@ -12,7 +12,7 @@ type LeafletStatic = {
   map: (el: HTMLElement, opts?: Record<string, unknown>) => LeafletMap;
   tileLayer: (
     url: string,
-    opts?: Record<string, unknown>
+    opts?: Record<string, unknown>,
   ) => { addTo: (map: LeafletMap) => void };
   marker?: (coords: [number, number]) => {
     addTo: (map: LeafletMap) => LeafletMarker;
@@ -50,15 +50,14 @@ function loadLeaflet(): Promise<LeafletStatic | undefined> {
       const ready = (existing as HTMLScriptElement & { readyState?: string })
         .readyState;
       if (ready === "complete" || ready === "loaded") {
-        // script tag present and appears loaded; resolve with window.L if available
         const maybeL = (window as unknown as { L?: LeafletStatic }).L;
         if (maybeL) return resolve(maybeL);
       }
       existing.addEventListener("load", () =>
-        resolve((window as unknown as { L?: LeafletStatic }).L)
+        resolve((window as unknown as { L?: LeafletStatic }).L),
       );
       existing.addEventListener("error", () =>
-        reject(new Error("Failed to load Leaflet script"))
+        reject(new Error("Failed to load Leaflet script")),
       );
       return;
     }
@@ -67,7 +66,6 @@ function loadLeaflet(): Promise<LeafletStatic | undefined> {
     script.src = scriptSrc;
     script.async = true;
     script.onload = () => {
-      // mark script as loaded for future calls
       try {
         script.setAttribute("data-leaflet-loaded", "1");
       } catch {
@@ -84,12 +82,60 @@ function loadLeaflet(): Promise<LeafletStatic | undefined> {
   return leafletLoader;
 }
 
+/* ── Pin icon (inline SVG) ── */
+function MapPinIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function NavigationIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="3 11 22 2 13 21 11 13 3 11" />
+    </svg>
+  );
+}
+
 function Maps({ props }: { props: BlockData }) {
   const {
     latitude: latStr = "0",
     longitude: lngStr = "0",
     zoom: zoomStr = "2",
-  } = getStringFields(props.data, ["latitude", "longitude", "zoom"]);
+    title = "",
+    description = "",
+  } = getStringFields(props.data, [
+    "latitude",
+    "longitude",
+    "zoom",
+    "title",
+    "description",
+  ]);
   const lat = parseFloat(latStr) || 0;
   const lng = parseFloat(lngStr) || 0;
   const zoom = parseFloat(zoomStr) || 2;
@@ -97,18 +143,18 @@ function Maps({ props }: { props: BlockData }) {
   const leafletRef = React.useRef<LeafletMap | null>(null);
   const markerRef = React.useRef<LeafletMarker | null>(null);
 
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+
   React.useEffect(() => {
     if (!mapRef.current) return;
 
     let mounted = true;
 
-    // Ensure Leaflet is loaded from CDN, then initialize/update map
     loadLeaflet()
       .then((L) => {
         if (!mounted || !mapRef.current || !L) return;
 
         if (leafletRef.current) {
-          // Map already created: update marker position but do NOT change map view (keep map static)
           if (
             markerRef.current &&
             typeof markerRef.current.setLatLng === "function"
@@ -121,7 +167,6 @@ function Maps({ props }: { props: BlockData }) {
         const map = L.map(mapRef.current, {
           center: [lat, lng],
           zoom,
-          // make the map static / non-interactive
           dragging: false,
           touchZoom: false,
           scrollWheelZoom: false,
@@ -129,18 +174,15 @@ function Maps({ props }: { props: BlockData }) {
           boxZoom: false,
           keyboard: false,
           zoomControl: false,
-          attributionControl: true,
+          attributionControl: false,
         });
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(map);
 
         leafletRef.current = map;
 
-        // add a marker at the given coordinates and keep it when coords update
         try {
           const winL = window as unknown as {
             L?: LeafletStatic & { marker?: (...a: unknown[]) => unknown };
@@ -158,29 +200,15 @@ function Maps({ props }: { props: BlockData }) {
           /* noop */
         }
 
-        // debug
-        console.debug("Leaflet map created", {
-          el: mapRef.current,
-          lat,
-          lng,
-          zoom,
-        });
-
-        // Sometimes the container may be hidden or resized by parent layout; ensure Leaflet lays out
-        try {
-          // call invalidateSize after a tick to allow layout to settle
-          setTimeout(() => {
-            try {
-              (
-                map as unknown as { invalidateSize?: () => void }
-              ).invalidateSize?.();
-            } catch {
-              /* noop */
-            }
-          }, 0);
-        } catch {
-          /* noop */
-        }
+        setTimeout(() => {
+          try {
+            (
+              map as unknown as { invalidateSize?: () => void }
+            ).invalidateSize?.();
+          } catch {
+            /* noop */
+          }
+        }, 0);
       })
       .catch((err) => {
         console.error("Leaflet load failed:", err);
@@ -196,7 +224,6 @@ function Maps({ props }: { props: BlockData }) {
         leafletRef.current = null;
       }
       if (markerRef.current) {
-        // try removing marker from map if supported, then clear ref
         try {
           (
             markerRef.current as LeafletMarker & { remove?: () => void }
@@ -209,16 +236,62 @@ function Maps({ props }: { props: BlockData }) {
     };
   }, [lat, lng, zoom]);
 
+  const coordText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
   return (
     <div
-      ref={mapRef}
-      className="w-full aspect-video rounded-md cursor-pointer"
+      className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden group"
       data-uuid={props.id}
-      onClick={() => {
-        const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-        window.open(url, "_blank", "noopener");
-      }}
-    ></div>
+    >
+      {/* Map */}
+      <div
+        className="relative w-full cursor-pointer"
+        onClick={() => window.open(mapsUrl, "_blank", "noopener")}
+      >
+        <div ref={mapRef} className="w-full aspect-2/1" style={{ zIndex: 0 }} />
+        {/* Gradient overlay at bottom of map */}
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-black/30 to-transparent pointer-events-none" />
+        {/* Floating coordinates badge */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm shadow-sm text-[0.7rem] font-medium text-gray-700">
+          <MapPinIcon className="w-3.5 h-3.5 text-red-500" />
+          {coordText}
+        </div>
+      </div>
+
+      {/* Info section */}
+      <div className="px-4 py-3">
+        {/* Title */}
+        {title && (
+          <h3 className="text-sm font-semibold text-gray-900 leading-snug">
+            {title}
+          </h3>
+        )}
+
+        {/* Description */}
+        {description && (
+          <p
+            className={`text-xs text-gray-500 leading-relaxed ${title ? "mt-1" : ""}`}
+          >
+            {description}
+          </p>
+        )}
+
+        {/* If no title and no description, show a default label */}
+        {!title && !description && (
+          <p className="text-xs text-gray-400">Map location</p>
+        )}
+
+        {/* Action button */}
+        <button
+          type="button"
+          onClick={() => window.open(mapsUrl, "_blank", "noopener")}
+          className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 active:bg-gray-950 transition-colors cursor-pointer"
+        >
+          <NavigationIcon className="w-3.5 h-3.5" />
+          Open in Google Maps
+        </button>
+      </div>
+    </div>
   );
 }
 

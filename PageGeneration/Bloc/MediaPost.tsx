@@ -632,11 +632,28 @@ function TwitterEmbed({ url, tweetId }: { url: string; tweetId: string }) {
             conversation: "none",
             align: "center",
             dnt: true,
+            width: "100%",
           },
         );
         if (!cancelled) {
           setLoaded(true);
           if (!el) setError(true);
+          // Force full-width on Twitter widget elements (they use inline max-width: 550px)
+          if (containerRef.current) {
+            const widgets = containerRef.current.querySelectorAll(
+              "twitter-widget, twitterwidget, .twitter-tweet, .twitter-tweet-rendered",
+            );
+            widgets.forEach((w) => {
+              (w as HTMLElement).style.maxWidth = "100%";
+              (w as HTMLElement).style.width = "100%";
+            });
+            // Also handle iframes inside the widget
+            const iframes = containerRef.current.querySelectorAll("iframe");
+            iframes.forEach((iframe) => {
+              iframe.style.maxWidth = "100%";
+              iframe.style.width = "100%";
+            });
+          }
         }
       } catch {
         if (!cancelled) setError(true);
@@ -647,6 +664,34 @@ function TwitterEmbed({ url, tweetId }: { url: string; tweetId: string }) {
       cancelled = true;
     };
   }, [tweetId]);
+
+  // Force full width on any Twitter widget elements that appear asynchronously
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const forceFullWidth = () => {
+      if (!containerRef.current) return;
+      const els = containerRef.current.querySelectorAll(
+        "twitter-widget, twitterwidget, .twitter-tweet, .twitter-tweet-rendered, iframe",
+      );
+      els.forEach((el) => {
+        (el as HTMLElement).style.maxWidth = "100%";
+        (el as HTMLElement).style.width = "100%";
+      });
+    };
+    const observer = new MutationObserver(forceFullWidth);
+    observer.observe(containerRef.current, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
+    const interval = setInterval(forceFullWidth, 200);
+    const timeout = setTimeout(() => clearInterval(interval), 5000);
+    return () => {
+      observer.disconnect();
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [loaded]);
 
   if (error) {
     return (
@@ -674,6 +719,12 @@ function TwitterEmbed({ url, tweetId }: { url: string; tweetId: string }) {
 
   return (
     <div className="w-full">
+      <style>{`
+        twitter-widget, twitterwidget, .twitter-tweet, .twitter-tweet-rendered {
+          max-width: 100% !important;
+          width: 100% !important;
+        }
+      `}</style>
       {!loaded && (
         <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           <div className="p-4 animate-pulse">
@@ -698,7 +749,7 @@ function TwitterEmbed({ url, tweetId }: { url: string; tweetId: string }) {
       )}
       <div
         ref={containerRef}
-        className="w-full [&>div]:m-0! [&_.twitter-tweet]:m-0!"
+        className="w-full max-w-[550px] mx-auto [&>div]:m-0! [&_.twitter-tweet]:m-0! [&_.twitter-tweet]:max-w-full! [&_.twitter-tweet]:w-full! *:max-w-full! [&_iframe]:w-full!"
       />
     </div>
   );
