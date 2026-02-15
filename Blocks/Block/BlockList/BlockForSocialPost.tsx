@@ -22,9 +22,16 @@ const POST_EXAMPLES = {
   "Bluesky-Post": "https://bsky.app/profile/hackernoon.com/post/3lu5d6yrser25",
 } as const;
 
+function normalizeUrl(input: string) {
+  const trimmed = input.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 function isValidPostUrlByAlt(url: string, alt: Props["alt"]) {
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(normalizeUrl(url));
     if (!/^https?:$/.test(parsed.protocol)) return false;
 
     const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
@@ -152,7 +159,7 @@ function BlockForSocialPost({
                 size="icon"
                 className="h-6 w-6 shrink-0"
                 onClick={() => {
-                  window.open(url, "_blank");
+                  window.open(normalizeUrl(url), "_blank");
                   toast.success("Opening URL...");
                 }}
               >

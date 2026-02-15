@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Smartphone, X } from "lucide-react";
 
 // MobileView renders arbitrary HTML/CSS/JS in a sandboxed iframe, sized like a phone.
@@ -131,7 +131,9 @@ export default function MobileView({
   disableLinks = true,
 }: MobileViewProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [scale, setScale] = useState(1);
   // If src is a blob: or data: URL, resolve it to HTML and use srcDoc to avoid browser restrictions
   const [resolved, setResolved] = useState<{ src?: string; html?: string }>({});
 
@@ -266,6 +268,24 @@ export default function MobileView({
   const outerWidth = contentWidth;
   const outerHeight = contentHeight + TOP_DECO + BOTTOM_DECO;
 
+  // Auto-scale the device shell to fit within its container
+  const computeScale = useCallback(() => {
+    if (!containerRef.current) return;
+    const availableWidth = containerRef.current.clientWidth - 32; // 16px padding each side
+    const availableHeight = containerRef.current.clientHeight - 60; // space for label
+    if (availableWidth <= 0 || availableHeight <= 0) return;
+    const scaleX = Math.min(1, availableWidth / outerWidth);
+    const scaleY = Math.min(1, availableHeight / outerHeight);
+    setScale(Math.min(scaleX, scaleY));
+  }, [outerWidth, outerHeight]);
+
+  useEffect(() => {
+    computeScale();
+    const ro = new ResizeObserver(computeScale);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [computeScale]);
+
   const DeviceShell = (
     <div
       className="relative bg-foreground rounded-2xl shadow-[6px_6px_0px_var(--border)] border-2 border-border overflow-hidden"
@@ -323,12 +343,21 @@ export default function MobileView({
   return (
     <>
       {/* Desktop view: persist preview on right side */}
-      <div className={className}>
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+      <div ref={containerRef} className={className}>
+        <div className="flex flex-col items-center gap-2 mt-6">
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
             Live Preview
           </p>
-          {DeviceShell}
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: "top center",
+              width: outerWidth,
+              height: outerHeight,
+            }}
+          >
+            {DeviceShell}
+          </div>
         </div>
       </div>
 

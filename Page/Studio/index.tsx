@@ -4,7 +4,7 @@ import BasicCard from "@/Blocks/studioBlock/BasicBlock";
 import NavBar from "@/Blocks/UI/NavBar";
 import React, { useEffect } from "react";
 import { useBlockStore } from "@/store/useBlockStore";
-import { Globe, Loader2, Plus } from "lucide-react";
+import { Globe, Loader2, Monitor, Plus, Smartphone } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Dialog, DialogTrigger } from "@/src/components/ui/dialog";
 import BlockDialog from "@/Blocks/studioBlock/BlockDialog";
@@ -36,6 +36,9 @@ function Studio() {
   const [seoMeta] = React.useState(DEFAULT_SEO_META);
   const [selectedFile, setSelectedFile] = React.useState<string>("");
   const [isPublishing, setIsPublishing] = React.useState(false);
+  const [previewMode, setPreviewMode] = React.useState<"mobile" | "desktop">(
+    "mobile",
+  );
   const name = useBlockStore((s) => s.name);
   const description = useBlockStore((s) => s.description);
   const avatarUrl = useBlockStore((s) => s.avatarUrl);
@@ -239,14 +242,46 @@ function Studio() {
             </div>
           </div>
 
+          {/* Preview Mode Toggle - sits above MobileView's "Live Preview" label */}
+          <div className="hidden lg:flex fixed right-0 top-14 w-[40%] xl:w-[45%] z-30 justify-center pt-3 pb-1">
+            <div className="inline-flex items-center rounded-md border-2 border-border bg-background shadow-[3px_3px_0px_var(--border)] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setPreviewMode("mobile")}
+                className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide transition-colors ${
+                  previewMode === "mobile"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Smartphone className="h-3 w-3" />
+                Mobile
+              </button>
+              <div className="w-px h-5 bg-border" />
+              <button
+                type="button"
+                onClick={() => setPreviewMode("desktop")}
+                className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide transition-colors ${
+                  previewMode === "desktop"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Monitor className="h-3 w-3" />
+                Desktop
+              </button>
+            </div>
+          </div>
+
           {/* Preview Panel */}
           <MobileView
-            frameHeight={700}
-            frameWidth={350}
+            frameHeight={previewMode === "mobile" ? 700 : 560}
+            frameWidth={previewMode === "mobile" ? 350 : 820}
             html={html}
             sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups"
             allow="clipboard-read; clipboard-write"
             square={false}
+            showDecorations={previewMode === "mobile"}
             disableLinks={true}
           />
         </div>

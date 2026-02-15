@@ -23,8 +23,10 @@ import { SiFarcaster } from "react-icons/si";
 import Paragraph from "@/assets/Paragraph";
 import Odysee from "@/assets/Odysee";
 import {
+  FaCode,
   FaDiscord,
   FaFile,
+  FaGithub,
   FaInfoCircle,
   FaMedium,
   FaReddit,
@@ -33,6 +35,7 @@ import {
   FaTwitch,
   FaYoutube,
 } from "react-icons/fa";
+import { IoMdGitBranch } from "react-icons/io";
 import { RiTokenSwapFill } from "react-icons/ri";
 import social from "./social";
 import Permaswap from "@/assets/Permaswap";
@@ -244,6 +247,26 @@ export const node = {
           icon: FaReddit,
           description: "Share Reddit communities and discussions",
           display: ["View", "Join"],
+        },
+      ],
+    },
+    {
+      name: "Developer",
+      icon: FaCode,
+      node: [
+        {
+          name: "GitHub Profile",
+          alt: "GitHub-Profile",
+          icon: FaGithub,
+          description: "Show a developer’s GitHub profile, bio, and stats",
+          display: ["View"],
+        },
+        {
+          name: "GitHub Repository",
+          alt: "GitHub-Repository",
+          icon: IoMdGitBranch,
+          description: "Show repository details like stars, forks, and README",
+          display: ["View"],
         },
       ],
     },

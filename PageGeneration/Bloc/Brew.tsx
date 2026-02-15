@@ -178,6 +178,56 @@ function parseTipAmounts(raw: string | undefined): string[] {
     .sort((a, b) => Number.parseFloat(a) - Number.parseFloat(b));
 }
 
+function parseTipAmountsFromData(raw: unknown): string[] {
+  if (typeof raw === "string") {
+    return parseTipAmounts(raw);
+  }
+
+  if (!Array.isArray(raw)) return [];
+
+  const parsed = raw
+    .map((item) => {
+      if (typeof item === "number" || typeof item === "string") {
+        return Number.parseFloat(item.toString());
+      }
+
+      if (item && typeof item === "object" && "value" in item) {
+        const value = (item as { value?: unknown }).value;
+        if (typeof value === "number" || typeof value === "string") {
+          return Number.parseFloat(value.toString());
+        }
+      }
+
+      return Number.NaN;
+    })
+    .filter((n) => Number.isFinite(n) && n > 0)
+    .map((n) => n.toString())
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort((a, b) => Number.parseFloat(a) - Number.parseFloat(b));
+
+  return parsed;
+}
+
+function parseAllowCustom(raw: unknown): boolean {
+  if (typeof raw === "boolean") return raw;
+  if (typeof raw === "string") return raw.toLowerCase() !== "false";
+  return true;
+}
+
+function getCustomAmountError(raw: string): string {
+  const value = raw.trim();
+  if (!value) return "Enter a valid amount";
+  if (/[a-zA-Z]/.test(value)) return "Only numeric values are allowed";
+  if (value.includes("-")) return "Negative amounts are not allowed";
+
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed)) return "Enter a valid amount";
+  if (parsed === 0) return "Amount must be greater than 0";
+  if (parsed < 0) return "Negative amounts are not allowed";
+
+  return "";
+}
+
 function formatAddress(addr: string): string {
   if (!addr) return "";
   return addr.length > 16 ? `${addr.slice(0, 8)}...${addr.slice(-6)}` : addr;
@@ -187,7 +237,7 @@ function formatAddress(addr: string): string {
 /*  Step type                                                         */
 /* ------------------------------------------------------------------ */
 
-type ModalStep = "connecting" | "tip" | "processing" | "success";
+type ModalStep = "connecting" | "tip" | "confirm" | "processing" | "success";
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                         */
@@ -200,8 +250,6 @@ function Brew({ props }: { props: BlockData }) {
     buttonName = "Buy Me a Brew",
     paymentAddress = "yourpaymentaddress",
     selectedChain = "AO",
-    tipAmounts = "5,10,15",
-    customAmount = "true",
     thankMessage = "Thank you for your support! Your contribution means a lot to me.",
   } = getStringFields(props.data, [
     "title",
@@ -209,16 +257,20 @@ function Brew({ props }: { props: BlockData }) {
     "buttonName",
     "paymentAddress",
     "selectedChain",
-    "tipAmounts",
-    "customAmount",
     "thankMessage",
   ]);
 
-  const allowCustom = (customAmount || "").toLowerCase() !== "false";
-  const parsedTipAmounts = useMemo(
-    () => parseTipAmounts(tipAmounts),
-    [tipAmounts],
-  );
+  const rawTipAmounts = props.data.tipAmounts;
+  const rawCustomAmount = props.data.customAmount;
+
+  const allowCustom = parseAllowCustom(rawCustomAmount);
+  const parsedTipAmounts = useMemo(() => {
+    const parsed = parseTipAmountsFromData(rawTipAmounts);
+    if (parsed.length > 0) return parsed;
+    return rawTipAmounts === undefined || rawTipAmounts === null
+      ? parseTipAmounts("5,10,15")
+      : [];
+  }, [rawTipAmounts]);
 
   const chain = chainMeta[selectedChain as ChainKey] || {
     label: selectedChain || "Token",
@@ -292,13 +344,25 @@ function Brew({ props }: { props: BlockData }) {
 
   /* ---- custom amount ---- */
   const applyCustom = () => {
-    const v = Number.parseFloat(customVal);
-    if (!Number.isFinite(v) || v <= 0) {
-      setInputErr("Enter a valid amount");
+    const err = getCustomAmountError(customVal);
+    if (err) {
+      setInputErr(err);
       return;
     }
+
+    const v = Number.parseFloat(customVal.trim());
     setInputErr("");
     setSelectedAmt(v.toString());
+  };
+
+  /* ---- review before submit ---- */
+  const handleOpenConfirm = () => {
+    if (!selectedAmt) return;
+    setStep("confirm");
+  };
+
+  const handleBackToTip = () => {
+    setStep("tip");
   };
 
   /* ---- submit tip ---- */
@@ -450,13 +514,17 @@ function Brew({ props }: { props: BlockData }) {
                       </label>
                       <div className="flex gap-2">
                         <input
-                          type="number"
-                          min="0"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           value={customVal}
                           onChange={(e) => {
-                            setCustomVal(e.target.value);
-                            setInputErr("");
+                            const nextValue = e.target.value;
+                            setCustomVal(nextValue);
+                            if (!nextValue.trim()) {
+                              setInputErr("");
+                              return;
+                            }
+                            setInputErr(getCustomAmountError(nextValue));
                           }}
                           placeholder={`e.g. 3.5 ${chain.symbol}`}
                           className="flex-1 px-3 py-2.5 rounded-lg border-[3px] border-black text-sm text-black outline-none shadow-[2px_2px_0px_#000] focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5"
@@ -479,7 +547,7 @@ function Brew({ props }: { props: BlockData }) {
                   <button
                     type="button"
                     disabled={!selectedAmt}
-                    onClick={handleSubmitTip}
+                    onClick={handleOpenConfirm}
                     className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg border-[3px] font-bold text-sm transition-all mt-1 ${
                       selectedAmt
                         ? "bg-black text-white border-black uppercase shadow-[4px_4px_0px_#FF6B6B] cursor-pointer hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#FF6B6B]"
@@ -488,9 +556,49 @@ function Brew({ props }: { props: BlockData }) {
                   >
                     <CoffeeIcon className="h-4 w-4" />
                     {selectedAmt
-                      ? `${buttonName} — ${selectedAmt} ${chain.symbol}`
-                      : buttonName}
+                      ? `Review tip — ${selectedAmt} ${chain.symbol}`
+                      : "Review tip"}
                   </button>
+                </div>
+              )}
+
+              {/* ======= STEP: CONFIRM ======= */}
+              {step === "confirm" && (
+                <div className="flex flex-col gap-4">
+                  <div className="rounded-lg border-[3px] border-black bg-[#FFE66D] px-4 py-3">
+                    <p className="font-bold text-black text-sm uppercase">
+                      Confirm tip
+                    </p>
+                    <p className="text-xs text-black/70 mt-1">
+                      Review the details before sending.
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border-[3px] border-black bg-white px-4 py-3 text-sm">
+                    <p className="font-bold text-black">
+                      {selectedAmt} {chain.symbol}
+                    </p>
+                    <p className="text-xs text-black/70 mt-1">
+                      To: {formatAddress(paymentAddress)}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={handleBackToTip}
+                      className="w-full flex items-center justify-center py-3 rounded-lg border-[3px] border-black bg-white text-black text-sm font-bold uppercase cursor-pointer shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#000] transition-transform"
+                    >
+                      Disagree
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSubmitTip}
+                      className="w-full flex items-center justify-center py-3 rounded-lg border-[3px] border-black bg-black text-white text-sm font-bold uppercase cursor-pointer shadow-[4px_4px_0px_#FF6B6B] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#FF6B6B] transition-transform"
+                    >
+                      Confirm
+                    </button>
+                  </div>
                 </div>
               )}
 

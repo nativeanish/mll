@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/components/ui/card";
-import { Separator } from "@/src/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
@@ -41,6 +40,8 @@ import BlockForFundMyBrew from "./BlockList/BlockForFundMyBrew";
 import BlockForTokenInfo from "./BlockList/BlockForTokenInfo";
 import BlockForTokenSwap from "./BlockList/BlockForTokenSwap";
 import BlockForSocialPost from "./BlockList/BlockForSocialPost";
+import BlockForGithubProfile from "./BlockList/BlockForGithubProfile";
+import BlockForGithubRepos from "./BlockList/BlockForGithubRepos";
 
 interface BlockItemProps {
   block: BlockData;
@@ -169,6 +170,22 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
             setError={setError}
             alt={block.alt}
             placeholder={block.placeholder}
+            uuid={block.id}
+          />
+        );
+      case "GitHub-Profile":
+        return (
+          <BlockForGithubProfile
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
+      case "GitHub-Repository":
+        return (
+          <BlockForGithubRepos
+            isEdit={isEdit}
+            setError={setError}
             uuid={block.id}
           />
         );
