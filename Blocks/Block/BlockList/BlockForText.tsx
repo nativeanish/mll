@@ -1,5 +1,6 @@
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
+import { Input } from "@/src/components/ui/input";
 import {
   type textAlign,
   type textSize,
@@ -28,6 +29,8 @@ function BlockForText({ isEdit, uuid }: Props) {
   const [size, setSize] = useState<NonNullable<textSize>>("base");
   const [font, setFont] = useState<NonNullable<textFont>>("sans");
   const [align, setAlign] = useState<NonNullable<textAlign>>("left");
+  const [spacingAbove, setSpacingAbove] = useState<string>("0");
+  const [spacingBelow, setSpacingBelow] = useState<string>("0");
   const updateBlock = useBlockStore((state) => state.updateBlockData);
   useEffect(() => {
     if (!isEdit) {
@@ -37,9 +40,22 @@ function BlockForText({ isEdit, uuid }: Props) {
         size,
         font,
         align,
+        spacingAbove,
+        spacingBelow,
       });
     }
-  }, [isEdit, text, color, size, font, align, updateBlock, uuid]);
+  }, [
+    isEdit,
+    text,
+    color,
+    size,
+    font,
+    align,
+    spacingAbove,
+    spacingBelow,
+    updateBlock,
+    uuid,
+  ]);
   return (
     <div>
       {isEdit ? (
@@ -113,6 +129,31 @@ function BlockForText({ isEdit, uuid }: Props) {
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
                 className="h-9 w-full rounded-md border bg-muted/40 p-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Spacing Top (px)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="128"
+                value={spacingAbove}
+                onChange={(e) => setSpacingAbove(e.target.value)}
+                className="bg-muted/40"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Spacing Bottom (px)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="128"
+                value={spacingBelow}
+                onChange={(e) => setSpacingBelow(e.target.value)}
+                className="bg-muted/40"
               />
             </div>
           </div>

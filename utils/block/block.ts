@@ -41,6 +41,7 @@ import social from "./social";
 import Permaswap from "@/assets/Permaswap";
 import Bazar from "@/assets/Bazar";
 import { FaBluesky } from "react-icons/fa6";
+import ArDrive from "@/assets/ArDrive";
 export const node = {
   nav: [
     { name: "Social", icon: MessageCircle, node: social },
@@ -138,6 +139,13 @@ export const node = {
           alt: "File",
           icon: FaFile,
           description: "Upload and share various file types",
+          display: ["View", "Download"],
+        },
+        {
+          name: "ArDrive",
+          alt: "ArDrive-File",
+          icon: ArDrive,
+          description: "Attach Public ArDrive",
           display: ["View", "Download"],
         },
       ],

@@ -42,6 +42,7 @@ import BlockForTokenSwap from "./BlockList/BlockForTokenSwap";
 import BlockForSocialPost from "./BlockList/BlockForSocialPost";
 import BlockForGithubProfile from "./BlockList/BlockForGithubProfile";
 import BlockForGithubRepos from "./BlockList/BlockForGithubRepos";
+import BlockForArDrive from "./BlockList/BlockForArDrive";
 
 interface BlockItemProps {
   block: BlockData;
@@ -78,7 +79,7 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
       case "Discord":
       case "Farcaster":
       case "Medium":
-      case "Mirror":
+      case "Paragraph":
       case "Youtube":
       case "Github":
       case "Instagram":
@@ -241,6 +242,15 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
             onExitEdit={() => setIsEdit(false)}
           />
         );
+      case "ArDrive-File":
+        return (
+          <BlockForArDrive
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
+
       default:
         return (
           <BlockForText isEdit={isEdit} setError={setError} uuid={block.id} />

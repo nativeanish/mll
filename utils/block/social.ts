@@ -12,9 +12,9 @@ import {
 } from "react-icons/fa6";
 import { SiFarcaster } from "react-icons/si";
 import Odysee from "@/assets/Odysee";
-import Mirror from "@/assets/Mirror";
 import { RiMailFill, RiTelegram2Fill } from "react-icons/ri";
 import { FaDiscord, FaLink, FaReddit } from "react-icons/fa";
+import Paragraph from "@/assets/Paragraph";
 const social = [
   {
     name: "X (Twitter)",
@@ -52,10 +52,10 @@ const social = [
     display: ["View", "Click"],
   },
   {
-    name: "Mirror",
-    icon: Mirror,
-    alt: "Mirror",
-    description: "Feature your Mirror blog posts and writings",
+    name: "Paragraph",
+    icon: Paragraph,
+    alt: "Paragraph",
+    description: "Feature your Paragraph blog posts and writings",
     display: ["View", "Click"],
   },
   {

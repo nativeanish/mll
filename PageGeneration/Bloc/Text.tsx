@@ -37,11 +37,29 @@ function Text({ props }: { props: BlockData }) {
     font: fontValue = "sans",
     color = "#000000",
     size: sizeValue = "base",
-  } = getStringFields(props.data, ["text", "align", "font", "color", "size"]);
+    spacingAbove: spacingAboveStr = "0",
+    spacingBelow: spacingBelowStr = "0",
+  } = getStringFields(props.data, [
+    "text",
+    "align",
+    "font",
+    "color",
+    "size",
+    "spacingAbove",
+    "spacingBelow",
+  ]);
   const font = fontValue as textFont;
   const size = sizeValue as textSize;
+  const spacingAbove = Number(spacingAboveStr) || 0;
+  const spacingBelow = Number(spacingBelowStr) || 0;
   return (
-    <div className="w-full p-2">
+    <div
+      className="w-full p-2"
+      style={{
+        paddingTop: `${spacingAbove}px`,
+        paddingBottom: `${spacingBelow}px`,
+      }}
+    >
       <span
         id={props.id}
         className={`w-full block font-bold ${sizeMap[size]} ${fontMap[font]} text-${align}`}

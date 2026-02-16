@@ -22,6 +22,7 @@ import MediaPost from "./Bloc/MediaPost";
 import GithubProfile from "./Bloc/GithubProfile";
 import GithubRepo from "./Bloc/GithubRepo";
 import BazarCollection from "./Bloc/BazarCollection";
+import ArDrive from "./Bloc/ArDrive";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -352,6 +353,8 @@ export default function PageGeneration({ basicData, block }: Props) {
         return <GithubRepo key={b.id} props={b} />;
       case "Bazar-Collection":
         return <BazarCollection key={b.id} props={b} />;
+      case "ArDrive-File":
+        return <ArDrive key={b.id} props={b} />;
       default:
         return null;
     }

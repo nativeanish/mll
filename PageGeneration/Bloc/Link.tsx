@@ -24,7 +24,7 @@ function getIconFor(block: string) {
   if (block === "Url") return <Url />;
   if (block === "Email") return <Email />;
   if (block === "Odysee") return <Odysee />;
-  if (block === "Mirror") return <Mirror />;
+  if (block === "Paragraph") return <Paragraph />;
   return <UndefinedLink />;
 }
 
@@ -80,7 +80,6 @@ function Link({ block }: Props) {
       </a>
       <div className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full rounded-lg border-2 border-black px-2 py-1 text-[10px] font-bold uppercase opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-black text-white max-w-64 whitespace-normal warp-break-words text-center">
         <div className="font-medium">{tooltipLabel}</div>
-        {desc && <div className="opacity-80 mt-0.5">{desc}</div>}
       </div>
     </div>
   );
@@ -578,22 +577,34 @@ function UndefinedLink() {
   );
 }
 
-function Mirror() {
+function Paragraph(props: React.SVGProps<SVGSVGElement>){
   return (
-    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="grayShade" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ffffff" />
-          <stop offset="100%" stop-color="#333333" />
-        </linearGradient>
-      </defs>
-
-      <circle cx="250" cy="250" r="250" fill="black" />
-
-      <path
-        d="M150,380 V180 A100,100 0 0,1 350,180 V380 Z"
-        fill="url(#grayShade)"
-      />
-    </svg>
-  );
+      <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="81"
+    height="82"
+    fill="none"
+    viewBox="0 0 81 82"
+    {...props}
+  >
+    <path
+      stroke="currentColor"
+      strokeMiterlimit="10"
+      strokeWidth="10.659"
+      d="M6 0v76.135h75"
+    />
+    <path
+      stroke="currentColor"
+      strokeLinejoin="round"
+      strokeWidth="10.659"
+      d="M34.407 5.302 6 76.134l70.072-29.167"
+    />
+    <path
+      stroke="currentColor"
+      strokeMiterlimit="10"
+      strokeWidth="10.659"
+      d="m6 76.129 53.03-54.545"
+    />
+  </svg>
+  )
 }

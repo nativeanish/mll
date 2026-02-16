@@ -95,42 +95,66 @@ export default function BasicCard() {
         </div>
 
         <div className="relative aspect-3/1 w-full overflow-hidden bg-muted group/cover border-b-2 border-border">
-          <img
-            src={coverUrl || "/cover-image-placeholder.png"}
-            alt="Cover"
-            className="h-full w-full object-cover transition-all duration-300 group-hover/cover:scale-105"
-          />
-          <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover/cover:bg-black/40 group-hover/cover:opacity-100">
-            <div className="flex flex-col items-center gap-2 text-white">
-              <div className="rounded-lg bg-white/20 p-3 border-2 border-white/40">
-                <Upload className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-black uppercase">Change Cover</span>
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={onCoverChange}
-              className="hidden"
-              disabled={disabled}
-            />
-          </label>
           {coverUrl ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Remove cover image"
-              onClick={() => {
-                if (coverUrl?.startsWith("blob:"))
-                  URL.revokeObjectURL(coverUrl);
-                setData({ coverUrl: null });
-              }}
-              className="absolute right-2 top-2 h-7 w-7 rounded-md bg-destructive text-white border-2 border-border hover:bg-destructive/80 opacity-0 group-hover/cover:opacity-100 transition-opacity shadow-none"
-              disabled={disabled}
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          ) : null}
+            <>
+              <img
+                src={coverUrl}
+                alt="Cover"
+                className="h-full w-full object-cover transition-all duration-300 group-hover/cover:scale-105"
+              />
+              {/* hover overlay: change cover */}
+              <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover/cover:bg-black/40 group-hover/cover:opacity-100">
+                <div className="flex flex-col items-center gap-2 text-white">
+                  <div className="rounded-lg bg-white/20 p-3 border-2 border-white/40">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-black uppercase">
+                    Change Cover
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={onCoverChange}
+                  className="hidden"
+                  disabled={disabled}
+                />
+              </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Remove cover image"
+                onClick={() => {
+                  if (coverUrl?.startsWith("blob:"))
+                    URL.revokeObjectURL(coverUrl);
+                  setData({ coverUrl: null });
+                }}
+                className="absolute right-2 top-2 h-7 w-7 rounded-md bg-destructive text-white border-2 border-border hover:bg-destructive/80 opacity-0 group-hover/cover:opacity-100 transition-opacity shadow-none"
+                disabled={disabled}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </>
+          ) : (
+            /* no cover: always-visible upload prompt */
+            <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-muted transition-colors hover:bg-muted/80">
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <div className="rounded-lg bg-muted-foreground/10 p-3 border-2 border-border">
+                  <Upload className="h-5 w-5" />
+                </div>
+                <span className="text-sm font-black uppercase">
+                  Upload Cover
+                </span>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={onCoverChange}
+                className="hidden"
+                disabled={disabled}
+              />
+            </label>
+          )}
         </div>
       </div>
 
