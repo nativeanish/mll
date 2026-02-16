@@ -258,10 +258,6 @@ function BlockForGithubProfile({ isEdit, setError, uuid }: Props) {
       if (prev.includes(repoName)) {
         return prev.filter((name) => name !== repoName);
       }
-      if (prev.length >= 5) {
-        toast.warning("You can pin up to 5 repositories");
-        return prev;
-      }
       return [...prev, repoName];
     });
   };
@@ -401,7 +397,7 @@ function BlockForGithubProfile({ isEdit, setError, uuid }: Props) {
 
               <div className="space-y-3">
                 <Label className="text-sm font-medium">
-                  Pin Public Repositories (up to 5)
+                  Pin Public Repositories
                 </Label>
                 <div className="max-h-52 overflow-y-auto rounded border p-2 space-y-2">
                   {repos.length === 0 ? (

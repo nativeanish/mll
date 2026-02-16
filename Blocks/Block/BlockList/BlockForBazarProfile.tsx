@@ -28,15 +28,13 @@ export interface BazarAsset {
 
 interface BazarProfile {
   id: string;
-  owner: string;
+  walletAddress: string;
   assets: BazarAsset[];
-  version: string;
-  description?: string;
-  banner?: string;
-  username?: string;
-  displayName?: string;
-  collections: string[];
-  thumbnail?: string;
+  description: string;
+  banner: string;
+  username: string;
+  displayName: string;
+  thumbnail: string;
 }
 function BlockForBazarProfile({ isEdit, uuid }: Props) {
   const address = useWallet.getState().address;
@@ -47,21 +45,14 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
     isLoading,
     error,
     isError,
-  } = useQuery<BazarProfile | { id: null }>({
+  } = useQuery<BazarProfile>({
     queryKey: ["bazar-profile", address],
     queryFn: () => fetchProfilewithAssets(address || ""),
     enabled: address !== null,
     retry: 1,
   });
 
-  const profile = profileData as BazarProfile & {
-    assets: Array<{
-      type: "image" | "video" | "unknown" | "token";
-      id: string;
-      logoImage: string;
-      quantity: string;
-    }>;
-  };
+  const profile = profileData!;
 
   const profileId = profile?.id;
   const profileDisplayName = profile?.displayName;
@@ -81,6 +72,7 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
       banner: profileBanner,
       thumbnail: profileThumbnail,
       selectedAssets,
+      assets: profile?.assets || [],
     });
   }, [
     isEdit,
@@ -91,6 +83,7 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
     profileBanner,
     profileThumbnail,
     selectedAssets,
+    profile?.assets,
     updateBlock,
     uuid,
   ]);
@@ -99,14 +92,9 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
     setSelectedAssets((prev) => {
       if (prev.includes(asset.id)) {
         return prev.filter((id) => id !== asset.id);
-      } else if (prev.length < 5) {
-        return [...prev, asset.id];
-      } else {
-        toast.warning("Maximum 5 assets allowed", {
-          description: "You can select up to 5 assets for your profile.",
-        });
-        return prev;
       }
+
+      return [...prev, asset.id];
     });
   };
 
@@ -125,13 +113,7 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
       </div>
     );
   }
-  if (
-    isError ||
-    !profileData ||
-    ("id" in profileData && profileData.id === null) ||
-    !profileData.id ||
-    error
-  ) {
+  if (isError || !profileData || !profileData.id || error) {
     return (
       <div className="flex flex-col items-center justify-center p-2">
         <div className="text-center space-y-4">
@@ -155,9 +137,7 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
               Bazar Profile Error
             </h3>
             <p className="text-sm text-red-700 dark:text-red-300 max-w-sm mx-auto">
-              {profileData && "id" in profileData && profileData.id === null
-                ? "No Bazar account found for this wallet address"
-                : "Failed to load profile data from Arweave"}
+              Failed to load profile data from Arweave
             </p>
           </div>
         </div>
@@ -245,8 +225,7 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
                   Select Assets to Display
                 </h4>
                 <p className="text-xs text-muted-foreground">
-                  Choose up to 5 assets to showcase ({selectedAssets.length}/5
-                  selected)
+                  Selected assets: {selectedAssets.length}
                 </p>
               </div>
             </div>
@@ -335,7 +314,7 @@ function BlockForBazarProfile({ isEdit, uuid }: Props) {
 
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span>{profile.assets?.length || 0} assets</span>
-            <span>{profile.collections?.length || 0} collections</span>
+            <span>0 collections</span>
           </div>
           {selectedAssets.length > 0 && (
             <div className="space-y-3">

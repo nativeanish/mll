@@ -2,7 +2,7 @@ import type { BlockData } from "@/store/useBlockStore";
 import getStringFields from "../utils/getStringFields";
 import { useState } from "react";
 
-interface BazarProfileProps {
+interface BazarCollectionProps {
   props: BlockData;
 }
 
@@ -12,6 +12,8 @@ interface AssetData {
   logoImage: string;
   quantity: string;
 }
+
+const ASSETS_PER_ROW = 4;
 
 const getStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -27,16 +29,6 @@ const getAssetArray = (value: unknown): AssetData[] => {
       "type" in item &&
       "id" in item,
   );
-};
-
-const toInitials = (name?: string) => {
-  if (!name) return "B";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
 };
 
 /* ── Asset Modal ─────────────────────────────────────────── */
@@ -190,18 +182,33 @@ function AssetModal({
 }
 
 /* ── Main Component ──────────────────────────────────────── */
-function BazarProfile({ props }: BazarProfileProps) {
+function BazarCollection({ props }: BazarCollectionProps) {
+  const [expanded, setExpanded] = useState(false);
   const [activeAsset, setActiveAsset] = useState<AssetData | null>(null);
 
-  const { profileId, displayName, username, description, banner, thumbnail } =
-    getStringFields(props.data, [
-      "profileId",
-      "displayName",
-      "username",
-      "description",
-      "banner",
-      "thumbnail",
-    ]);
+  const {
+    collectionId,
+    title,
+    description,
+    banner,
+    thumbnail,
+    floorPrice,
+    listedPercentage,
+    tokenLogo,
+    createdDate,
+    assetCount,
+  } = getStringFields(props.data, [
+    "collectionId",
+    "title",
+    "description",
+    "banner",
+    "thumbnail",
+    "floorPrice",
+    "listedPercentage",
+    "tokenLogo",
+    "createdDate",
+    "assetCount",
+  ]);
 
   const selectedAssets = getStringArray(
     (props.data as Record<string, unknown> | undefined)?.selectedAssets,
@@ -211,30 +218,34 @@ function BazarProfile({ props }: BazarProfileProps) {
     (props.data as Record<string, unknown> | undefined)?.assets,
   );
 
-  // Only show assets that were selected
   const displayAssets =
     selectedAssets.length > 0
       ? assets.filter((a) => selectedAssets.includes(a.id))
       : [];
 
-  if (!profileId) {
+  const visibleAssets = expanded
+    ? displayAssets
+    : displayAssets.slice(0, ASSETS_PER_ROW);
+
+  const hasMore = displayAssets.length > ASSETS_PER_ROW;
+
+  if (!collectionId) {
     return (
       <div
-        className="w-full rounded-lg border-[3px] border-black bg-[#FFE66D] p-4 text-center shadow-[4px_4px_0px_#000]"
+        className="w-full rounded-lg border-[3px] border-black bg-[#FF6B6B] p-4 text-center shadow-[4px_4px_0px_#000]"
         data-uuid={props.id}
       >
         <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded border-2 border-black bg-white">
-          <span className="text-sm font-black text-black">B</span>
+          <span className="text-sm font-black text-black">?</span>
         </div>
         <div className="text-xs font-bold text-black uppercase">
-          No Bazar profile selected
+          No collection selected
         </div>
       </div>
     );
   }
 
-  const title = displayName || (username ? `@${username}` : "Bazar Profile");
-  const profileUrl = `https://bazar.arweave.dev/#/profile/${profileId}`;
+  const collectionUrl = `https://bazar.arweave.dev/#/collection/${collectionId}`;
 
   return (
     <div
@@ -257,7 +268,7 @@ function BazarProfile({ props }: BazarProfileProps) {
             />
           </div>
         ) : (
-          <div className="h-14 w-full bg-[#4ECDC4]" />
+          <div className="h-14 w-full bg-[#FF6B6B]" />
         )}
 
         <div className="absolute -bottom-7 left-4">
@@ -265,12 +276,12 @@ function BazarProfile({ props }: BazarProfileProps) {
             {thumbnail ? (
               <img
                 src={`https://arweave.net/${thumbnail}`}
-                alt={title}
+                alt={title || "Collection"}
                 className="h-full w-full object-cover"
               />
             ) : (
               <span className="text-base font-black text-black">
-                {toInitials(displayName || username || "Bazar")}
+                {(title || "C")[0].toUpperCase()}
               </span>
             )}
           </div>
@@ -279,14 +290,15 @@ function BazarProfile({ props }: BazarProfileProps) {
 
       {/* Content */}
       <div className="px-4 pb-4 pt-10">
-        <div className="min-w-0">
+        {/* Title + date */}
+        <div className="flex items-baseline justify-between gap-2">
           <div className="text-sm font-black text-black uppercase truncate">
-            {title}
+            {title || "Untitled Collection"}
           </div>
-          {username && (
-            <div className="text-[10px] text-black/50 font-bold">
-              @{username}
-            </div>
+          {createdDate && (
+            <span className="shrink-0 text-[9px] font-bold text-black/40 uppercase">
+              {createdDate}
+            </span>
           )}
         </div>
 
@@ -296,14 +308,46 @@ function BazarProfile({ props }: BazarProfileProps) {
           </p>
         )}
 
-        {/* Featured Assets Grid */}
+        {/* Metrics — single row */}
+        <div className="mt-3 grid grid-cols-3 gap-1.5">
+          <div className="rounded border-2 border-black bg-[#4ECDC4] px-2 py-1 text-center shadow-[2px_2px_0px_#000]">
+            <div className="text-[8px] font-black text-black/70 uppercase">
+              Floor
+            </div>
+            <div className="text-[11px] font-black text-black flex items-center justify-center gap-0.5">
+              {floorPrice || "N/A"}
+              {tokenLogo && (
+                <img
+                  src={`https://arweave.net/${tokenLogo}`}
+                  alt=""
+                  className="w-3 h-3"
+                />
+              )}
+            </div>
+          </div>
+          <div className="rounded border-2 border-black bg-[#FFE66D] px-2 py-1 text-center shadow-[2px_2px_0px_#000]">
+            <div className="text-[8px] font-black text-black/70 uppercase">
+              Listed
+            </div>
+            <div className="text-[11px] font-black text-black">
+              {listedPercentage || "N/A"}
+            </div>
+          </div>
+          <div className="rounded border-2 border-black bg-[#C4B5FD] px-2 py-1 text-center shadow-[2px_2px_0px_#000]">
+            <div className="text-[8px] font-black text-black/70 uppercase">
+              Assets
+            </div>
+            <div className="text-[11px] font-black text-black">
+              {assetCount || "0"}
+            </div>
+          </div>
+        </div>
+
+        {/* Assets Grid */}
         {displayAssets.length > 0 && (
           <div className="mt-3">
-            <div className="text-[9px] font-black text-black/50 uppercase tracking-widest mb-2">
-              Featured Assets
-            </div>
             <div className="grid grid-cols-5 md:grid-cols-8 gap-1.5">
-              {displayAssets.map((asset) => (
+              {visibleAssets.map((asset) => (
                 <div
                   key={asset.id}
                   className="aspect-square rounded border-2 border-black overflow-hidden bg-gray-100 shadow-[2px_2px_0px_#000] cursor-pointer transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
@@ -313,7 +357,7 @@ function BazarProfile({ props }: BazarProfileProps) {
                     <img
                       src={`https://arweave.net/${asset.logoImage}`}
                       alt="Token"
-                      className="w-full h-full object-contain p-1.5 bg-white"
+                      className="w-full h-full object-contain p-2 bg-white"
                     />
                   )}
                   {asset.type === "image" && (
@@ -335,7 +379,7 @@ function BazarProfile({ props }: BazarProfileProps) {
                   {asset.type === "unknown" && (
                     <div className="flex items-center justify-center h-full text-black/30 bg-white">
                       <svg
-                        className="w-4 h-4"
+                        className="w-5 h-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -352,13 +396,38 @@ function BazarProfile({ props }: BazarProfileProps) {
                 </div>
               ))}
             </div>
+
+            {/* Expand / Collapse */}
+            {hasMore && (
+              <button
+                className="mt-2 w-full rounded border-2 border-black bg-[#FFE66D] px-3 py-1.5 text-[10px] font-black text-black uppercase tracking-wider shadow-[2px_2px_0px_#000] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-1 active:translate-y-1 flex items-center justify-center gap-1.5"
+                onClick={() => setExpanded(!expanded)}
+              >
+                <svg
+                  className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+                {expanded
+                  ? "Less"
+                  : `+${displayAssets.length - ASSETS_PER_ROW} More`}
+              </button>
+            )}
           </div>
         )}
 
         {/* Action Button */}
         <button
           className="mt-3 w-full rounded-lg border-[3px] border-black bg-black px-4 py-2 text-xs font-bold text-white uppercase shadow-[3px_3px_0px_#000] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-none"
-          onClick={() => window.open(profileUrl, "_blank")}
+          onClick={() => window.open(collectionUrl, "_blank")}
         >
           View on Bazar
         </button>
@@ -367,4 +436,4 @@ function BazarProfile({ props }: BazarProfileProps) {
   );
 }
 
-export default BazarProfile;
+export default BazarCollection;

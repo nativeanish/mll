@@ -21,6 +21,7 @@ import Calendar from "./Bloc/Calendar";
 import MediaPost from "./Bloc/MediaPost";
 import GithubProfile from "./Bloc/GithubProfile";
 import GithubRepo from "./Bloc/GithubRepo";
+import BazarCollection from "./Bloc/BazarCollection";
 interface Props {
   basicData: BasicBlockData;
   block: Array<BlockData>;
@@ -349,6 +350,8 @@ export default function PageGeneration({ basicData, block }: Props) {
         return <GithubProfile key={b.id} props={b} />;
       case "GitHub-Repository":
         return <GithubRepo key={b.id} props={b} />;
+      case "Bazar-Collection":
+        return <BazarCollection key={b.id} props={b} />;
       default:
         return null;
     }
@@ -428,14 +431,14 @@ export default function PageGeneration({ basicData, block }: Props) {
           )}
 
           {/* Name & Bio */}
-          <div className="text-center mt-5">
+          <div className="text-center mt-5 px-2">
             {name && (
-              <h1 className="text-2xl md:text-3xl font-black text-black uppercase tracking-wide">
+              <h1 className="text-2xl md:text-3xl font-black text-black uppercase tracking-wide leading-tight wrap-anywhere max-w-full mx-auto">
                 {name}
               </h1>
             )}
             {description && (
-              <p className="mt-2 text-black/70 text-sm md:text-base font-medium leading-relaxed max-w-md mx-auto">
+              <p className="mt-2 text-black/70 text-sm md:text-base font-medium leading-relaxed max-w-md mx-auto wrap-anywhere">
                 {description}
               </p>
             )}

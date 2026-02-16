@@ -201,7 +201,13 @@ function BlockItem({ block, onToggle, onDelete }: BlockItemProps) {
           />
         );
       case "Bazar-Collection":
-        return <BlockForBazarCollection isEdit={isEdit} setError={setError} />;
+        return (
+          <BlockForBazarCollection
+            isEdit={isEdit}
+            setError={setError}
+            uuid={block.id}
+          />
+        );
       case "Bazar-Profile":
         return (
           <BlockForBazarProfile

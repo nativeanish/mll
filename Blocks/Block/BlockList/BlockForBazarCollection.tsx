@@ -18,9 +18,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import BazarAssetViewer from "./nftutils/bazarAssetViewer";
-import { toast } from "sonner";
 import { Badge } from "@/src/components/ui/badge";
 import { Token } from "@/utils/ao/token";
+import { useBlockStore } from "@/store/useBlockStore";
 export type CollectionType = {
   id: string;
   title: string;
@@ -31,11 +31,12 @@ export type CollectionType = {
   thumbnail: string | null;
 };
 export type CollectionDetailType = CollectionType & {
-  assetIds: string[];
+  assets: string[];
 };
 interface Props {
   isEdit: boolean;
   setError: (value: boolean) => void;
+  uuid: string;
 }
 interface BazarAsset {
   type: "image" | "video" | "unknown" | "token";
@@ -59,12 +60,13 @@ type CollectionMetrics = {
   pl: number | null;
   currency: string | null;
 };
-function BlockForBazarCollection({ isEdit }: Props) {
+function BlockForBazarCollection({ isEdit, uuid }: Props) {
   const pendingSelectionRef = useRef(false);
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(true);
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const address = useWallet((state) => state.address);
+  const updateBlock = useBlockStore((state) => state.updateBlockData);
   const handleSelectCollection = (selectedCollectionId: string) => {
     pendingSelectionRef.current = true;
     setCollectionId(selectedCollectionId);
@@ -124,14 +126,9 @@ function BlockForBazarCollection({ isEdit }: Props) {
     setSelectedAssets((prev) => {
       if (prev.includes(asset.id)) {
         return prev.filter((id) => id !== asset.id);
-      } else if (prev.length < 5) {
-        return [...prev, asset.id];
-      } else {
-        toast.warning("Maximum 5 assets allowed", {
-          description: "You can select up to 5 assets for your collection.",
-        });
-        return prev;
       }
+
+      return [...prev, asset.id];
     });
   };
 
@@ -173,6 +170,46 @@ function BlockForBazarCollection({ isEdit }: Props) {
     }
     return price / Math.pow(10, tokenInfo.denomination);
   }, [collectionMetrics?.price, tokenInfo]);
+
+  const formatPercentageVal = (percentage: number | null | undefined) => {
+    if (typeof percentage !== "number" || Number.isNaN(percentage)) {
+      return "N/A";
+    }
+    return `${percentage.toFixed(1)}%`;
+  };
+
+  // Persist collection data + assets to the block store for PageGeneration
+  useEffect(() => {
+    if (isEdit || !collectionId || !selectedCollection) return;
+
+    updateBlock(uuid, {
+      collectionId,
+      title: selectedCollection.name || selectedCollection.title || "",
+      description: selectedCollection.description || "",
+      banner: selectedCollection.banner || "",
+      thumbnail: selectedCollection.thumbnail || "",
+      selectedAssets,
+      assets: getCollectionAssetsQuery.data || [],
+      floorPrice: String(formattedPrice),
+      listedPercentage: formatPercentageVal(collectionMetrics?.pl),
+      tokenLogo: tokenInfo?.logo || "",
+      assetCount: String(assetCount),
+      createdDate: createdDate || "",
+    });
+  }, [
+    isEdit,
+    collectionId,
+    selectedCollection,
+    selectedAssets,
+    getCollectionAssetsQuery.data,
+    formattedPrice,
+    collectionMetrics?.pl,
+    tokenInfo?.logo,
+    assetCount,
+    createdDate,
+    updateBlock,
+    uuid,
+  ]);
 
   return (
     <div>
@@ -287,8 +324,7 @@ function BlockForBazarCollection({ isEdit }: Props) {
                       Select Assets to Display
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Choose up to 5 assets to showcase ({selectedAssets.length}
-                      /5 selected)
+                      Selected assets: {selectedAssets.length}
                     </p>
                   </div>
                   <Button

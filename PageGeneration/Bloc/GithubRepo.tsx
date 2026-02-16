@@ -153,6 +153,9 @@ const parseRepoData = (value: unknown): RepoDetails | null => {
   };
 };
 
+const toExternalHref = (value: string) =>
+  /^https?:\/\//i.test(value) ? value : `https://${value}`;
+
 function GithubRepo({ props }: GithubRepoProps) {
   const data = isRecord(props.data) ? props.data : {};
   const repoData = parseRepoData(data.repoData);
@@ -204,14 +207,20 @@ function GithubRepo({ props }: GithubRepoProps) {
     });
 
   /* helper: stat chips */
-  const stats: { label: string; value: number; bg: string; text: string }[] =
-    [];
+  const stats: {
+    label: string;
+    value: number;
+    bg: string;
+    text: string;
+    tooltip: string;
+  }[] = [];
   if (visibleFields.stargazers)
     stats.push({
       label: "★",
       value: repoData.stargazers_count ?? 0,
       bg: "bg-[#FFE66D]",
       text: "text-black",
+      tooltip: "Stars",
     });
   if (visibleFields.watchers)
     stats.push({
@@ -219,6 +228,7 @@ function GithubRepo({ props }: GithubRepoProps) {
       value: repoData.watchers_count ?? 0,
       bg: "bg-[#4ECDC4]",
       text: "text-black",
+      tooltip: "Watchers",
     });
   if (visibleFields.forks)
     stats.push({
@@ -226,6 +236,7 @@ function GithubRepo({ props }: GithubRepoProps) {
       value: repoData.forks_count ?? 0,
       bg: "bg-[#6366F1]",
       text: "text-white",
+      tooltip: "Forks",
     });
   if (visibleFields.open_issues)
     stats.push({
@@ -233,6 +244,7 @@ function GithubRepo({ props }: GithubRepoProps) {
       value: repoData.open_issues_count ?? 0,
       bg: "bg-black",
       text: "text-white",
+      tooltip: "Open issues",
     });
 
   return (
@@ -304,6 +316,8 @@ function GithubRepo({ props }: GithubRepoProps) {
               <div
                 key={s.label}
                 className={`inline-flex items-center gap-1 rounded border-2 border-black px-2 py-0.5 ${s.bg} shadow-[2px_2px_0px_#000]`}
+                title={s.tooltip}
+                aria-label={s.tooltip}
               >
                 <span className={`text-[11px] ${s.text}`}>{s.label}</span>
                 <span className={`text-xs font-black ${s.text}`}>
@@ -333,7 +347,15 @@ function GithubRepo({ props }: GithubRepoProps) {
         {visibleFields.homepage && repoData.homepage && (
           <div className="text-[11px] text-black/60 truncate">
             <span className="font-bold text-black/80">🔗 </span>
-            <span className="break-all">{repoData.homepage}</span>
+            <a
+              href={toExternalHref(repoData.homepage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="break-all underline hover:text-black cursor-pointer"
+              title="Open homepage"
+            >
+              {repoData.homepage}
+            </a>
           </div>
         )}
 

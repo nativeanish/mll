@@ -180,6 +180,9 @@ function GithubProfile({ props }: GithubProfileProps) {
   const [activeFollowModal, setActiveFollowModal] = useState<{
     title: string;
     items: GithubFollow[];
+    totalCount: number;
+    tab: "followers" | "following";
+    profileUrl: string;
   } | null>(null);
   const [showAllPinned, setShowAllPinned] = useState(false);
 
@@ -239,27 +242,41 @@ function GithubProfile({ props }: GithubProfileProps) {
 
   const visiblePinnedRepos = showAllPinned
     ? pinnedRepoData
-    : pinnedRepoData.slice(0, 3);
+    : pinnedRepoData.slice(0, 2);
 
   const formatNumber = (value?: number) => (value ?? 0).toLocaleString();
 
-  const renderFollowPreview = (title: string, items: GithubFollow[]) => {
+  const renderFollowPreview = (
+    title: string,
+    items: GithubFollow[],
+    totalCount: number,
+    tab: "followers" | "following",
+  ) => {
     const previewItems = items.slice(0, 5);
-    const extraCount = Math.max(0, items.length - 5);
+    const extraCount = Math.max(0, totalCount - previewItems.length);
+    const profileUrl = user.html_url || `https://github.com/${user.login}`;
 
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
         <span className="text-[10px] font-black uppercase text-black/60 shrink-0">
-          {title} ({items.length})
+          {title} ({formatNumber(totalCount)})
         </span>
 
-        {items.length > 0 ? (
-          <div className="flex items-center -space-x-1.5">
+        {totalCount > 0 ? (
+          <div className="flex min-w-0 items-center -space-x-1.5">
             {previewItems.map((row) => (
               <button
                 key={row.id}
-                className="h-6 w-6 shrink-0 overflow-hidden rounded-full border-[1.5px] border-black bg-[#4ECDC4] ring-1 ring-white"
-                onClick={() => setActiveFollowModal({ title, items })}
+                className="h-6 w-6 shrink-0 overflow-hidden rounded-full border-[1.5px] border-black bg-[#4ECDC4] ring-1 ring-white cursor-pointer"
+                onClick={() =>
+                  setActiveFollowModal({
+                    title,
+                    items,
+                    totalCount,
+                    tab,
+                    profileUrl,
+                  })
+                }
                 title={row.login}
               >
                 {row.avatar_url ? (
@@ -278,8 +295,16 @@ function GithubProfile({ props }: GithubProfileProps) {
 
             {extraCount > 0 && (
               <button
-                className="h-6 shrink-0 rounded-full border-[1.5px] border-black bg-[#FFE66D] px-1.5 text-[9px] font-black text-black ring-1 ring-white"
-                onClick={() => setActiveFollowModal({ title, items })}
+                className="h-6 shrink-0 rounded-full border-[1.5px] border-black bg-[#FFE66D] px-1.5 text-[9px] font-black text-black ring-1 ring-white whitespace-nowrap cursor-pointer"
+                onClick={() =>
+                  setActiveFollowModal({
+                    title,
+                    items,
+                    totalCount,
+                    tab,
+                    profileUrl,
+                  })
+                }
               >
                 +{extraCount}
               </button>
@@ -289,12 +314,6 @@ function GithubProfile({ props }: GithubProfileProps) {
           <span className="text-[10px] text-black/40">None</span>
         )}
 
-        <button
-          className="shrink-0 rounded border-[1.5px] border-black bg-white px-1.5 py-px text-[9px] font-bold uppercase text-black hover:bg-[#FFF8E7]"
-          onClick={() => setActiveFollowModal({ title, items })}
-        >
-          View
-        </button>
       </div>
     );
   };
@@ -308,6 +327,8 @@ function GithubProfile({ props }: GithubProfileProps) {
     value: number;
     bg: string;
     text: string;
+    tab?: "repositories" | "followers" | "following";
+    externalUrl?: string;
   }[] = [];
   if (visibleFields.public_repos)
     statCards.push({
@@ -315,6 +336,7 @@ function GithubProfile({ props }: GithubProfileProps) {
       value: user.public_repos ?? 0,
       bg: "bg-[#FFE66D]",
       text: "text-black",
+      tab: "repositories",
     });
   if (visibleFields.public_gists)
     statCards.push({
@@ -322,6 +344,7 @@ function GithubProfile({ props }: GithubProfileProps) {
       value: user.public_gists ?? 0,
       bg: "bg-[#4ECDC4]",
       text: "text-black",
+      externalUrl: `https://gist.github.com/${user.login}`,
     });
   if (visibleFields.followers)
     statCards.push({
@@ -329,6 +352,7 @@ function GithubProfile({ props }: GithubProfileProps) {
       value: user.followers ?? 0,
       bg: "bg-[#6366F1]",
       text: "text-white",
+      tab: "followers",
     });
   if (visibleFields.following)
     statCards.push({
@@ -336,15 +360,18 @@ function GithubProfile({ props }: GithubProfileProps) {
       value: user.following ?? 0,
       bg: "bg-black",
       text: "text-white",
+      tab: "following",
     });
 
   /* choose grid columns so cards always fill their row evenly */
   const statGridCols =
-    statCards.length <= 2
-      ? "grid-cols-2"
-      : statCards.length === 3
-        ? "grid-cols-3"
-        : "grid-cols-2 md:grid-cols-4";
+    statCards.length === 1
+      ? "grid-cols-1"
+      : statCards.length === 2
+        ? "grid-cols-2"
+        : statCards.length === 3
+          ? "grid-cols-3"
+          : "grid-cols-2";
 
   return (
     <div
@@ -407,21 +434,39 @@ function GithubProfile({ props }: GithubProfileProps) {
       {hasFollowPanels && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-b-[2.5px] border-black bg-[#FFF8E7] px-3 py-2">
           {visibleFields.followers_list &&
-            renderFollowPreview("Followers", followersList)}
+            renderFollowPreview(
+              "Followers",
+              followersList,
+              user.followers ?? followersList.length,
+              "followers",
+            )}
           {visibleFields.following_list &&
-            renderFollowPreview("Following", followingList)}
+            renderFollowPreview(
+              "Following",
+              followingList,
+              user.following ?? followingList.length,
+              "following",
+            )}
         </div>
       )}
 
       {/* ── stat cards ── */}
       {statCards.length > 0 && (
         <div
-          className={`grid ${statGridCols} gap-0 border-b-[2.5px] border-black`}
+          className={`grid ${statGridCols} gap-[2.5px] border-b-[2.5px] border-black bg-black`}
         >
-          {statCards.map((s, i) => (
-            <div
+          {statCards.map((s) => (
+            <button
               key={s.label}
-              className={`${s.bg} px-3 py-2 text-center ${i < statCards.length - 1 ? "border-r-[2.5px] border-black" : ""}`}
+              className={`${s.bg} px-3 py-2 text-center cursor-pointer`}
+              onClick={() =>
+                window.open(
+                  s.externalUrl ||
+                    `https://github.com/${user.login}?tab=${s.tab || "repositories"}`,
+                  "_blank",
+                )
+              }
+              title={`Open ${s.label} on GitHub`}
             >
               <div className={`text-[10px] font-black uppercase ${s.text}`}>
                 {s.label}
@@ -429,7 +474,7 @@ function GithubProfile({ props }: GithubProfileProps) {
               <div className={`text-lg font-black leading-tight ${s.text}`}>
                 {formatNumber(s.value)}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -441,12 +486,12 @@ function GithubProfile({ props }: GithubProfileProps) {
             <span className="text-[10px] font-black uppercase tracking-wider text-black/70">
               Pinned Repositories ({pinnedRepoData.length})
             </span>
-            {pinnedRepoData.length > 3 && (
+            {pinnedRepoData.length > 2 && (
               <button
                 className="rounded border-2 border-black bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase text-black shadow-[2px_2px_0px_#000] transition-all hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_#000]"
                 onClick={() => setShowAllPinned((prev) => !prev)}
               >
-                {showAllPinned ? "Show Less" : "Show All"}
+                {showAllPinned ? "Collapse" : "Expand"}
               </button>
             )}
           </div>
@@ -485,7 +530,8 @@ function GithubProfile({ props }: GithubProfileProps) {
           <div className="w-full max-w-md rounded-lg border-[3px] border-black bg-white shadow-[6px_6px_0px_#000]">
             <div className="flex items-center justify-between border-b-[3px] border-black px-4 py-3">
               <h3 className="text-sm font-black uppercase text-black">
-                {activeFollowModal.title}
+                {activeFollowModal.title} (
+                {formatNumber(activeFollowModal.totalCount)})
               </h3>
               <button
                 className="rounded-lg border-2 border-black bg-[#FFE66D] px-2 py-1 text-xs font-bold text-black"
@@ -526,6 +572,26 @@ function GithubProfile({ props }: GithubProfileProps) {
                   </div>
                 </button>
               ))}
+
+              {activeFollowModal.totalCount >
+                activeFollowModal.items.length && (
+                <button
+                  className="w-full rounded-lg border-2 border-black bg-[#FFE66D] px-3 py-2 text-sm font-bold text-black hover:bg-[#FFD93D]"
+                  onClick={() =>
+                    window.open(
+                      `${activeFollowModal.profileUrl}?tab=${activeFollowModal.tab}`,
+                      "_blank",
+                    )
+                  }
+                >
+                  View all on GitHub (+
+                  {formatNumber(
+                    activeFollowModal.totalCount -
+                      activeFollowModal.items.length,
+                  )}
+                  )
+                </button>
+              )}
             </div>
           </div>
         </div>

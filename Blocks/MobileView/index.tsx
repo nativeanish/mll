@@ -134,6 +134,8 @@ export default function MobileView({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [scale, setScale] = useState(1);
+  const [isResolving, setIsResolving] = useState(false);
+  const [isFrameLoading, setIsFrameLoading] = useState(false);
   // If src is a blob: or data: URL, resolve it to HTML and use srcDoc to avoid browser restrictions
   const [resolved, setResolved] = useState<{ src?: string; html?: string }>({});
 
@@ -157,14 +159,18 @@ export default function MobileView({
     let cancelled = false;
 
     async function resolve() {
+      if (!cancelled) setIsResolving(true);
+
       // If html is provided, that wins
       if (html != null) {
         setResolved({ html });
+        if (!cancelled) setIsResolving(false);
         return;
       }
 
       if (!src) {
         setResolved({});
+        if (!cancelled) setIsResolving(false);
         return;
       }
 
@@ -184,16 +190,19 @@ export default function MobileView({
           const res = await fetch(src);
           const text = await res.text();
           if (!cancelled) setResolved({ html: text });
+          if (!cancelled) setIsResolving(false);
           return;
         } catch {
           // Fall back to using src directly if fetch fails (e.g., cross-origin blob)
           if (!cancelled) setResolved({ src });
+          if (!cancelled) setIsResolving(false);
           return;
         }
       }
 
       // Default: use src as-is
       setResolved({ src });
+      if (!cancelled) setIsResolving(false);
     }
 
     resolve();
@@ -205,6 +214,11 @@ export default function MobileView({
   const srcDoc = resolved.html
     ? withViewport(resolved.html, { disableLinks })
     : undefined;
+
+  useEffect(() => {
+    const hasContent = Boolean(srcDoc || resolved.src);
+    setIsFrameLoading(hasContent);
+  }, [srcDoc, resolved.src]);
 
   // If disabling links for remote src, attempt same-origin injection; also harden sandbox by stripping popup/navigation tokens.
   function computeEffectiveSandbox(base: string, disable: boolean): string {
@@ -226,6 +240,8 @@ export default function MobileView({
   }
 
   const effectiveSandbox = computeEffectiveSandbox(sandbox, disableLinks);
+  const isEmpty = !src && !html;
+  const showRendering = !isEmpty && (isResolving || isFrameLoading);
 
   function injectDisableLinks(doc: Document) {
     try {
@@ -323,6 +339,7 @@ export default function MobileView({
                 // Cross-origin, cannot inject
               }
             }
+            setIsFrameLoading(false);
           }}
           style={{
             width: "100%",
@@ -332,9 +349,110 @@ export default function MobileView({
           }}
         />
       </div>
-      {!src && !html && (
-        <div className="absolute inset-0 flex items-center justify-center text-center text-sm text-muted-foreground font-bold p-4 bg-background">
-          Provide html or src to render inside the mobile preview.
+      {isEmpty && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center text-sm text-muted-foreground font-black uppercase tracking-[0.18em] p-4 bg-background">
+          <svg
+            width="116"
+            height="116"
+            viewBox="0 0 116 116"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            className="drop-shadow-[4px_4px_0px_var(--border)]"
+          >
+            <rect
+              x="16"
+              y="16"
+              width="84"
+              height="84"
+              rx="8"
+              className="fill-muted/40 stroke-border"
+              strokeWidth="4"
+            />
+            <rect
+              x="30"
+              y="30"
+              width="56"
+              height="56"
+              rx="4"
+              className="fill-background stroke-primary"
+              strokeWidth="4"
+            />
+            <rect
+              x="40"
+              y="40"
+              width="14"
+              height="14"
+              className="fill-primary stroke-border animate-bounce"
+              strokeWidth="3"
+            />
+            <rect
+              x="62"
+              y="62"
+              width="14"
+              height="14"
+              className="fill-accent stroke-border animate-bounce"
+              strokeWidth="3"
+              style={{ animationDelay: "140ms" }}
+            />
+          </svg>
+          <div className="space-y-1">
+            <p className="text-muted-foreground">Add content to preview</p>
+            <p className="text-[10px] tracking-[0.16em] text-muted-foreground/80">
+              Add image, name, bio or block to preview
+            </p>
+          </div>
+        </div>
+      )}
+
+      {showRendering && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground font-black uppercase tracking-[0.2em] p-4 bg-background/85 backdrop-blur-[1px]">
+          <svg
+            width="96"
+            height="96"
+            viewBox="0 0 96 96"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            className="drop-shadow-[3px_3px_0px_var(--border)]"
+          >
+            <rect
+              x="10"
+              y="10"
+              width="76"
+              height="76"
+              rx="6"
+              className="fill-background stroke-border"
+              strokeWidth="4"
+            />
+            <rect
+              x="20"
+              y="20"
+              width="56"
+              height="56"
+              rx="2"
+              className="fill-primary/15 stroke-primary animate-pulse"
+              strokeWidth="4"
+            />
+            <rect
+              x="28"
+              y="28"
+              width="14"
+              height="14"
+              className="fill-primary stroke-border animate-bounce"
+              strokeWidth="3"
+            />
+            <rect
+              x="54"
+              y="54"
+              width="14"
+              height="14"
+              className="fill-accent stroke-border animate-bounce"
+              strokeWidth="3"
+              style={{ animationDelay: "150ms" }}
+            />
+          </svg>
+          <span>Rendering</span>
         </div>
       )}
     </div>

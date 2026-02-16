@@ -1,11 +1,22 @@
 import useCollectionState from "@/store/useCollectionState";
 import useAddress from "@/store/useWallet";
-import permaweb from "@/utils/ao/permaweb";
 import { dryrun } from "@permaweb/aoconnect";
 import { toast } from "sonner";
 import { Token } from "../ao/token";
-import type { CollectionDetailType } from "node_modules/@permaweb/libs/dist/types/helpers";
 import { getContentTypes } from "./fetchDetails";
+import { fetchProfile, getCollection } from "../ao/permaweb";
+export type CollectionType = {
+  id: string;
+  title: string;
+  description: string | null;
+  creator: string;
+  dateCreated: string;
+  banner: string | null;
+  thumbnail: string | null;
+};
+export type CollectionDetailType = CollectionType & {
+  assets: string[];
+};
 export type AssetSortType =
   | "high-to-low"
   | "low-to-high"
@@ -55,7 +66,7 @@ function getPrice(sortedEntries: OrderbookEntryType[]) {
 export function sortOrderbookEntries(
   entries: OrderbookEntryType[],
   sortType: AssetSortType,
-  stamps: StampsType
+  stamps: StampsType,
 ): OrderbookEntryType[] {
   const getSortKey = (entry: OrderbookEntryType): number => {
     if (!entry.Orders || entry.Orders.length === 0) return Infinity;
@@ -105,10 +116,10 @@ export function sortOrderbookEntries(
   }
 
   let entriesWithOrders = entries.filter(
-    (entry) => entry.Orders && entry.Orders.length > 0
+    (entry) => entry.Orders && entry.Orders.length > 0,
   );
   const entriesWithoutOrders = entries.filter(
-    (entry) => !entry.Orders || entry.Orders.length === 0
+    (entry) => !entry.Orders || entry.Orders.length === 0,
   );
 
   entriesWithOrders.sort((a, b) => {
@@ -151,7 +162,7 @@ const normalizedOrders = (ucm) =>
       : [],
     //@ts-expect-error I have not defined the types
   })).sort((a, b) =>
-    JSON.stringify(a.Pair).localeCompare(JSON.stringify(b.Pair))
+    JSON.stringify(a.Pair).localeCompare(JSON.stringify(b.Pair)),
   ) || [];
 
 const setState = async () => {
@@ -184,29 +195,37 @@ export const getFullCollections = async () => {
     toast.error("Active wallet not found. Please connect your wallet.");
     return null;
   }
-
-  const creatorId = await permaweb.getProfileByWalletAddress(address);
-  if (creatorId.collections && creatorId.collections.length > 0) {
-    creatorId.collections = [...new Set(creatorId.collections)];
-    const results = await Promise.all(
-      creatorId.collections.map(async (e: string) => {
-        const push = await permaweb.getCollection(e);
-        return push ? { ...push, id: e } : null;
-      })
-    );
-    const filtered = results.filter(Boolean) as Array<CollectionDetailType>;
-    return filtered;
+  try {
+    const creatorId = await fetchProfile(address);
+    if (
+      creatorId &&
+      creatorId.collections &&
+      creatorId.collections.length > 0
+    ) {
+      creatorId.collections = [...new Set(creatorId.collections)];
+      const results = await Promise.all(
+        creatorId.collections.map(async (e: string) => {
+          const push = await getCollection(e);
+          return push ? { ...push, id: e } : null;
+        }),
+      );
+      const filtered = results.filter(Boolean) as Array<CollectionDetailType>;
+      return filtered;
+    }
+    return null;
+  } catch (err) {
+    console.error("Error fetching collections:", err);
+    toast.error("An error occurred while fetching collections.");
+    return null;
   }
-  return null;
 };
 
 export const getCollectionAssets = async (collectionId: string) => {
   console.log("Fetching assets for collection:", collectionId);
   try {
-    const collection = (await permaweb.getCollection(
-      collectionId
+    const collection = (await getCollection(
+      collectionId,
     )) as CollectionDetailType | null;
-    //@ts-expect-error I have not defined the types
     if (!collection || !collection.assets || collection.assets.length === 0) {
       return [];
     }
@@ -219,7 +238,6 @@ export const getCollectionAssets = async (collectionId: string) => {
     }> = [];
 
     // Filter token assets
-    //@ts-expect-error I have not defined the types
     const filteredAssets = collection.assets.filter((assetId: string) => {
       return Token.some((token) => token.address === assetId);
     });
@@ -234,9 +252,8 @@ export const getCollectionAssets = async (collectionId: string) => {
     });
 
     // Handle remaining assets
-    //@ts-expect-error I have not defined the types
     const remainingAssets = collection.assets.filter(
-      (assetId: string) => !Token.some((token) => token.address === assetId)
+      (assetId: string) => !Token.some((token) => token.address === assetId),
     );
 
     if (remainingAssets.length > 0) {
@@ -270,7 +287,7 @@ export const getCollectionAssets = async (collectionId: string) => {
 
 export const getCollectionwithAssets = async (
   collections: Array<CollectionDetailType>,
-  collectionId: string
+  collectionId: string,
 ) => {
   try {
     const collection = collections.find((col) => col.id === collectionId);
@@ -287,21 +304,20 @@ export const getCollectionwithAssets = async (
         return false;
       }
       const filteredEntries: OrderbookEntryType[] = data.filter(
-        //@ts-expect-error I have not defined the types
-        (entry: OrderbookEntryType) => collection.assets.includes(entry.Pair[0])
+        (entry: OrderbookEntryType) =>
+          collection.assets.includes(entry.Pair[0]),
       );
       const sortedEntries: OrderbookEntryType[] = sortOrderbookEntries(
         filteredEntries,
         "low-to-high",
-        {}
+        {},
       );
       return {
         price: getPrice(sortedEntries),
         pl:
           (filteredEntries.filter(
-            (entry) => entry.Orders && entry.Orders.length > 0
+            (entry) => entry.Orders && entry.Orders.length > 0,
           ).length /
-            //@ts-expect-error I have not defined the types
             collection.assets.length) *
           100,
         currency: sortedEntries[0] ? sortedEntries[0].Pair[1] : null,

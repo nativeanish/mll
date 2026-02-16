@@ -1,6 +1,19 @@
+import { fetchProfile } from "../ao/permaweb";
 import { Token } from "../ao/token";
-import permaweb from "../ao/permaweb";
 import { toast } from "sonner";
+
+type ProfileData = NonNullable<Awaited<ReturnType<typeof fetchProfile>>>;
+
+type ProfileAssetView = {
+  type: "image" | "video" | "unknown" | "token";
+  id: string;
+  logoImage: string;
+  quantity: string;
+};
+
+type ProfileWithAssetView = Omit<ProfileData, "assets"> & {
+  assets: ProfileAssetView[];
+};
 
 interface TransactionNode {
   id: string;
@@ -11,7 +24,7 @@ interface TransactionNode {
 }
 
 export async function getContentTypes(
-  ids: string[]
+  ids: string[],
 ): Promise<{ id: string; contentType: string | null }[]> {
   const chunkSize = 100;
   const results: { id: string; contentType: string | null }[] = [];
@@ -48,28 +61,29 @@ export async function getContentTypes(
           id: node.id,
           contentType:
             node.tags.find((t) => t.name === "Content-Type")?.value || null,
-        })
-      )
+        }),
+      ),
     );
   }
 
   return results;
 }
 
-export async function fetchProfilewithAssets(profileId: string) {
+export async function fetchProfilewithAssets(
+  profileId: string,
+): Promise<ProfileWithAssetView> {
   try {
-    const data = await permaweb.getProfileByWalletAddress(profileId);
-    const finalArray: Array<{
-      type: "image" | "video" | "unknown" | "token";
-      id: string;
-      logoImage: string;
-      quantity: string;
-    }> = [];
+    const data = await fetchProfile(profileId);
+    if (!data) {
+      throw new Error("Failed to fetch profile");
+    }
+    console.log("Fetched profile data:", data);
+    const finalArray: ProfileAssetView[] = [];
     if (data.assets.length > 0) {
       const filteredAssets = data.assets.filter(
         (asset: { id: string; quantity: string }) => {
           return Token.some((token) => token.address === asset.id);
-        }
+        },
       );
       filteredAssets.forEach((asset: { id: string; quantity: string }) => {
         finalArray.push({
@@ -81,15 +95,15 @@ export async function fetchProfilewithAssets(profileId: string) {
       });
       const remainingAssets = data.assets.filter(
         (asset: { id: string; quantity: string }) =>
-          !Token.some((token) => token.address === asset.id)
+          !Token.some((token) => token.address === asset.id),
       );
       if (remainingAssets.length > 0) {
         const contentTypes = await getContentTypes(
-          remainingAssets.map((a: { id: string }) => a.id)
+          remainingAssets.map((a: { id: string }) => a.id),
         );
         remainingAssets.forEach((asset: { id: string; quantity: string }) => {
           const contentTypeEntry = contentTypes.find(
-            (ct) => ct.id === asset.id
+            (ct) => ct.id === asset.id,
           );
           const contentType = contentTypeEntry
             ? contentTypeEntry.contentType
@@ -108,8 +122,11 @@ export async function fetchProfilewithAssets(profileId: string) {
         });
       }
     }
-    data.assets = finalArray;
-    return data;
+
+    return {
+      ...data,
+      assets: finalArray,
+    };
   } catch {
     toast.error("Failed to fetch profile");
     throw new Error("Failed to fetch profile");
