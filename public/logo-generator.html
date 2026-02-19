@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Metalinks Logo Generator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #1a1a1a;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+      }
+      h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+      }
+      p.sub {
+        color: #aaa;
+        margin-bottom: 32px;
+      }
+      .preview {
+        background: #2a2a2a;
+        border: 2px solid #444;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+      }
+      canvas {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 24px;
+      }
+      button {
+        font-family: inherit;
+        font-weight: 800;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 12px 24px;
+        border: 3px solid #000;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      button:hover {
+        transform: translate(-2px, -2px);
+      }
+      button:active {
+        transform: translate(1px, 1px);
+      }
+      .btn-icon {
+        background: #ffd43b;
+        color: #000;
+        box-shadow: 4px 4px 0 #000;
+      }
+      .btn-icon:hover {
+        box-shadow: 6px 6px 0 #000;
+      }
+      .btn-banner {
+        background: #ff6b6b;
+        color: #000;
+        box-shadow: 4px 4px 0 #000;
+      }
+      .btn-banner:hover {
+        box-shadow: 6px 6px 0 #000;
+      }
+      .btn-square {
+        background: #51cf66;
+        color: #000;
+        box-shadow: 4px 4px 0 #000;
+      }
+      .btn-square:hover {
+        box-shadow: 6px 6px 0 #000;
+      }
+      .btn-og {
+        background: #339af0;
+        color: #000;
+        box-shadow: 4px 4px 0 #000;
+      }
+      .btn-og:hover {
+        box-shadow: 6px 6px 0 #000;
+      }
+      .btn-favicon {
+        background: #cc5de8;
+        color: #000;
+        box-shadow: 4px 4px 0 #000;
+      }
+      .btn-favicon:hover {
+        box-shadow: 6px 6px 0 #000;
+      }
+      .btn-transparent {
+        background: #ff922b;
+        color: #000;
+        box-shadow: 4px 4px 0 #000;
+      }
+      .btn-transparent:hover {
+        box-shadow: 6px 6px 0 #000;
+      }
+      .section-label {
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #888;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+      .divider {
+        width: 100%;
+        max-width: 600px;
+        height: 2px;
+        background: #333;
+        margin: 8px 0 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Metalinks Logo</h1>
+    <p class="sub">Neo-brutalism "M" — download in any size</p>
+
+    <div class="preview">
+      <canvas id="preview" width="512" height="512"></canvas>
+    </div>
+
+    <p class="section-label">Icon / Profile Picture</p>
+    <div class="buttons">
+      <button
+        class="btn-icon"
+        onclick="download(512, 512, 'metalinks-icon-512')"
+      >
+        512 × 512
+      </button>
+      <button
+        class="btn-icon"
+        onclick="download(1024, 1024, 'metalinks-icon-1024')"
+      >
+        1024 × 1024
+      </button>
+      <button
+        class="btn-favicon"
+        onclick="download(192, 192, 'metalinks-favicon')"
+      >
+        Favicon 192
+      </button>
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">Social Media Banner</p>
+    <div class="buttons">
+      <button
+        class="btn-banner"
+        onclick="download(1500, 500, 'metalinks-twitter-banner')"
+      >
+        Twitter 1500 × 500
+      </button>
+      <button
+        class="btn-banner"
+        onclick="download(1584, 396, 'metalinks-linkedin-banner')"
+      >
+        LinkedIn 1584 × 396
+      </button>
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">Open Graph / Share</p>
+    <div class="buttons">
+      <button class="btn-og" onclick="download(1200, 630, 'metalinks-og')">
+        OG 1200 × 630
+      </button>
+      <button
+        class="btn-square"
+        onclick="download(1200, 1200, 'metalinks-square')"
+      >
+        Square 1200 × 1200
+      </button>
+    </div>
+
+    <div class="divider"></div>
+    <p class="section-label">Transparent Background</p>
+    <div class="buttons">
+      <button
+        class="btn-transparent"
+        onclick="download(1024, 1024, 'metalinks-transparent', true)"
+      >
+        1024 × 1024 (no bg)
+      </button>
+      <button
+        class="btn-transparent"
+        onclick="download(512, 512, 'metalinks-transparent-512', true)"
+      >
+        512 × 512 (no bg)
+      </button>
+    </div>
+
+    <script>
+      function drawLogo(ctx, w, h, transparent) {
+        // Background
+        if (!transparent) {
+          ctx.fillStyle = "#1a1a1a";
+          ctx.fillRect(0, 0, w, h);
+        }
+
+        // Calculate logo size to fit centered
+        const logoSize = Math.min(w, h) * 0.75;
+        const cx = w / 2;
+        const cy = h / 2;
+        const s = logoSize / 340; // scale factor (original viewBox is 340)
+        const ox = cx - 170 * s; // offset x
+        const oy = cy - 170 * s; // offset y
+
+        // Hard shadow
+        const shadowOffX = 10 * s;
+        const shadowOffY = 10 * s;
+        ctx.fillStyle = "#000000";
+        roundRect(ctx, ox + 14 * s, oy + 14 * s, 316 * s, 316 * s, 32 * s);
+        ctx.fill();
+
+        // Main yellow background
+        ctx.fillStyle = "#FFD43B";
+        roundRect(ctx, ox + 4 * s, oy + 4 * s, 316 * s, 316 * s, 32 * s);
+        ctx.fill();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 8 * s;
+        roundRect(ctx, ox + 4 * s, oy + 4 * s, 316 * s, 316 * s, 32 * s);
+        ctx.stroke();
+
+        // Bold M
+        ctx.beginPath();
+        ctx.moveTo(ox + 80 * s, oy + 240 * s);
+        ctx.lineTo(ox + 80 * s, oy + 100 * s);
+        ctx.lineTo(ox + 162 * s, oy + 185 * s);
+        ctx.lineTo(ox + 244 * s, oy + 100 * s);
+        ctx.lineTo(ox + 244 * s, oy + 240 * s);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 24 * s;
+        ctx.lineCap = "square";
+        ctx.lineJoin = "miter";
+        ctx.miterLimit = 10;
+        ctx.stroke();
+      }
+
+      function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      function download(w, h, name, transparent = false) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d");
+        drawLogo(ctx, w, h, transparent);
+        const link = document.createElement("a");
+        link.download = name + ".png";
+        link.href = c.toDataURL("image/png");
+        link.click();
+      }
+
+      // Draw preview
+      const preview = document.getElementById("preview");
+      const pctx = preview.getContext("2d");
+      drawLogo(pctx, 512, 512, false);
+    </script>
+  </body>
+</html>

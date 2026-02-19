@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/components/ui/card";
-import Logo from "./Logo";
 import LoginForm from "./login-form";
 import { ThemeToggle } from "@/Blocks/Common/ThemeSwitcher";
 import { BackgroundDecoration } from "./background-decoration";
@@ -24,7 +23,10 @@ const Login = () => {
     <div className="relative flex h-auto min-h-screen flex-col overflow-x-hidden bg-background">
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-5 lg:px-10">
-        <Logo className="gap-2.5" />
+        <span className="font-black text-lg tracking-tight uppercase bg-nb-yellow text-black px-2 py-0.5 border-2 border-border rounded-md shadow-[2px_2px_0px_var(--border)] group-hover:shadow-[3px_3px_0px_var(--border)] group-hover:-translate-x-px group-hover:-translate-y-px transition-all duration-150">
+          <span className="sm:hidden">M</span>
+          <span className="hidden sm:inline">metalinks</span>
+        </span>
         <ThemeToggle />
       </header>
 

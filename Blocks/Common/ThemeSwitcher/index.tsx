@@ -23,16 +23,16 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="icon"
       onClick={toggleTheme}
-      className="rounded-full"
+      className="h-9 w-9 rounded-lg bg-background border-2 border-border shadow-[3px_3px_0px_var(--border)] hover:shadow-[5px_5px_0px_var(--border)] hover:-translate-x-px hover:-translate-y-px active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_var(--border)] transition-all duration-150"
       aria-label="Toggle theme"
     >
       {theme === "light" ? (
-        <Moon className="h-5 w-5" />
+        <Moon className="h-4 w-4" />
       ) : (
-        <Sun className="h-5 w-5" />
+        <Sun className="h-4 w-4" />
       )}
     </Button>
   );

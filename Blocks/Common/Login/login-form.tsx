@@ -1,4 +1,3 @@
-import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/src/components/ui/button";
 import useWallet from "@/store/useWallet";
 import { disconnectWallet } from "@/utils/wallet";
@@ -17,7 +16,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const LoginForm = () => {
-  const { theme } = useTheme();
   const { status, type, address, error, setStatus } = useWallet();
 
   const [countdown, setCountdown] = useState<number>(3);
@@ -106,20 +104,13 @@ const LoginForm = () => {
           {/* Wallet type row */}
           <div className="flex items-center gap-3 px-4 py-3 border-b-2 border-border bg-muted">
             <div className="shrink-0">
-              {type === "arweave" &&
-                (theme === "dark" ? (
-                  <img
-                    src="https://arweave.net/r6TvdrKbdBtWUaCs_m1sT9ce1JWxE4lhJlOOixb_INw"
-                    className="h-6 w-6"
-                    alt="Arweave"
-                  />
-                ) : (
-                  <img
-                    src="https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E"
-                    className="h-6 w-6"
-                    alt="Arweave"
-                  />
-                ))}
+              {type === "arweave" && (
+                <img
+                  src="https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E"
+                  className="h-6 w-6"
+                  alt="Arweave"
+                />
+              )}
               {type === "wander" && (
                 <img
                   src="https://arweave.net/qbL1viCRNm6RfKHQXztVdKmf5Q0WKmOLmNdTht7G9PE"
@@ -189,19 +180,11 @@ const LoginForm = () => {
       <div className="space-y-2.5">
         <div className="flex items-center gap-2.5 px-1">
           <div className="flex h-6 w-6 items-center justify-center rounded-sm border-2 border-border bg-accent shadow-[1px_1px_0px_var(--border)]">
-            {theme === "dark" ? (
-              <img
-                src="https://arweave.net/r6TvdrKbdBtWUaCs_m1sT9ce1JWxE4lhJlOOixb_INw"
-                className="h-4 w-4"
-                alt="Arweave"
-              />
-            ) : (
-              <img
-                src="https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E"
-                className="h-4 w-4"
-                alt="Arweave"
-              />
-            )}
+            <img
+              src="https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E"
+              className="h-4 w-4"
+              alt="Arweave"
+            />
           </div>
           <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
             Arweave Wallets
@@ -252,19 +235,11 @@ const LoginForm = () => {
           >
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent border-2 border-border shadow-[2px_2px_0px_var(--border)]">
-                {theme === "dark" ? (
-                  <img
-                    src="https://arweave.net/r6TvdrKbdBtWUaCs_m1sT9ce1JWxE4lhJlOOixb_INw"
-                    className="h-5 w-5"
-                    alt="Arweave"
-                  />
-                ) : (
-                  <img
-                    src="https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E"
-                    className="h-5 w-5"
-                    alt="Arweave"
-                  />
-                )}
+                <img
+                  src="https://arweave.net/ntfnBJCwLW8nFY083UJCcGYCZt5uUuRBd3szkGoAE6E"
+                  className="h-5 w-5"
+                  alt="Arweave"
+                />
               </div>
               <span>Arweave.app</span>
             </div>

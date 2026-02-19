@@ -13,13 +13,13 @@ declare global {
   }
 }
 
-const metamask_client = window.ethereum
+export const metamask_client = window.ethereum
   ? createWalletClient({
       chain: mainnet,
       transport: custom(
         window.ethereum as unknown as {
           request: (...args: unknown[]) => Promise<unknown>;
-        }
+        },
       ),
     })
   : null;
@@ -68,7 +68,7 @@ export const connectMetaMask = async () => {
               rel: "noopener noreferrer",
               className: "underline",
             },
-            "Please install MetaMask from here"
+            "Please install MetaMask from here",
           ),
           ".",
         ]),
@@ -95,7 +95,7 @@ export const connectMetaMask = async () => {
           alt: "MetaMask",
           className: "h-7 w-7",
         }),
-      }
+      },
     );
     // --- Step 2: Sign and verify message ---
     const message = `Please sign this message to verify your wallet.\nNonce: ${Date.now()}`;
@@ -121,7 +121,7 @@ export const connectMetaMask = async () => {
     useWallet.getState().setStatus("error");
     useWallet.getState().setError("Failed to connect or verify MetaMask");
     toast.error(
-      e instanceof Error ? e.message : "Failed to connect or verify MetaMask"
+      e instanceof Error ? e.message : "Failed to connect or verify MetaMask",
     );
     return false;
   }

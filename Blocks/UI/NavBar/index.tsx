@@ -33,7 +33,7 @@ import {
 import { disconnectWallet as disconnect } from "@/utils/wallet";
 import { useTheme } from "@/hooks/useTheme";
 import useWallet from "@/store/useWallet";
-import Logo from "@/assets/Logo";
+
 const NotificationMenu = ({
   notificationCount = 3,
   onItemClick,
@@ -331,17 +331,20 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   onUserItemClick?: (item: string) => void;
   onPublish?: () => void;
   isPublishing?: boolean;
+  showNotifications?: boolean;
+  showPublishButton?: boolean;
 }
 
 const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
   (
     {
       className,
-      logo = <Logo />,
       notificationCount = 3,
       onNotificationItemClick,
       onPublish,
       isPublishing = false,
+      showNotifications = true,
+      showPublishButton = true,
       ...props
     },
     ref,
@@ -380,9 +383,9 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
               onClick={(e) => e.preventDefault()}
               className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors cursor-pointer group"
             >
-              <div className="text-xl">{logo}</div>
-              <span className="hidden font-black text-lg sm:inline-block tracking-tight uppercase">
-                metalinks
+              <span className="font-black text-lg tracking-tight uppercase bg-nb-yellow text-black px-2 py-0.5 border-2 border-border rounded-md shadow-[2px_2px_0px_var(--border)] group-hover:shadow-[3px_3px_0px_var(--border)] group-hover:-translate-x-px group-hover:-translate-y-px transition-all duration-150">
+                <span className="sm:hidden">M</span>
+                <span className="hidden sm:inline">metalinks</span>
               </span>
             </button>
           </div>
@@ -402,13 +405,15 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            <NotificationMenu
-              notificationCount={notificationCount}
-              onItemClick={onNotificationItemClick}
-            />
+            {showNotifications && (
+              <NotificationMenu
+                notificationCount={notificationCount}
+                onItemClick={onNotificationItemClick}
+              />
+            )}
 
             {/* Publish button */}
-            {address && walletType && (
+            {showPublishButton && address && walletType && (
               <Button
                 onClick={onPublish}
                 disabled={isPublishing}

@@ -12,8 +12,14 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
 
+const WalletLazyRouteImport = createFileRoute('/wallet')()
 const IndexLazyRouteImport = createFileRoute('/')()
 
+const WalletLazyRoute = WalletLazyRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/wallet.lazy').then((d) => d.Route))
 const IndexLazyRoute = IndexLazyRouteImport.update({
   id: '/',
   path: '/',
@@ -22,28 +28,39 @@ const IndexLazyRoute = IndexLazyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
+  '/wallet': typeof WalletLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
+  '/wallet': typeof WalletLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
+  '/wallet': typeof WalletLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/wallet'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/wallet'
+  id: '__root__' | '/' | '/wallet'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  WalletLazyRoute: typeof WalletLazyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -56,6 +73,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  WalletLazyRoute: WalletLazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
