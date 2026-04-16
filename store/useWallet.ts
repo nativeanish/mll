@@ -1,11 +1,17 @@
 import { create } from "zustand";
 
 export type wallet_type = "metamask" | "arweave" | "wander" | "beacon";
-export type connection_status = "idle" | "connecting" | "connected" | "error" | "disconnected";
+export type connection_status =
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "error"
+  | "disconnected";
 
 interface WalletStorage {
   wallet: wallet_type | null;
   connection: "Connected" | "Disconnected";
+  ekey?: string;
 }
 
 interface State {
@@ -13,10 +19,12 @@ interface State {
   status: connection_status;
   address: string | null;
   error: string | null;
+  ekey: string | null;
   setType: (type: State["type"]) => void;
   setStatus: (status: connection_status) => void;
   setAddress: (address: string | null) => void;
   setError: (error: string | null) => void;
+  setEkey: (ekey: string | null) => void;
   connect: (type: wallet_type) => void;
   disconnect: () => void;
   saveToStorage: () => void;
@@ -39,6 +47,8 @@ const useWallet = create<State>((set, get) => ({
   connect: (type) => {
     set({ type, status: "connecting", error: null });
   },
+  ekey: null,
+  setEkey: (ekey) => set({ ekey }),
 
   disconnect: () => {
     set({ type: null, status: "disconnected", address: null, error: null });

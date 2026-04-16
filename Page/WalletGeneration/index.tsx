@@ -23,7 +23,9 @@ import {
 import encrypt from "@/utils/wallet/utils/encrypt";
 import { create } from "@/utils/wallet/utils/createData";
 import upload from "@/utils/wallet/utils/upload";
-
+import sendMessage from "@/utils/ao/sendMessage";
+import router from "@/src/router";
+import { toast } from "sonner";
 /* ─── Types ────────────────────────────────────────── */
 type StepStatus = "idle" | "running" | "waiting" | "success" | "error";
 
@@ -88,6 +90,76 @@ const STEPS: Step[] = [
     accentColor: "#a8e6cf",
   },
 ];
+
+const REGISTRATION_ACTIONS = [
+  "registered_user_success",
+  "registration_failed_user_exists",
+] as const;
+
+function getRegistrationResult(payload: unknown): {
+  action: (typeof REGISTRATION_ACTIONS)[number];
+  data: string;
+} {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid registration response payload");
+  }
+
+  const response = payload as {
+    raw?: {
+      Messages?: unknown;
+    };
+  };
+
+  if (!response.raw || typeof response.raw !== "object") {
+    throw new Error("Missing raw in registration response payload");
+  }
+
+  if (!Array.isArray(response.raw.Messages)) {
+    throw new Error("Missing raw.Messages in registration response payload");
+  }
+
+  for (const message of response.raw.Messages as Array<{
+    Data?: unknown;
+    Tags?: unknown;
+  }>) {
+    if (typeof message?.Data !== "string") {
+      continue;
+    }
+
+    const actionTag = Array.isArray(message.Tags)
+      ? message.Tags.find((tag) => {
+          if (!tag || typeof tag !== "object") {
+            return false;
+          }
+
+          const candidate = tag as { name?: unknown; value?: unknown };
+          return (
+            candidate.name === "Action" &&
+            typeof candidate.value === "string" &&
+            (REGISTRATION_ACTIONS as readonly string[]).includes(
+              candidate.value,
+            )
+          );
+        })
+      : null;
+
+    if (!actionTag || typeof actionTag !== "object") {
+      continue;
+    }
+
+    const action = (actionTag as { value?: unknown }).value;
+    if (typeof action !== "string") {
+      continue;
+    }
+
+    return {
+      action: action as (typeof REGISTRATION_ACTIONS)[number],
+      data: message.Data,
+    };
+  }
+
+  throw new Error("No supported registration action found in response");
+}
 
 /* ─── Confetti burst (on final success) ────────────── */
 function Confetti() {
@@ -527,6 +599,7 @@ function WalletGeneration() {
   const [generatedWallet, setGeneratedWallet] =
     useState<GeneratedArweaveWallet | null>(null);
   const [encryptedWalletData, setEncryptedWalletData] = useState<unknown>(null);
+  const [uploadTxId, setUploadTxId] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const updateStatus = useCallback((idx: number, status: StepStatus) => {
@@ -563,6 +636,7 @@ function WalletGeneration() {
 
             const txId = await upload(encryptedWalletData);
             console.log("Upload result:", txId);
+            setUploadTxId(txId);
 
             updateStatus(stepIdx, "success");
             setTimeout(() => setCurrentStep(4), 700);
@@ -640,21 +714,72 @@ function WalletGeneration() {
       return;
     }
 
+    if (currentStep === 4) {
+      void (async () => {
+        try {
+          if (!generatedWallet?.publicKey) {
+            throw new Error("No wallet public key found to register");
+          }
+          if (!uploadTxId) {
+            throw new Error("No upload transaction ID found to register");
+          }
+
+          const data = await sendMessage("register_user", "", [
+            { name: "Publickey", value: generatedWallet.publicKey },
+            { name: "Txid", value: uploadTxId },
+          ]);
+
+          const { action, data: responseData } = getRegistrationResult(data);
+          const parsedData = JSON.parse(responseData) as {
+            Success?: string;
+            Message?: string;
+          };
+
+          if (action === "registration_failed_user_exists") {
+            toast.error("This user already exists. Redirecting to home.");
+            window.setTimeout(() => {
+              void router.navigate({ to: "/" });
+            }, 900);
+            return;
+          }
+
+          const isRegistered =
+            action === "registered_user_success" &&
+            parsedData?.Success === "true" &&
+            parsedData?.Message === "User registered successfully";
+
+          if (!isRegistered) {
+            throw new Error("Registration response did not confirm success");
+          }
+
+          // updateStatus(idx, "success");
+          setTimeout(() => setCurrentStep(5), 700);
+        } catch (error) {
+          console.error("User registration failed:", error);
+          toast.error(
+            "Something went wrong during registration. We are looking into it.",
+          );
+          updateStatus(idx, "error");
+        }
+      })();
+      return;
+    }
+
     timerRef.current = setTimeout(() => {
       const ok = Math.random() > 0.2;
       if (ok) {
         updateStatus(idx, "success");
-        if (STEPS[idx].id === STEPS.length) {
-          setShowConfetti(true);
-          setTimeout(() => (window.location.href = "/"), 3000);
-        } else {
-          setTimeout(() => setCurrentStep(currentStep + 1), 700);
-        }
+        // if (STEPS[idx].id === STEPS.length) {
+        //   setShowConfetti(true);
+        //   setTimeout(() => (window.location.href = "/"), 3000);
+        // } else {
+        //   setTimeout(() => setCurrentStep(currentStep + 1), 700);
+        // }
       } else {
         updateStatus(idx, "error");
       }
     }, 1800);
-  }, [currentStep, generatedWallet, updateStatus]);
+  }, [currentStep, generatedWallet, updateStatus, uploadTxId]);
 
   /* Retry */
   const handleRetry = useCallback(() => {

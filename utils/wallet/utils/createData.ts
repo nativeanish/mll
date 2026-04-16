@@ -1,13 +1,48 @@
 import useWallet from "@/store/useWallet";
 import arweave_client from "../arweave";
 import { metamask_client } from "../metamask";
-export async function create(data: string): Promise<ArrayBuffer> {
+import { appname, appversion } from "@/utils/constant";
+export interface DataItemCreateOptions {
+  target?: string;
+  tags: {
+    name: string;
+    value: string;
+  }[];
+  anchor?: string;
+}
+export async function create(
+  data: string,
+  dataItemCreateOptions: DataItemCreateOptions = { tags: [] },
+): Promise<ArrayBuffer> {
   console.log("The data is ready for encryption:", data);
   const wallet = useWallet.getState().type;
   const address = useWallet.getState().address;
   if (!wallet || !address) {
     throw new Error("No wallet connected");
   }
+  dataItemCreateOptions.tags?.push(
+    {
+      name: "App-Name",
+      value: appname,
+    },
+    {
+      name: "App-Version",
+      value: appversion,
+    },
+    {
+      name: "signing-format",
+      value: "ans104",
+    },
+    {
+      name: "SDK",
+      value: "aoconnect",
+    },
+    {
+      name: "Variant",
+      value: "ao.TN.1",
+    },
+  );
+  console.log("Creating data item with options:", dataItemCreateOptions);
   switch (wallet) {
     case "wander": {
       if (!window.arweaveWallet)
@@ -19,10 +54,9 @@ export async function create(data: string): Promise<ArrayBuffer> {
           "SIGNATURE",
           "ACCESS_PUBLIC_KEY",
         ]);
-        const tags = [...TagCreator(address)];
         const signedData = await window.arweaveWallet.signDataItem({
           data: new TextEncoder().encode(data),
-          tags,
+          ...dataItemCreateOptions,
           anchor: generateAnchor(),
         });
         return toArrayBuffer(signedData);
@@ -35,10 +69,9 @@ export async function create(data: string): Promise<ArrayBuffer> {
     }
     case "arweave": {
       try {
-        const tags = [...TagCreator(address)];
         const signedData = await arweave_client.signDataItem({
           data: data,
-          tags,
+          ...dataItemCreateOptions,
           anchor: generateAnchor(),
         });
         return toArrayBuffer(signedData);
@@ -61,11 +94,10 @@ export async function create(data: string): Promise<ArrayBuffer> {
         }
 
         const anchor = generateAnchor();
-        const tags = TagCreator(account);
         const dataBytes = new TextEncoder().encode(data);
         const ownerBytes = new TextEncoder().encode(account.toLowerCase());
         const anchorBytes = new TextEncoder().encode(anchor);
-        const tagsBytes = serializeTags(tags);
+        const tagsBytes = serializeTags(dataItemCreateOptions.tags || []);
 
         const signatureType = 7;
         const signatureLength = 65;
@@ -102,7 +134,10 @@ export async function create(data: string): Promise<ArrayBuffer> {
         bytes.set(anchorBytes, anchorOffset + 1);
 
         const tagsOffset = anchorOffset + anchorLength;
-        bytes.set(longTo8ByteArray(tags.length), tagsOffset);
+        bytes.set(
+          longTo8ByteArray(dataItemCreateOptions.tags?.length || 0),
+          tagsOffset,
+        );
         bytes.set(longTo8ByteArray(tagsBytes.byteLength), tagsOffset + 8);
         bytes.set(tagsBytes, tagsOffset + 16);
 
@@ -305,13 +340,12 @@ function generateAnchor() {
   return String(anchor); // ensure string
 }
 
-function TagCreator(address: string) {
-  return [
-    { name: "Content-Type", value: "text/plain" },
-    { name: "Content-Transfer-Encoding", value: "base64" },
-    { name: "App-Name", value: "metalinks" },
-    { name: "App-Version", value: "0.2.0" },
-    { name: "Type", value: "wallet_data" },
-    { name: "Wallet-Address", value: address },
-  ];
-}
+// function TagCreator() {
+//   return [
+//     { name: "Content-Type", value: "text/plain" },
+//     { name: "Content-Transfer-Encoding", value: "base64" },
+//     { name: "App-Name", value: "metalinks" },
+//     { name: "App-Version", value: "0.2.0" },
+//     { name: "Type", value: "wallet_data" },
+//   ];
+// }

@@ -4,5 +4,7 @@
   "less.lint.unknownAtRules": "ignore",
   "files.associations": {
     "*.css": "postcss"
-  }
+  },
+  "Lua.workspace.library": ["${addons}/ao/module/library"],
+  "Lua.workspace.checkThirdParty": false
 }

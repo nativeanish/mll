@@ -1,6 +1,6 @@
 export default async function upload(signedData: ArrayBuffer) {
   try {
-    const response = await fetch("https://up.arweave.net/tx", {
+    const response = await fetch("https://upload.ardrive.io/tx", {
       method: "POST",
       headers: {
         "Content-Type": "application/octet-stream",
