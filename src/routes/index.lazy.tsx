@@ -8,13 +8,15 @@ export const Route = createLazyFileRoute("/")({
 });
 
 function RouteComponent() {
-  const { status, address, type } = useWallet();
+  const { status, address, type, ekey } = useWallet();
   if (
     status === "connected" &&
     address &&
     address.length > 0 &&
     type &&
-    type.length > 0
+    type.length > 0 &&
+    ekey &&
+    ekey.length > 0
   ) {
     return <Studio />;
   }

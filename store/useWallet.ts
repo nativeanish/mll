@@ -51,7 +51,13 @@ const useWallet = create<State>((set, get) => ({
   setEkey: (ekey) => set({ ekey }),
 
   disconnect: () => {
-    set({ type: null, status: "disconnected", address: null, error: null });
+    set({
+      type: null,
+      status: "disconnected",
+      address: null,
+      error: null,
+      ekey: null,
+    });
     localStorage.removeItem(STORAGE_KEY);
   },
 

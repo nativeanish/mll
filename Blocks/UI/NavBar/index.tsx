@@ -23,7 +23,7 @@ import {
 } from "@/src/components/ui/dropdown-menu";
 import { cn } from "@/src/lib/utils";
 import { Token } from "@/utils/ao/token";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   get_ao_balance,
   get_ar_balance,
@@ -33,76 +33,217 @@ import {
 import { disconnectWallet as disconnect } from "@/utils/wallet";
 import { useTheme } from "@/hooks/useTheme";
 import useWallet from "@/store/useWallet";
+import { HYPERBEAM, processId } from "@/utils/constant";
+import sendMessage from "@/utils/ao/sendMessage";
+
+type NotificationItem = {
+  status: string;
+  timestamp?: number;
+  message: string;
+};
+
+const formatNotificationTime = (timestamp?: number) => {
+  if (!timestamp || Number.isNaN(timestamp)) return "Unknown time";
+
+  const diffMs = Date.now() - timestamp;
+  if (diffMs < 0) return "Just now";
+
+  const minuteMs = 60 * 1000;
+  const hourMs = 60 * minuteMs;
+  const dayMs = 24 * hourMs;
+  const monthMs = 30 * dayMs;
+  const yearMs = 365 * dayMs;
+
+  if (diffMs < minuteMs) return "Just now";
+
+  if (diffMs < hourMs) {
+    const minutes = Math.floor(diffMs / minuteMs);
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
+
+  if (diffMs < dayMs) {
+    const hours = Math.floor(diffMs / hourMs);
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
+
+  if (diffMs < monthMs) {
+    const days = Math.floor(diffMs / dayMs);
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
+  }
+
+  if (diffMs < yearMs) {
+    const months = Math.floor(diffMs / monthMs);
+    return `${months} ${months === 1 ? "month" : "months"} ago`;
+  }
+
+  const years = Math.floor(diffMs / yearMs);
+  return `${years} ${years === 1 ? "year" : "years"} ago`;
+};
 
 const NotificationMenu = ({
-  notificationCount = 3,
+  notificationCount = 0,
+  notifications = [],
+  isLoading = false,
+  isError = false,
+  isMarkingAllRead = false,
+  errorMessage,
   onItemClick,
+  onMarkAllRead,
 }: {
   notificationCount?: number;
+  notifications?: NotificationItem[];
+  isLoading?: boolean;
+  isError?: boolean;
+  isMarkingAllRead?: boolean;
+  errorMessage?: string;
   onItemClick?: (item: string) => void;
-}) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button
-        variant="outline"
-        size="icon"
-        className="h-9 w-9 relative rounded-lg bg-background border-2 border-border shadow-[2px_2px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-px hover:-translate-y-px active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_var(--border)] transition-all duration-150"
+  onMarkAllRead?: () => void;
+}) => {
+  const unreadCount = notifications.filter(
+    (item) => item.status === "unread",
+  ).length;
+  const allRead = notifications.length > 0 && unreadCount === 0;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 relative rounded-lg bg-background border-2 border-border shadow-[2px_2px_0px_var(--border)] hover:shadow-[4px_4px_0px_var(--border)] hover:-translate-x-px hover:-translate-y-px active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_var(--border)] transition-all duration-150"
+        >
+          <BellIcon size={16} />
+          {notificationCount > 0 && (
+            <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center rounded-sm bg-destructive text-[10px] font-black text-destructive-foreground border border-border shadow-[1px_1px_0px_var(--border)]">
+              {notificationCount > 9 ? "9+" : notificationCount}
+            </span>
+          )}
+          <span className="sr-only">Notifications</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-88 rounded-xl border-2 border-border bg-background p-1 shadow-[6px_6px_0px_var(--border)]"
       >
-        <BellIcon size={16} />
-        {notificationCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center rounded-sm bg-destructive text-[10px] font-black text-destructive-foreground border border-border shadow-[1px_1px_0px_var(--border)]">
-            {notificationCount > 9 ? "9+" : notificationCount}
-          </span>
+        <DropdownMenuLabel className="mb-1 rounded-md border-2 border-border bg-muted px-2 py-1 text-xs font-black uppercase tracking-wider text-foreground">
+          Notifications
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {isLoading ? (
+          <DropdownMenuItem
+            disabled
+            className="rounded-md border-2 border-border"
+          >
+            <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading notifications...
+            </div>
+          </DropdownMenuItem>
+        ) : isError ? (
+          <DropdownMenuItem
+            disabled
+            className="rounded-md border-2 border-border"
+          >
+            <div className="flex flex-col gap-1 py-1">
+              <p className="text-sm font-medium text-destructive">
+                Could not load notifications
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {errorMessage || "Server did not respond. Please try again."}
+              </p>
+            </div>
+          </DropdownMenuItem>
+        ) : notifications.length === 0 ? (
+          <DropdownMenuItem
+            disabled
+            className="rounded-md border-2 border-border"
+          >
+            <div className="flex flex-col gap-1 py-1">
+              <p className="text-sm font-medium">No notifications yet</p>
+              <p className="text-xs text-muted-foreground">
+                You are all caught up.
+              </p>
+            </div>
+          </DropdownMenuItem>
+        ) : (
+          <>
+            <div className="max-h-[210px] overflow-y-auto pr-1 space-y-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
+              {notifications.map((item, index) => (
+                <DropdownMenuItem
+                  key={`${item.timestamp ?? "no-time"}-${index}`}
+                  onClick={() => onItemClick?.(`notification-${index}`)}
+                  className={cn(
+                    "group rounded-md cursor-pointer border-2 border-border px-3 py-2 transition-all duration-150 data-highlighted:-translate-x-px data-highlighted:-translate-y-px data-highlighted:shadow-[3px_3px_0px_var(--border)]",
+                    item.status === "unread" &&
+                      "bg-nb-yellow text-black shadow-[2px_2px_0px_var(--border)] data-highlighted:bg-nb-yellow",
+                    item.status !== "unread" &&
+                      "bg-background text-foreground data-highlighted:bg-muted",
+                  )}
+                >
+                  <div className="w-full">
+                    <div className="flex items-start justify-between gap-3">
+                      <p
+                        className={cn(
+                          "text-sm font-black leading-tight",
+                          item.status === "unread"
+                            ? "text-black"
+                            : "text-foreground",
+                        )}
+                      >
+                        {item.message}
+                      </p>
+                      {item.status === "unread" && (
+                        <span className="shrink-0 rounded-sm border-2 border-black bg-black px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-nb-yellow">
+                          New
+                        </span>
+                      )}
+                    </div>
+                    <p
+                      className={cn(
+                        "mt-1 text-xs font-medium",
+                        item.status === "unread"
+                          ? "text-black/70"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {formatNotificationTime(item.timestamp)}
+                    </p>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          </>
         )}
-        <span className="sr-only">Notifications</span>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent
-      align="end"
-      className="w-80 rounded-xl shadow-xl border-border/50"
-    >
-      <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Notifications
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        onClick={() => onItemClick?.("notification1")}
-        className="rounded-lg cursor-pointer"
-      >
-        <div className="flex flex-col gap-1 py-1">
-          <p className="text-sm font-medium">New message received</p>
-          <p className="text-xs text-muted-foreground">2 minutes ago</p>
-        </div>
-      </DropdownMenuItem>
-      <DropdownMenuItem
-        onClick={() => onItemClick?.("notification2")}
-        className="rounded-lg cursor-pointer"
-      >
-        <div className="flex flex-col gap-1 py-1">
-          <p className="text-sm font-medium">System update available</p>
-          <p className="text-xs text-muted-foreground">1 hour ago</p>
-        </div>
-      </DropdownMenuItem>
-      <DropdownMenuItem
-        onClick={() => onItemClick?.("notification3")}
-        className="rounded-lg cursor-pointer"
-      >
-        <div className="flex flex-col gap-1 py-1">
-          <p className="text-sm font-medium">Weekly report ready</p>
-          <p className="text-xs text-muted-foreground">3 hours ago</p>
-        </div>
-      </DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        onClick={() => onItemClick?.("view-all")}
-        className="rounded-lg cursor-pointer"
-      >
-        <Check className="mr-2 h-4 w-4" />
-        Mark all as read
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => {
+            if (allRead) return;
+            onMarkAllRead?.();
+          }}
+          disabled={isMarkingAllRead || allRead}
+          className={cn(
+            "mt-1 rounded-md border-2 border-border font-bold",
+            allRead
+              ? "bg-muted/60 text-muted-foreground cursor-default"
+              : "bg-muted cursor-pointer data-highlighted:bg-nb-mint data-highlighted:text-black",
+          )}
+        >
+          {isMarkingAllRead ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Marking as read...
+            </>
+          ) : (
+            <>
+              <Check className="mr-2 h-4 w-4" />
+              {allRead ? "All notifications are read" : "Mark all as read"}
+            </>
+          )}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 const formatAddress = (addr: string) => {
   if (addr.length <= 10) return addr;
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -350,9 +491,100 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
     ref,
   ) => {
     const containerRef = useRef<HTMLElement>(null);
+    const queryClient = useQueryClient();
     const address = useWallet((state) => state.address);
     const walletType = useWallet((state) => state.type);
     const { theme, setTheme } = useTheme();
+    const [isMarkingAllRead, setIsMarkingAllRead] = React.useState(false);
+
+    const notificationsQuery = useQuery<NotificationItem[], Error>({
+      queryKey: ["notifications", address],
+      queryFn: async () => {
+        if (!address) return [];
+        const url = `${HYPERBEAM}/${processId}~process@1.0/now/user/${encodeURIComponent(address)}/notification`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`Server responded with ${response.status}`);
+        }
+
+        let payload: unknown;
+        const contentType = response.headers.get("content-type") ?? "";
+
+        if (contentType.includes("application/json")) {
+          payload = await response.json();
+        } else {
+          const text = await response.text();
+          try {
+            payload = JSON.parse(text);
+          } catch {
+            throw new Error("Invalid notification response format");
+          }
+        }
+
+        if (typeof payload === "string") {
+          try {
+            payload = JSON.parse(payload);
+          } catch {
+            return [];
+          }
+        }
+
+        if (!Array.isArray(payload)) {
+          return [];
+        }
+
+        return payload
+          .filter((item): item is Partial<NotificationItem> => {
+            return typeof item === "object" && item !== null;
+          })
+          .map((item) => ({
+            status: typeof item.status === "string" ? item.status : "unread",
+            timestamp:
+              typeof item.timestamp === "number" ? item.timestamp : undefined,
+            message:
+              typeof item.message === "string"
+                ? item.message
+                : "No message content",
+          }));
+      },
+      enabled: showNotifications && !!address,
+    });
+
+    const notifications = notificationsQuery.data ?? [];
+    const unreadCount = notifications.filter(
+      (item) => item.status === "unread",
+    ).length;
+    const resolvedNotificationCount = address ? unreadCount : notificationCount;
+
+    const handleMarkAllRead = React.useCallback(async () => {
+      if (!address || isMarkingAllRead) return;
+
+      setIsMarkingAllRead(true);
+      try {
+        await sendMessage("readallnotification");
+
+        // Drop stale cached notifications before fetching the fresh server state.
+        await queryClient.cancelQueries({
+          queryKey: ["notifications", address],
+        });
+        queryClient.removeQueries({
+          queryKey: ["notifications", address],
+          exact: true,
+        });
+
+        await notificationsQuery.refetch();
+        onNotificationItemClick?.("view-all");
+      } finally {
+        setIsMarkingAllRead(false);
+      }
+    }, [
+      address,
+      isMarkingAllRead,
+      notificationsQuery,
+      onNotificationItemClick,
+      queryClient,
+    ]);
 
     // Combine refs
     const combinedRef = React.useCallback(
@@ -407,8 +639,14 @@ const NavBar = React.forwardRef<HTMLElement, NavbarProps>(
 
             {showNotifications && (
               <NotificationMenu
-                notificationCount={notificationCount}
+                notificationCount={resolvedNotificationCount}
+                notifications={notifications}
+                isLoading={notificationsQuery.isLoading}
+                isError={notificationsQuery.isError}
+                isMarkingAllRead={isMarkingAllRead}
+                errorMessage={notificationsQuery.error?.message}
                 onItemClick={onNotificationItemClick}
+                onMarkAllRead={handleMarkAllRead}
               />
             )}
 

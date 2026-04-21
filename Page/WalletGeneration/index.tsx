@@ -26,6 +26,14 @@ import upload from "@/utils/wallet/utils/upload";
 import sendMessage from "@/utils/ao/sendMessage";
 import router from "@/src/router";
 import { toast } from "sonner";
+import useWallet from "@/store/useWallet";
+import {
+  fetchAndCacheWalletKey,
+  hasMatchingCachedWalletKey,
+  getCachedWalletKey,
+  syncWalletKeyCookiesForAddress,
+  WalletKeyFetchError,
+} from "@/utils/wallet/fetch-wallet-key";
 /* ─── Types ────────────────────────────────────────── */
 type StepStatus = "idle" | "running" | "waiting" | "success" | "error";
 
@@ -590,6 +598,7 @@ function CheckingWallet() {
    MAIN PAGE
    ═══════════════════════════════════════════════════════ */
 function WalletGeneration() {
+  const { status, address, setEkey } = useWallet();
   const [phase, setPhase] = useState<"checking" | "generating">("checking");
   const [currentStep, setCurrentStep] = useState(1);
   const [stepStatuses, setStepStatuses] = useState<StepStatus[]>(
@@ -610,11 +619,93 @@ function WalletGeneration() {
     });
   }, []);
 
+  const wait = useCallback((ms: number) => {
+    return new Promise<void>((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }, []);
+
+  const fetchAndStoreWalletKeyWithRetry = useCallback(async () => {
+    if (!address) {
+      throw new Error("Connected wallet address is missing");
+    }
+
+    const attempts = 6;
+    for (let i = 0; i < attempts; i += 1) {
+      try {
+        const key = await fetchAndCacheWalletKey(address);
+        setEkey(key);
+        return key;
+      } catch (error) {
+        const isNotFound =
+          error instanceof WalletKeyFetchError && error.statusCode === 404;
+        const isLastAttempt = i === attempts - 1;
+
+        if (!isNotFound || isLastAttempt) {
+          throw error;
+        }
+
+        await wait(1200);
+      }
+    }
+
+    throw new Error("Failed to fetch wallet key after registration");
+  }, [address, setEkey, wait]);
+
   /* Phase 0: check wallet */
   useEffect(() => {
-    const t = setTimeout(() => setPhase("generating"), 2500);
-    return () => clearTimeout(t);
-  }, []);
+    let cancelled = false;
+
+    const checkExistingKey = async () => {
+      if (status !== "connected" || !address) {
+        setPhase("generating");
+        return;
+      }
+
+      syncWalletKeyCookiesForAddress(address);
+
+      if (hasMatchingCachedWalletKey(address)) {
+        const cachedKey = getCachedWalletKey(address);
+        if (cachedKey) {
+          setEkey(cachedKey);
+          void router.navigate({ to: "/" });
+          return;
+        }
+      }
+
+      try {
+        const networkKey = await fetchAndCacheWalletKey(address);
+        if (cancelled) {
+          return;
+        }
+
+        setEkey(networkKey);
+        void router.navigate({ to: "/" });
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        const isNotFound =
+          error instanceof WalletKeyFetchError && error.statusCode === 404;
+
+        if (!isNotFound) {
+          console.error("Failed to verify wallet key on network:", error);
+          toast.error(
+            "Unable to verify key on network. Continuing with wallet generation.",
+          );
+        }
+
+        setPhase("generating");
+      }
+    };
+
+    void checkExistingKey();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address, setEkey, status]);
 
   /* Auto-advance */
   const runStep = useCallback(
@@ -752,7 +843,8 @@ function WalletGeneration() {
             throw new Error("Registration response did not confirm success");
           }
 
-          // updateStatus(idx, "success");
+          await fetchAndStoreWalletKeyWithRetry();
+          updateStatus(idx, "success");
           setTimeout(() => setCurrentStep(5), 700);
         } catch (error) {
           console.error("User registration failed:", error);
@@ -779,7 +871,13 @@ function WalletGeneration() {
         updateStatus(idx, "error");
       }
     }, 1800);
-  }, [currentStep, generatedWallet, updateStatus, uploadTxId]);
+  }, [
+    currentStep,
+    fetchAndStoreWalletKeyWithRetry,
+    generatedWallet,
+    updateStatus,
+    uploadTxId,
+  ]);
 
   /* Retry */
   const handleRetry = useCallback(() => {

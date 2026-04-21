@@ -1,6 +1,28 @@
 User = User or {}
 local json = require("json")
 
+function UpdateNotifications(user,message)
+  if User[user] == nil then return end
+  local decodedMessage = json.decode(User[user].notification)
+  if type(decodedMessage) ~= "table" then
+    decodedMessage = {}
+  end
+  table.insert(decodedMessage, {
+    status = "unread",
+    message = message,
+    timestamp = os.time()
+  })
+  User[user].notification = json.encode(decodedMessage)
+end
+
+function UpdateUser()
+  Send({
+    Target = ao.id,
+    device = 'patch@1.0',
+    user = User
+  })
+end
+
 Handlers.add(
   "register_user",
   Handlers.utils.hasMatchingTag("Action", "register_user"),
@@ -40,14 +62,14 @@ Handlers.add(
 
     User[message.From] = {
       publickey = pub,
-      txid = txid
+      txid = txid,
+      notification = "[]"
     }
 
-    Send({
-      Target = ao.id,
-      device = 'patch@1.0',
-      user = User
-    })
+    UpdateNotifications(message.From, "Welcome to the metalinks!")
+    UpdateUser()
+
+    ao.log("Registered user: " .. message.From .. " with public key: " .. pub .. " and txid: " .. txid)
 
     return message.reply({
       Action = "registered_user_success",
@@ -58,3 +80,16 @@ Handlers.add(
     })
   end
 )
+
+Handlers.add("readallnotification",Handlers.utils.hasMatchingTag("Action", "readallnotification"), function(message)
+  if User[message.From] == nil then return end
+  local decodedMessage = json.decode(User[message.From].notification)
+  if type(decodedMessage) ~= "table" then
+    decodedMessage = {}
+  end
+  for _, notification in ipairs(decodedMessage) do
+    notification.status = "read"
+  end
+  User[message.From].notification = json.encode(decodedMessage)
+  UpdateUser()
+end)

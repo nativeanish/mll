@@ -1,9 +1,13 @@
+import { arweaveUploadGateway } from "@/utils/constant";
+
 export default async function upload(signedData: ArrayBuffer) {
   try {
-    const response = await fetch("https://upload.ardrive.io/tx", {
+    const response = await fetch(arweaveUploadGateway, {
       method: "POST",
       headers: {
         "Content-Type": "application/octet-stream",
+        "Content-Length": signedData.byteLength.toString(),
+        "content-type": "application/octet-stream",
       },
       body: signedData,
     });

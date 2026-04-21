@@ -8,16 +8,91 @@ import {
 import LoginForm from "./login-form";
 import { ThemeToggle } from "@/Blocks/Common/ThemeSwitcher";
 import { BackgroundDecoration } from "./background-decoration";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { autoReconnectWallet } from "@/utils/wallet/auto-reconnect";
 import useWallet from "@/store/useWallet";
 import { Shield } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import {
+  fetchAndCacheWalletKey,
+  getCachedWalletKey,
+  syncWalletKeyCookiesForAddress,
+  WalletKeyFetchError,
+} from "@/utils/wallet/fetch-wallet-key";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [isFetchingKey, setIsFetchingKey] = useState(false);
+  const [keyFetchError, setKeyFetchError] = useState<string | null>(null);
+
   useEffect(() => {
     autoReconnectWallet();
   }, []);
-  const { status, address } = useWallet();
+
+  const { status, address, setEkey } = useWallet();
+
+  useEffect(() => {
+    if (status !== "connected" || !address) {
+      setIsFetchingKey(false);
+      setKeyFetchError(null);
+      setEkey(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchWalletKey = async () => {
+      setEkey(null);
+      setKeyFetchError(null);
+      syncWalletKeyCookiesForAddress(address);
+
+      const cachedKey = getCachedWalletKey(address);
+      if (cachedKey && cachedKey.length > 0) {
+        if (!cancelled) {
+          setEkey(cachedKey);
+        }
+        return;
+      }
+
+      setIsFetchingKey(true);
+      try {
+        const decryptedKey = await fetchAndCacheWalletKey(address);
+        if (cancelled) {
+          return;
+        }
+        setEkey(decryptedKey);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        if (error instanceof WalletKeyFetchError && error.statusCode === 404) {
+          const message = "No wallet key found for this address.";
+          setKeyFetchError(message);
+          toast.error(message);
+          void navigate({ to: "/wallet" });
+          return;
+        }
+
+        setKeyFetchError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch and decrypt wallet key",
+        );
+      } finally {
+        if (!cancelled) {
+          setIsFetchingKey(false);
+        }
+      }
+    };
+
+    void fetchWalletKey();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address, navigate, setEkey, status]);
 
   return (
     <div className="relative flex h-auto min-h-screen flex-col overflow-x-hidden bg-background">
@@ -56,7 +131,10 @@ const Login = () => {
             </CardHeader>
 
             <CardContent className="space-y-6 px-6 pb-8 pt-2">
-              <LoginForm />
+              <LoginForm
+                isFetchingKey={isFetchingKey}
+                keyFetchError={keyFetchError}
+              />
               {status === "connected" &&
               address &&
               address.length > 0 ? null : (

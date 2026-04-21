@@ -3,6 +3,17 @@ import { beacon_client } from "./beacon";
 import arweave_client from "./arweave";
 import { toast } from "sonner";
 
+function clearAllCookies(): void {
+  const cookies = document.cookie
+    .split(";")
+    .map((cookie) => cookie.trim().split("=")[0])
+    .filter((name) => name.length > 0);
+
+  for (const name of cookies) {
+    document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Strict`;
+  }
+}
+
 export const disconnectWallet = async () => {
   try {
     const state = useWallet.getState().type;
@@ -19,6 +30,7 @@ export const disconnectWallet = async () => {
       await arweave_client.disconnect();
     }
     useWallet.getState().disconnect();
+    clearAllCookies();
     return true;
   } catch (error) {
     toast.warning("Failed to disconnect wallet");

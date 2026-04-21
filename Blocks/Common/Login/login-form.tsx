@@ -15,7 +15,15 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const LoginForm = () => {
+type LoginFormProps = {
+  isFetchingKey?: boolean;
+  keyFetchError?: string | null;
+};
+
+const LoginForm = ({
+  isFetchingKey = false,
+  keyFetchError = null,
+}: LoginFormProps) => {
   const { status, type, address, error, setStatus } = useWallet();
 
   const [countdown, setCountdown] = useState<number>(3);
@@ -91,6 +99,24 @@ const LoginForm = () => {
   }
 
   if (status === "connected" && address) {
+    if (isFetchingKey) {
+      return (
+        <div className="flex flex-col items-center justify-center space-y-5 py-14">
+          <div className="rounded-lg bg-accent border-2 border-border p-4 shadow-[3px_3px_0px_var(--border)]">
+            <Loader2 className="h-8 w-8 animate-spin text-accent-foreground" />
+          </div>
+          <div className="text-center space-y-1.5">
+            <p className="text-base font-black uppercase tracking-wide">
+              Fetching Keys...
+            </p>
+            <p className="text-xs text-muted-foreground font-bold">
+              Decrypting your key for this wallet address
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center space-y-5">
         <div className="rounded-lg bg-nb-mint border-2 border-border p-4 shadow-[3px_3px_0px_var(--border)]">
@@ -170,6 +196,12 @@ const LoginForm = () => {
         >
           Disconnect Wallet
         </Button>
+
+        {keyFetchError ? (
+          <p className="w-full rounded-md border-2 border-border bg-destructive/10 px-3 py-2 text-center text-xs font-bold text-destructive">
+            {keyFetchError}
+          </p>
+        ) : null}
       </div>
     );
   }
