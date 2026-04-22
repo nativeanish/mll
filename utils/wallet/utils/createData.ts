@@ -2,6 +2,8 @@ import useWallet from "@/store/useWallet";
 import arweave_client from "../arweave";
 import { metamask_client } from "../metamask";
 import { appname, appversion } from "@/utils/constant";
+import { hashMessage, hexToBytes, recoverPublicKey } from "viem";
+
 export interface DataItemCreateOptions {
   target?: string;
   tags: {
@@ -86,103 +88,23 @@ export async function create(
       if (!metamask_client) {
         throw new Error("MetaMask client is not available");
       }
+      const metaMaskClient = metamask_client;
 
       try {
-        const [account] = await metamask_client.requestAddresses();
+        const [account] = await metaMaskClient.requestAddresses();
         if (!account) {
           throw new Error("No MetaMask account found");
         }
-
-        const anchor = generateAnchor();
-        const dataBytes = new TextEncoder().encode(data);
-        const ownerBytes = new TextEncoder().encode(account.toLowerCase());
-        const anchorBytes = new TextEncoder().encode(anchor);
-        const tagsBytes = serializeTags(dataItemCreateOptions.tags || []);
-
-        const signatureType = 7;
-        const signatureLength = 65;
-        const ownerLength = 42;
-        const targetLength = 1;
-        const anchorLength = 1 + anchorBytes.byteLength;
-        const tagsLength = 16 + tagsBytes.byteLength;
-        const totalLength =
-          2 +
-          signatureLength +
-          ownerLength +
-          targetLength +
-          anchorLength +
-          tagsLength +
-          dataBytes.byteLength;
-
-        const bytes = new Uint8Array(totalLength);
-        bytes.set(shortTo2ByteArray(signatureType), 0);
-
-        const ownerOffset = 2 + signatureLength;
-        if (ownerBytes.byteLength !== ownerLength) {
-          throw new Error(`Invalid owner length: ${ownerBytes.byteLength}`);
-        }
-        bytes.set(ownerBytes, ownerOffset);
-
-        const targetOffset = ownerOffset + ownerLength;
-        bytes[targetOffset] = 0;
-
-        const anchorOffset = targetOffset + targetLength;
-        bytes[anchorOffset] = 1;
-        if (anchorBytes.byteLength !== 32) {
-          throw new Error("Anchor must be 32 bytes");
-        }
-        bytes.set(anchorBytes, anchorOffset + 1);
-
-        const tagsOffset = anchorOffset + anchorLength;
-        bytes.set(
-          longTo8ByteArray(dataItemCreateOptions.tags?.length || 0),
-          tagsOffset,
+        return await createMetaMaskDataItem(
+          data,
+          {
+            tags: dataItemCreateOptions.tags,
+            target: dataItemCreateOptions.target,
+            anchor: generateAnchor(),
+          },
+          metaMaskClient,
+          account as `0x${string}`,
         );
-        bytes.set(longTo8ByteArray(tagsBytes.byteLength), tagsOffset + 8);
-        bytes.set(tagsBytes, tagsOffset + 16);
-
-        const dataOffset = tagsOffset + tagsLength;
-        bytes.set(dataBytes, dataOffset);
-
-        const signatureData = await deepHash([
-          textToBytes("dataitem"),
-          textToBytes("1"),
-          textToBytes(signatureType.toString()),
-          ownerBytes,
-          new Uint8Array(0),
-          anchorBytes,
-          tagsBytes,
-          dataBytes,
-        ]);
-
-        const signatureHex = await metamask_client.signTypedData({
-          account: account as `0x${string}`,
-          domain: {
-            name: "Bundlr",
-            version: "1",
-          },
-          types: {
-            Bundlr: [
-              { name: "Transaction hash", type: "bytes" },
-              { name: "address", type: "address" },
-            ],
-          },
-          primaryType: "Bundlr",
-          message: {
-            "Transaction hash": bytesToHex(signatureData),
-            address: account,
-          },
-        });
-
-        const signatureBytes = hexToBytes(signatureHex);
-        if (signatureBytes.byteLength !== signatureLength) {
-          throw new Error(
-            `Invalid signature length: ${signatureBytes.byteLength}`,
-          );
-        }
-        bytes.set(signatureBytes, 2);
-
-        return toArrayBuffer(bytes);
       } catch (e) {
         console.error(e);
         throw new Error("Failed to create data with MetaMask wallet", {
@@ -196,40 +118,141 @@ export async function create(
   }
 }
 
+async function createMetaMaskDataItem(
+  data: string,
+  options: DataItemCreateOptions,
+  metaMaskClient: NonNullable<typeof metamask_client>,
+  account: `0x${string}`,
+): Promise<ArrayBuffer> {
+  const signatureType = 3; // SignatureConfig.ETHEREUM
+  const signatureLength = 65;
+  const ownerLength = 65;
+
+  const ownerBytes = await getMetaMaskOwnerPublicKey(metaMaskClient, account);
+  if (ownerBytes.byteLength !== ownerLength) {
+    throw new Error(`Invalid owner length: ${ownerBytes.byteLength}`);
+  }
+
+  const dataBytes = new TextEncoder().encode(data);
+  const targetBytes = options.target
+    ? base64UrlToBytes(options.target)
+    : new Uint8Array(0);
+  if (targetBytes.byteLength !== 0 && targetBytes.byteLength !== 32) {
+    throw new Error(`Target must be 32 bytes, got ${targetBytes.byteLength}`);
+  }
+
+  const anchorValue = options.anchor ?? generateAnchor();
+  const anchorBytes = new TextEncoder().encode(anchorValue);
+  if (anchorBytes.byteLength !== 32) {
+    throw new Error("Anchor must be 32 bytes");
+  }
+
+  const tags = options.tags ?? [];
+  const tagsBytes = serializeTags(tags);
+
+  const targetLength = 1 + targetBytes.byteLength;
+  const anchorLength = 1 + anchorBytes.byteLength;
+  const tagsLength = 16 + tagsBytes.byteLength;
+  const totalLength =
+    2 +
+    signatureLength +
+    ownerLength +
+    targetLength +
+    anchorLength +
+    tagsLength +
+    dataBytes.byteLength;
+
+  const bytes = new Uint8Array(totalLength);
+  bytes.set(shortTo2ByteArray(signatureType), 0);
+
+  const ownerOffset = 2 + signatureLength;
+  bytes.set(ownerBytes, ownerOffset);
+
+  const targetOffset = ownerOffset + ownerLength;
+  if (targetBytes.byteLength === 32) {
+    bytes[targetOffset] = 1;
+    bytes.set(targetBytes, targetOffset + 1);
+  } else {
+    bytes[targetOffset] = 0;
+  }
+
+  const anchorOffset = targetOffset + targetLength;
+  bytes[anchorOffset] = 1;
+  bytes.set(anchorBytes, anchorOffset + 1);
+
+  const tagsOffset = anchorOffset + anchorLength;
+  bytes.set(longTo8ByteArray(tags.length), tagsOffset);
+  bytes.set(longTo8ByteArray(tagsBytes.byteLength), tagsOffset + 8);
+  bytes.set(tagsBytes, tagsOffset + 16);
+
+  const dataOffset = tagsOffset + tagsLength;
+  bytes.set(dataBytes, dataOffset);
+
+  const signatureData = await deepHash([
+    textToBytes("dataitem"),
+    textToBytes("1"),
+    textToBytes(signatureType.toString()),
+    ownerBytes,
+    targetBytes,
+    anchorBytes,
+    tagsBytes,
+    dataBytes,
+  ]);
+
+  const signatureHex = await metaMaskClient.signMessage({
+    account,
+    message: { raw: signatureData },
+  });
+  const signatureBytes = hexToBytes(signatureHex);
+  if (signatureBytes.byteLength !== signatureLength) {
+    throw new Error(`Invalid signature length: ${signatureBytes.byteLength}`);
+  }
+  bytes.set(signatureBytes, 2);
+
+  return toArrayBuffer(bytes);
+}
+
+async function getMetaMaskOwnerPublicKey(
+  metaMaskClient: NonNullable<typeof metamask_client>,
+  account: `0x${string}`,
+): Promise<Uint8Array> {
+  const connectMessage = "sign this message to connect to Bundlr.Network";
+  const signature = await metaMaskClient.signMessage({
+    account,
+    message: connectMessage,
+  });
+  const messageHash = hashMessage(connectMessage);
+  const publicKeyHex = await recoverPublicKey({
+    hash: messageHash,
+    signature,
+  });
+  return hexToBytes(publicKeyHex);
+}
+
 function textToBytes(value: string): Uint8Array {
   return new TextEncoder().encode(value);
 }
 
-function hexToBytes(hex: string): Uint8Array {
-  const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
-  if (clean.length % 2 !== 0) {
-    throw new Error("Invalid hex string length");
+function base64UrlToBytes(value: string): Uint8Array {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
   }
+  return bytes;
+}
 
-  const out = new Uint8Array(clean.length / 2);
-  for (let i = 0; i < out.length; i++) {
-    out[i] = Number.parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+function longToNByteArray(length: number, value: number): Uint8Array {
+  const out = new Uint8Array(length);
+  let num = value;
+  for (let i = 0; i < length; i++) {
+    const byte = num & 0xff;
+    out[i] = byte;
+    num = (num - byte) / 256;
   }
   return out;
-}
-
-function bytesToHex(bytes: Uint8Array): `0x${string}` {
-  let hex = "0x";
-  for (const b of bytes) {
-    hex += b.toString(16).padStart(2, "0");
-  }
-  return hex as `0x${string}`;
-}
-
-function longToNByteArray(N: number, value: number): Uint8Array {
-  const byteArray = new Uint8Array(N);
-  let long = value;
-  for (let index = 0; index < byteArray.length; index++) {
-    const byte = long & 0xff;
-    byteArray[index] = byte;
-    long = (long - byte) / 256;
-  }
-  return byteArray;
 }
 
 function shortTo2ByteArray(value: number): Uint8Array {
@@ -241,36 +264,14 @@ function longTo8ByteArray(value: number): Uint8Array {
 }
 
 function concatUint8(arrays: Uint8Array[]): Uint8Array {
-  const totalLength = arrays.reduce((sum, a) => sum + a.length, 0);
-  const result = new Uint8Array(totalLength);
+  const totalLength = arrays.reduce((sum, array) => sum + array.length, 0);
+  const out = new Uint8Array(totalLength);
   let offset = 0;
-  for (const a of arrays) {
-    result.set(a, offset);
-    offset += a.length;
+  for (const array of arrays) {
+    out.set(array, offset);
+    offset += array.length;
   }
-  return result;
-}
-
-function serializeTags(tags: { name: string; value: string }[]): Uint8Array {
-  if (tags.length === 0) {
-    return new Uint8Array(0);
-  }
-
-  const parts: Uint8Array[] = [];
-  parts.push(writeAvroLong(tags.length));
-  for (const tag of tags) {
-    const name = textToBytes(tag.name);
-    const value = textToBytes(tag.value);
-    parts.push(
-      writeAvroLong(name.length),
-      name,
-      writeAvroLong(value.length),
-      value,
-    );
-  }
-  parts.push(writeAvroLong(0));
-
-  return concatUint8(parts);
+  return out;
 }
 
 function writeAvroLong(value: number): Uint8Array {
@@ -286,6 +287,28 @@ function writeAvroLong(value: number): Uint8Array {
   } while (n !== 0);
 
   return Uint8Array.from(bytes);
+}
+
+function serializeTags(tags: { name: string; value: string }[]): Uint8Array {
+  if (tags.length === 0) {
+    return new Uint8Array(0);
+  }
+
+  const parts: Uint8Array[] = [];
+  parts.push(writeAvroLong(tags.length));
+  for (const tag of tags) {
+    const nameBytes = textToBytes(tag.name);
+    const valueBytes = textToBytes(tag.value);
+    parts.push(
+      writeAvroLong(nameBytes.length),
+      nameBytes,
+      writeAvroLong(valueBytes.length),
+      valueBytes,
+    );
+  }
+  parts.push(writeAvroLong(0));
+
+  return concatUint8(parts);
 }
 
 async function sha384(data: Uint8Array): Promise<Uint8Array> {
@@ -339,13 +362,3 @@ function generateAnchor() {
 
   return String(anchor); // ensure string
 }
-
-// function TagCreator() {
-//   return [
-//     { name: "Content-Type", value: "text/plain" },
-//     { name: "Content-Transfer-Encoding", value: "base64" },
-//     { name: "App-Name", value: "metalinks" },
-//     { name: "App-Version", value: "0.2.0" },
-//     { name: "Type", value: "wallet_data" },
-//   ];
-// }
